@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# data stores (generated at runtime)
+data/*.db
+data/chroma/
+data/*.sqlite3
+
+# logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

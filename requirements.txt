@@ -1,0 +1,27 @@
+# Agent orchestration
+crewai>=0.80.0
+google-adk
+
+# Agent-to-tool / agent-to-agent
+mcp
+a2a-sdk
+
+# LLMs
+ollama
+groq
+google-generativeai
+
+# Backend
+fastapi
+uvicorn
+python-dotenv
+pydantic
+
+# Storage
+chromadb
+
+# Dashboard
+streamlit
+
+# Testing
+pytest
