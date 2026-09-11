@@ -1,9 +1,15 @@
 """Strategy agent — reads last cycle's Analytics summary and revises the
 business plan (positioning, pricing, priorities) for the next cycle.
 
-Built on Google ADK: an LlmAgent backed by Gemini (via GEMINI_API_KEY), with
-ADK session state carrying the run's conversation history so each revision
-is grounded in what actually happened, not just re-derived from scratch.
+Built on Google ADK: an LlmAgent with ADK session state carrying the run's
+conversation history so each revision is grounded in what actually
+happened, not just re-derived from scratch.
+
+Backed by Groq (via LiteLlm), not Gemini directly: Gemini's free Developer
+API tier caps gemini-3.6-flash at 20 requests/day per project, which a
+single multi-cycle run burns through fast. Groq's free tier via ADK's
+LiteLlm wrapper avoids that ceiling; pass model="gemini-3.6-flash" to
+StrategyAgent to use Gemini directly instead.
 """
 
 import asyncio
@@ -11,9 +17,12 @@ from dataclasses import dataclass
 
 from google.adk import Runner
 from google.adk.agents import LlmAgent
+from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from pydantic import BaseModel, Field
+
+DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
 
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"
@@ -61,12 +70,13 @@ class StrategyDecision:
 
 
 class StrategyAgent:
-    """Google ADK LlmAgent wired to Gemini, with per-run session memory."""
+    """Google ADK LlmAgent, with per-run session memory."""
 
-    def __init__(self, model: str = "gemini-3.6-flash", session_id: str = "strategy_session"):
+    def __init__(self, model: str = DEFAULT_MODEL, session_id: str = "strategy_session"):
+        resolved_model = LiteLlm(model=model) if model.startswith("groq/") else model
         self._agent = LlmAgent(
             name="strategy_agent",
-            model=model,
+            model=resolved_model,
             instruction=_INSTRUCTION,
             output_schema=StrategyOutput,
             output_key="strategy_output",

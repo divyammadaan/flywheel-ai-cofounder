@@ -33,9 +33,12 @@ letting pip search the whole history.
 ## API keys
 
 Copy `.env.example` to `.env` and fill in:
-- `GEMINI_API_KEY` — used by Strategy/Finance/Analytics (Google ADK LlmAgent,
-  Gemini free tier via aistudio.google.com/apikey)
-- `GROQ_API_KEY` — not yet wired to any agent
+- `GROQ_API_KEY` — used by all 6 hosted-LLM agents (Strategy/Finance/
+  Analytics via ADK's LiteLlm wrapper, Marketing/Product/Sales via CrewAI's
+  native `groq/` model string). Get a free key at console.groq.com/keys.
+- `GEMINI_API_KEY` — not currently used by default (see Known issues below),
+  but every agent's `model` param accepts a plain Gemini model string
+  (e.g. `"gemini-3.6-flash"`) as a manual override if you want it.
 
 `.env` is gitignored; never commit it.
 
@@ -58,12 +61,25 @@ critical path) but don't route anything time-sensitive through it.
 
 ## Known issues
 
-- **Gemini free-tier daily quota**: `gemini-3.6-flash` on the free Developer
-  API tier is capped at 20 requests/day per project. A single full 6-agent
-  cycle uses 6 of those. Running the whole thing a few times in one day
-  will exhaust it -- if you hit a 429 `RESOURCE_EXHAUSTED` error, that's
-  why. Options: wait for the daily reset, enable billing, or add Groq as a
-  second hosted backend (not yet wired to any agent).
+- **Why Groq, not Gemini, is the default**: `gemini-3.6-flash` on Gemini's
+  free Developer API tier is capped at 20 requests/day per project -- a
+  single full 6-agent cycle burns 6 of those, so testing exhausts it fast
+  (429 `RESOURCE_EXHAUSTED`, and the daily reset does not follow local
+  midnight). Switched all 6 hosted-LLM agents to Groq's free tier instead.
+  Every agent's `model` constructor param still accepts a plain Gemini
+  string to switch back per-agent if wanted.
+- **Groq's free tier has its own limit**: ~1000 output tokens/minute per
+  model, not per-day. Running several agents back-to-back can trip it
+  (`litellm.RateLimitError` / `rate_limit_exceeded`), but it clears in
+  seconds (the error message includes the exact wait), and CrewAI/ADK's
+  built-in retry usually absorbs it without any code change needed. If it
+  persists, wait ~10-40s and retry.
+- **google-adk[extensions] is NOT required for Groq**: `litellm` is already
+  installed (a CrewAI dependency), which is all `google.adk.models.lite_llm.
+  LiteLlm` actually checks for. Installing the `[extensions]` extra pulls in
+  `protobuf>=6.33.5` (via `google-cloud-firestore`), which conflicts with
+  `google-ai-generativelanguage`/`a2a-sdk` (both want `protobuf<6`/`<7`) --
+  a genuinely unresolvable joint constraint. Don't install it.
 - **CrewAI event bus + Windows console**: tool-call logging can throw a
   `'charmap' codec` error on Windows (cp1252 can't encode some characters
   CrewAI tries to print). Cosmetic only -- doesn't affect results. Set

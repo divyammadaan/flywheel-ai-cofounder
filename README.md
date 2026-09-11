@@ -90,13 +90,13 @@ Marketing  Product     Sales       CRM          │
 ```
 flywheel/
 ├── agents/
-│   ├── strategy.py        # ADK + Gemini, session memory
-│   ├── finance.py         # guardrail deterministic; ADK + Gemini narrates it
-│   ├── marketing.py       # CrewAI + Gemini
-│   ├── product.py         # CrewAI + Gemini
-│   ├── sales.py           # CrewAI + Gemini
+│   ├── strategy.py        # ADK + Groq, session memory
+│   ├── finance.py         # guardrail deterministic; ADK + Groq narrates it
+│   ├── marketing.py       # CrewAI + Groq
+│   ├── product.py         # CrewAI + Groq
+│   ├── sales.py           # CrewAI + Groq
 │   ├── crm.py             # CrewAI + local Ollama (qwen3:4b) -- privacy slice
-│   └── analytics.py       # ADK + Gemini, session memory
+│   └── analytics.py       # ADK + Groq, session memory
 ├── simulator/
 │   └── market_simulator.py
 ├── orchestration/

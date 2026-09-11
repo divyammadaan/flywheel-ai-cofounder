@@ -12,7 +12,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-GEMINI_MODEL = "gemini/gemini-3.6-flash"
+# Groq, not Gemini: Strategy/Finance/Analytics already use Gemini's shared
+# 20-req/day free-tier quota (per project, per model) -- keeping the three
+# CrewAI execution agents on a different provider avoids all 6 agents
+# competing for the same daily cap.
+DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
 
 
 class MarketingOutputSchema(BaseModel):
@@ -30,10 +34,10 @@ class MarketingOutput:
 
 
 class MarketingAgent:
-    """CrewAI agent backed by Gemini -- writes ad copy grounded in
+    """CrewAI agent backed by Groq -- writes ad copy grounded in
     Strategy's positioning, price point, and this cycle's budget."""
 
-    def __init__(self, model: str = GEMINI_MODEL):
+    def __init__(self, model: str = DEFAULT_MODEL):
         llm = LLM(model=model)
         self._agent = Agent(
             role="Marketing Lead",

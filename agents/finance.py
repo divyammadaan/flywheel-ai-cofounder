@@ -3,8 +3,11 @@ agents based on Strategy's priorities, enforcing hard spend caps (guardrail).
 
 The spend caps are enforced in plain Python, deliberately NOT delegated to
 the LLM -- a guardrail must hold even if the model's reasoning is wrong. A
-Google ADK LlmAgent (Gemini) only narrates the resulting allocation; it
-never computes the numbers.
+Google ADK LlmAgent only narrates the resulting allocation; it never
+computes the numbers.
+
+Backed by Groq (via LiteLlm), not Gemini directly -- see strategy.py for
+why (Gemini's free-tier 20 req/day cap).
 """
 
 import asyncio
@@ -12,11 +15,13 @@ from dataclasses import dataclass
 
 from google.adk import Runner
 from google.adk.agents import LlmAgent
+from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"
+DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
 
 # Guardrail: no single agent may receive more than this fraction of budget.
 MAX_SHARE_PER_AGENT = 0.6
@@ -74,17 +79,18 @@ class BudgetAllocation:
 
 class FinanceAgent:
     """Deterministic guardrail-enforced allocation (plain Python) plus an
-    ADK LlmAgent (Gemini) that narrates the decision, with session memory
-    across cycles."""
+    ADK LlmAgent that narrates the decision, with session memory across
+    cycles."""
 
     def __init__(
         self,
         total_budget_per_cycle: float,
-        model: str = "gemini-3.6-flash",
+        model: str = DEFAULT_MODEL,
         session_id: str = "finance_session",
     ):
         self.total_budget_per_cycle = total_budget_per_cycle
-        self._agent = LlmAgent(name="finance_agent", model=model, instruction=_INSTRUCTION)
+        resolved_model = LiteLlm(model=model) if model.startswith("groq/") else model
+        self._agent = LlmAgent(name="finance_agent", model=resolved_model, instruction=_INSTRUCTION)
         self._session_service = InMemorySessionService()
         self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
         self._session_id = session_id
