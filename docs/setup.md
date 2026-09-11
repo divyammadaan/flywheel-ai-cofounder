@@ -55,3 +55,16 @@ no-GPU dev machine (Ryzen 7 5800U, 16GB RAM) — 7-8B models are painfully
 slow at that spec. qwen3:4b is a reasoning model, so a single call takes
 ~15-20s even for a trivial prompt; that's fine for CRM (not on any latency-
 critical path) but don't route anything time-sensitive through it.
+
+## Known issues
+
+- **Gemini free-tier daily quota**: `gemini-3.6-flash` on the free Developer
+  API tier is capped at 20 requests/day per project. A single full 6-agent
+  cycle uses 6 of those. Running the whole thing a few times in one day
+  will exhaust it -- if you hit a 429 `RESOURCE_EXHAUSTED` error, that's
+  why. Options: wait for the daily reset, enable billing, or add Groq as a
+  second hosted backend (not yet wired to any agent).
+- **CrewAI event bus + Windows console**: tool-call logging can throw a
+  `'charmap' codec` error on Windows (cp1252 can't encode some characters
+  CrewAI tries to print). Cosmetic only -- doesn't affect results. Set
+  `PYTHONIOENCODING=utf-8` before running if the noise bothers you.

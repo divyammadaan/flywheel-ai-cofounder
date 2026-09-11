@@ -90,28 +90,37 @@ Marketing  Product     Sales       CRM          │
 ```
 flywheel/
 ├── agents/
-│   ├── strategy.py
-│   ├── finance.py
-│   ├── marketing.py
-│   ├── product.py
-│   ├── sales.py
-│   ├── crm.py
-│   └── analytics.py
+│   ├── strategy.py        # ADK + Gemini, session memory
+│   ├── finance.py         # guardrail deterministic; ADK + Gemini narrates it
+│   ├── marketing.py       # CrewAI + Gemini
+│   ├── product.py         # CrewAI + Gemini
+│   ├── sales.py           # CrewAI + Gemini
+│   ├── crm.py             # CrewAI + local Ollama (qwen3:4b) -- privacy slice
+│   └── analytics.py       # ADK + Gemini, session memory
 ├── simulator/
 │   └── market_simulator.py
 ├── orchestration/
-│   ├── cycle.py          # main cycle loop
-│   └── a2a_bridge.py      # cross-framework agent communication
+│   ├── cycle.py           # main cycle loop
+│   └── a2a_bridge.py      # cross-framework agent communication -- TODO
 ├── observability/
 │   ├── decision_record.py
-│   └── dashboard/
-├── data/                  # SQLite + ChromaDB stores
+│   └── dashboard/         # Streamlit
+├── tools/
+│   ├── mcp_server.py      # FastMCP server: Decision Record query tools
+│   └── mcp_client_tool.py # CrewAI tool, talks to mcp_server.py over stdio
+├── data/                  # SQLite + ChromaDB stores (gitignored)
 ├── tests/
 ├── docs/
+│   ├── setup.md
+│   ├── installed-versions.lock.txt
 │   └── project_report.md
 ├── requirements.txt
 └── README.md
 ```
+
+Status: Strategy, Finance, Analytics, Marketing, Product, Sales, and CRM
+are all genuinely LLM-backed (not placeholders). MCP is real (FastMCP
+server + stdio client tool, wired into CRM). A2A is not yet implemented.
 
 ---
 
