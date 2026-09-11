@@ -5,12 +5,18 @@ Deliberately runs on a local Ollama model (qwen3:4b), not a hosted API:
 customer interaction/churn data is the most privacy-sensitive slice of
 Flywheel, so this agent's inputs and outputs never leave the machine.
 Satisfies the course's local-LLM / data-privacy requirement (CO2).
+
+Also has an MCP tool (query_decision_records) so it can look up this run's
+actual past Analytics summaries over the Model Context Protocol, rather
+than relying only on the churn figure handed to it directly.
 """
 
 from dataclasses import dataclass
 
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
+
+from tools.mcp_client_tool import DecisionRecordQueryTool
 
 OLLAMA_MODEL = "ollama/qwen3:4b"
 OLLAMA_BASE_URL = "http://localhost:11434"
@@ -42,9 +48,12 @@ class CRMAgent:
             backstory=(
                 "You manage customer relationships for a lean startup. You watch engagement "
                 "signals and recommend how much retention effort (0..1) the team should invest "
-                "this cycle, and which customer segments look most at risk of churning."
+                "this cycle, and which customer segments look most at risk of churning. If it "
+                "would help, you can call query_decision_records to look up analytics history "
+                "from past cycles in this run before deciding."
             ),
             llm=llm,
+            tools=[DecisionRecordQueryTool()],
             verbose=False,
         )
 
