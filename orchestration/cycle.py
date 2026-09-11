@@ -39,6 +39,7 @@ def run(num_cycles: int) -> None:
     simulator = MarketSimulator(seed=SIM_SEED)
 
     previous_summary = None
+    previous_churn_rate = None
 
     for cycle in range(1, num_cycles + 1):
         print(f"\n=== Cycle {cycle} ===")
@@ -52,7 +53,7 @@ def run(num_cycles: int) -> None:
         mkt_out = marketing.execute(cycle, allocation.marketing, decision.positioning)
         prod_out = product.execute(cycle, allocation.product)
         sales_out = sales.execute(cycle, allocation.sales, leads=0)  # leads unknown pre-simulation
-        crm_out = crm.execute(cycle, allocation.crm)
+        crm_out = crm.execute(cycle, allocation.crm, previous_churn_rate)
         for name, out in (("marketing", mkt_out), ("product", prod_out), ("sales", sales_out), ("crm", crm_out)):
             log_decision(DecisionRecord(cycle, name, {"budget": getattr(allocation, name)}, out.__dict__))
 
@@ -71,6 +72,7 @@ def run(num_cycles: int) -> None:
 
         print(report.summary)
         previous_summary = report.summary
+        previous_churn_rate = report.churn_rate
 
 
 if __name__ == "__main__":
