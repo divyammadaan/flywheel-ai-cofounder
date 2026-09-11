@@ -1,3 +1,6 @@
+# NOTE: install in stages (see docs/setup.md) — resolving crewai + google-adk
+# + a2a-sdk + chromadb together in one pip pass exceeds pip's resolver depth.
+
 # Agent orchestration
 crewai>=0.80.0
 google-adk
@@ -9,7 +12,7 @@ a2a-sdk
 # LLMs
 ollama
 groq
-google-generativeai
+google-genai  # NOTE: google-generativeai is deprecated (EOL) — use this instead
 
 # Backend
 fastapi
