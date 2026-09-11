@@ -40,6 +40,7 @@ def run(num_cycles: int) -> None:
 
     previous_summary = None
     previous_churn_rate = None
+    previous_leads = 0
 
     for cycle in range(1, num_cycles + 1):
         print(f"\n=== Cycle {cycle} ===")
@@ -50,9 +51,9 @@ def run(num_cycles: int) -> None:
         allocation = finance.allocate(cycle, decision.priorities)
         log_decision(DecisionRecord(cycle, "finance", {"priorities": decision.priorities}, allocation.__dict__))
 
-        mkt_out = marketing.execute(cycle, allocation.marketing, decision.positioning)
-        prod_out = product.execute(cycle, allocation.product)
-        sales_out = sales.execute(cycle, allocation.sales, leads=0)  # leads unknown pre-simulation
+        mkt_out = marketing.execute(cycle, allocation.marketing, decision.positioning, decision.pricing)
+        prod_out = product.execute(cycle, allocation.product, decision.positioning)
+        sales_out = sales.execute(cycle, allocation.sales, previous_leads)
         crm_out = crm.execute(cycle, allocation.crm, previous_churn_rate)
         for name, out in (("marketing", mkt_out), ("product", prod_out), ("sales", sales_out), ("crm", crm_out)):
             log_decision(DecisionRecord(cycle, name, {"budget": getattr(allocation, name)}, out.__dict__))
@@ -73,6 +74,7 @@ def run(num_cycles: int) -> None:
         print(report.summary)
         previous_summary = report.summary
         previous_churn_rate = report.churn_rate
+        previous_leads = sim_result.leads_generated
 
 
 if __name__ == "__main__":

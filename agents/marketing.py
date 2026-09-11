@@ -1,8 +1,23 @@
-"""Marketing agent — generates ad copy and visuals (multimodal) within its
-approved budget. Runs concurrently with Product/Sales/CRM via a CrewAI Flow.
+"""Marketing agent — generates ad copy within its approved budget. Runs
+concurrently with Product/Sales/CRM via a CrewAI Flow.
+
+Ad visuals (multimodal) are deliberately out of scope here: image
+generation needs its own MCP tool integration, which deserves a focused
+build rather than being bolted onto copy generation. ad_image_path stays
+None until that pass lands.
 """
 
 from dataclasses import dataclass
+
+from crewai import LLM, Agent, Crew, Task
+from pydantic import BaseModel, Field
+
+GEMINI_MODEL = "gemini/gemini-3.6-flash"
+
+
+class MarketingOutputSchema(BaseModel):
+    ad_copy: str = Field(description="Ad copy for this cycle, 2-4 sentences")
+    quality_score: float = Field(description="Self-assessed quality/confidence 0..1")
 
 
 @dataclass
@@ -11,21 +26,48 @@ class MarketingOutput:
     budget_spent: float
     ad_copy: str
     ad_image_path: str | None
-    quality_score: float  # 0..1, self-assessed or judged output quality
+    quality_score: float
 
 
 class MarketingAgent:
-    """TODO: wire to crewai.Agent with an image-gen tool (MCP) for ad visuals."""
+    """CrewAI agent backed by Gemini -- writes ad copy grounded in
+    Strategy's positioning, price point, and this cycle's budget."""
 
-    def __init__(self, llm_config: dict | None = None):
-        self.llm_config = llm_config or {}
+    def __init__(self, model: str = GEMINI_MODEL):
+        llm = LLM(model=model)
+        self._agent = Agent(
+            role="Marketing Lead",
+            goal="Write ad copy that converts, grounded in this cycle's positioning and budget",
+            backstory=(
+                "You run marketing for a lean, fast-moving startup. You write ad copy that "
+                "reflects the current positioning and price point, and are honest about your "
+                "own confidence in it given the budget you have to work with this cycle."
+            ),
+            llm=llm,
+            verbose=False,
+        )
 
-    def execute(self, cycle: int, budget: float, positioning: str) -> MarketingOutput:
-        # TODO: replace with real CrewAI task execution (copy + image gen).
+    def execute(self, cycle: int, budget: float, positioning: str, pricing: float | None = None) -> MarketingOutput:
+        price_context = f" at a ${pricing:.2f} price point" if pricing is not None else ""
+        task = Task(
+            description=(
+                f"Cycle {cycle}. Marketing budget this cycle: ${budget:.2f}. "
+                f"Current positioning: {positioning}{price_context}.\n"
+                "Write ad copy for this cycle and rate your own confidence in it (0..1), "
+                "considering whether the budget supports the reach this copy needs."
+            ),
+            expected_output="A JSON object matching the required schema.",
+            agent=self._agent,
+            output_pydantic=MarketingOutputSchema,
+        )
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew.kickoff()
+        parsed: MarketingOutputSchema = task.output.pydantic
+
         return MarketingOutput(
             cycle=cycle,
             budget_spent=budget,
-            ad_copy=f"[placeholder ad copy for: {positioning}]",
+            ad_copy=parsed.ad_copy,
             ad_image_path=None,
-            quality_score=0.5,
+            quality_score=parsed.quality_score,
         )
