@@ -10,6 +10,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from agents.analytics import AnalyticsAgent
 from agents.crm import CRMAgent
 from agents.finance import FinanceAgent
