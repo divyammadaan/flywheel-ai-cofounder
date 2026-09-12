@@ -19,10 +19,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._models import GROQ_MODEL
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+DEFAULT_MODEL = GROQ_MODEL
 
 _INSTRUCTION = """You are the Funding agent for an AI co-founder platform. Given a business,
 its region, and its actual measured KPI history from the execution engine, decide whether
@@ -37,7 +38,12 @@ size, sector focus, geography) -- do NOT name specific funds or individuals, sin
 have no live access to current fund mandates and would likely be out of date.
 
 The pitch deck outline should be slide-by-slide and specific to THIS business, not a
-generic template -- reference their actual numbers and positioning."""
+generic template -- reference their actual numbers and positioning.
+
+BE CONCISE. Every field is capped: no field longer than ~60 words, and the deck outline is
+one short line per slide. Dense and specific beats long -- cut hedging, preamble and
+restatement, not substance. (Output length is rate-limited, so verbosity directly costs
+the founder waiting time.)"""
 
 
 class FundingSchema(BaseModel):
@@ -63,7 +69,7 @@ class FundingPlan:
 
 class FundingAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        llm = LLM(model=model, response_format=FundingSchema)
         self._agent = Agent(
             role="Funding Advisor",
             goal="Decide if this business should raise now, and prepare it if so",

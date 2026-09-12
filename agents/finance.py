@@ -19,11 +19,12 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
+from agents._models import GROQ_MODEL
 from agents._retry import retry_on_rate_limit
 
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+DEFAULT_MODEL = GROQ_MODEL
 
 # Guardrail: no single agent may receive more than this fraction of budget.
 MAX_SHARE_PER_AGENT = 0.6

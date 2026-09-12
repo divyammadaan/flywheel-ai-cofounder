@@ -10,9 +10,10 @@ from dataclasses import dataclass, field
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._models import GROQ_MODEL
 from agents._retry import retry_on_rate_limit
 
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+DEFAULT_MODEL = GROQ_MODEL
 
 _INSTRUCTION = """You are the Intake agent for an AI co-founder platform. A founder gives you
 either a raw pitch for a new business idea, or a description of an existing business
@@ -53,7 +54,7 @@ class BusinessInput:
 
 class IntakeAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        llm = LLM(model=model, response_format=IntakeOutputSchema)
         self._agent = Agent(
             role="Intake Analyst",
             goal="Turn a founder's raw pitch or business description into structured data",

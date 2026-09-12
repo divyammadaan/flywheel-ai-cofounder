@@ -95,6 +95,15 @@ with st.sidebar:
         do_formation = st.checkbox("Include company formation plan", value=True)
         do_funding = st.checkbox("Include funding assessment", value=True)
 
+        # Groq's free tier caps output tokens/minute, so most of a run's wall
+        # time is spent waiting out rate limits rather than generating. Give a
+        # real estimate instead of an indefinite spinner.
+        est = 40 + 25 * int(num_cycles) + (30 if do_formation else 0) + (30 if do_funding else 0)
+        st.caption(
+            f"~{est // 60}m {est % 60}s expected. Real LLM calls, and Groq's free tier "
+            "rate-limits output tokens per minute, so much of that is waiting."
+        )
+
         if st.button("Analyse my idea", type="primary", use_container_width=True, disabled=not pitch.strip()):
             DB_PATH.unlink(missing_ok=True)
             with st.spinner("Intake + market research (real LLM calls, ~30s)..."):

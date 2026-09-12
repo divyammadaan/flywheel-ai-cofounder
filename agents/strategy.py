@@ -22,9 +22,12 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from pydantic import BaseModel, Field
 
+from agents._models import GROQ_MODEL_ADK_JSON
 from agents._retry import retry_on_rate_limit
 
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+# Not GROQ_MODEL: this is the one agent using ADK's output_schema, which
+# needs a model that returns bare JSON with no preamble. See _models.py.
+DEFAULT_MODEL = GROQ_MODEL_ADK_JSON
 
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"

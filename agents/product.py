@@ -13,13 +13,14 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._models import GROQ_MODEL
 from agents._retry import retry_on_rate_limit
 
 # Groq, not Gemini: Strategy/Finance/Analytics already use Gemini's shared
 # 20-req/day free-tier quota (per project, per model) -- keeping the three
 # CrewAI execution agents on a different provider avoids all 6 agents
 # competing for the same daily cap.
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+DEFAULT_MODEL = GROQ_MODEL
 
 
 class ProductOutputSchema(BaseModel):
@@ -40,7 +41,7 @@ class ProductAgent:
     per cycle, grounded in positioning and budget."""
 
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        llm = LLM(model=model, response_format=ProductOutputSchema)
         self._agent = Agent(
             role="Product Lead",
             goal="Ship one concrete, high-leverage product/storefront change per cycle",

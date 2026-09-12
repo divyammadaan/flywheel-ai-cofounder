@@ -16,10 +16,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._models import GROQ_MODEL
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+DEFAULT_MODEL = GROQ_MODEL
 
 _INSTRUCTION = """You are the Market Research agent for an AI co-founder platform. Given a
 founder's business summary, industry, target region, and (if applicable) existing
@@ -31,7 +32,11 @@ and reasoning, and be explicit that figures are estimates, not verified current 
 Also generate 2-4 clarifying questions the founder must answer before a GO/PIVOT/NO-GO
 call can be made -- at minimum ask about available investment budget if it wasn't already
 given. Ask about anything else genuinely decision-relevant (e.g. timeline, existing
-customer base, unique advantage) but keep the list short."""
+customer base, unique advantage) but keep the list short.
+
+BE CONCISE. No field longer than ~50 words, and each question one sentence. Dense and
+specific beats long. (Output length is rate-limited, so verbosity directly costs the
+founder waiting time.)"""
 
 
 class MarketResearchSchema(BaseModel):
@@ -55,7 +60,7 @@ class MarketResearchReport:
 
 class MarketResearchAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        llm = LLM(model=model, response_format=MarketResearchSchema)
         self._agent = Agent(
             role="Market Research Analyst",
             goal="Size the market and identify what's still unknown before a GO/NO-GO call",

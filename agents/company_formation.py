@@ -16,10 +16,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._models import GROQ_MODEL
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+DEFAULT_MODEL = GROQ_MODEL
 
 DISCLAIMER = (
     "Informational only, not legal advice. Generated without live access to current "
@@ -51,7 +52,12 @@ Match your specificity to your actual confidence, which differs sharply by level
   is worse than being vague.
 
 If you are unsure whether a requirement applies, say it may apply and needs checking --
-do not list it as definitely required."""
+do not list it as definitely required.
+
+BE CONCISE. No field longer than ~60 words. Registration steps are a numbered list of
+short imperatives, not paragraphs; licences and tax registrations are comma-separated
+lists, not prose. (Output length is rate-limited, so verbosity directly costs the founder
+waiting time.)"""
 
 
 class FormationSchema(BaseModel):
@@ -78,7 +84,7 @@ class FormationPlan:
 
 class CompanyFormationAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        llm = LLM(model=model, response_format=FormationSchema)
         self._agent = Agent(
             role="Company Formation Advisor",
             goal="Give a founder a concrete, jurisdiction-appropriate incorporation checklist",

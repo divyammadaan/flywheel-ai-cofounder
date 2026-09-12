@@ -11,11 +11,12 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._models import GROQ_MODEL
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 from agents.market_research import MarketResearchReport
 
-DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
+DEFAULT_MODEL = GROQ_MODEL
 
 _INSTRUCTION = """You are the Founder Advisor for an AI co-founder platform -- the final gate
 before a business plan starts running. Given the business summary, market research, and the
@@ -30,7 +31,11 @@ If GO (or PIVOT -- provide the seed plan for the PIVOTED direction), also produc
 plan: positioning, an initial price point, and initial budget priority weights across
 marketing/product/sales/crm (must sum to 1.0). This seed plan is hard data that feeds
 directly into the execution engine, so ground it in the founder's actual stated budget and
-the market research, not generic advice."""
+the market research, not generic advice.
+
+BE CONCISE. Rationale is at most ~70 words and positioning is one sentence. Say the hard
+thing plainly rather than cushioning it. (Output length is rate-limited, so verbosity
+directly costs the founder waiting time.)"""
 
 
 class AdvisorOutputSchema(BaseModel):
@@ -55,7 +60,7 @@ class AdvisorDecision:
 
 class FounderAdvisorAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        llm = LLM(model=model, response_format=AdvisorOutputSchema)
         self._agent = Agent(
             role="Founder Advisor",
             goal="Give a clear-eyed GO/PIVOT/NO-GO verdict grounded in real constraints",
