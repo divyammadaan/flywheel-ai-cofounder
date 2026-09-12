@@ -54,7 +54,7 @@ def _rule(title: str) -> None:
     print(f"\n{'=' * 70}\n{title}\n{'=' * 70}")
 
 
-def _kpi_history() -> list[dict]:
+def kpi_history() -> list[dict]:
     """Pull the engine's measured KPIs back out of the Decision Records so
     Funding reasons over what actually happened, not a fresh guess."""
     history = []
@@ -148,8 +148,8 @@ def validate(
 
     if not skip_funding:
         _rule("FUNDING ASSESSMENT")
-        funding = FundingAgent().assess(business, _kpi_history())
-        log_decision(DecisionRecord(PRECYCLE, "funding", {"kpi_history": _kpi_history()}, funding.__dict__))
+        funding = FundingAgent().assess(business, kpi_history())
+        log_decision(DecisionRecord(PRECYCLE, "funding", {"kpi_history": kpi_history()}, funding.__dict__))
         print(f"Readiness: {funding.readiness}\n")
         print(f"{funding.readiness_rationale}\n")
         print(f"Timing           : {funding.recommended_timing}\n")

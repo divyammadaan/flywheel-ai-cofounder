@@ -8,7 +8,8 @@ Two entry points, mirroring the product:
 Plus the observability view over everything that happened: KPI trends,
 budget allocation, and the full agent decision trail.
 
-Run with: streamlit run observability/dashboard/app.py
+Run with (must be the venv's Python -- a system-wide streamlit shadows it):
+    .venv/Scripts/python -m streamlit run observability/dashboard/app.py
 """
 
 import json
@@ -23,16 +24,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from agents.company_formation import CompanyFormationAgent
-from agents.founder_advisor import FounderAdvisorAgent
-from agents.funding import FundingAgent
-from agents.intake import IntakeAgent
-from agents.market_research import MarketResearchAgent
-from observability.decision_record import DB_PATH, DecisionRecord, get_records, log_decision
-from orchestration.cycle import run as run_cycles
-from orchestration.validate_flow import PRECYCLE, _kpi_history
-
 st.set_page_config(page_title="Flywheel", layout="wide", page_icon="🔄")
+
+# There is a system-wide `streamlit` on PATH that shadows the venv's. Running
+# plain `streamlit run app.py` therefore starts fine and only dies here, on
+# the first render, with a bare ModuleNotFoundError -- the server boots
+# either way because Streamlit doesn't import the script until a browser
+# connects. Catch it and say what to actually do.
+try:
+    from agents.company_formation import CompanyFormationAgent
+    from agents.founder_advisor import FounderAdvisorAgent
+    from agents.funding import FundingAgent
+    from agents.intake import IntakeAgent
+    from agents.market_research import MarketResearchAgent
+    from observability.decision_record import DB_PATH, DecisionRecord, get_records, log_decision
+    from orchestration.cycle import run as run_cycles
+    from orchestration.validate_flow import PRECYCLE, kpi_history
+except ModuleNotFoundError as exc:
+    st.error(
+        f"**Missing dependency: `{exc.name}`** — this is almost certainly the wrong Python.\n\n"
+        "A system-wide `streamlit` shadows the one in `.venv`, so plain `streamlit run ...` "
+        "runs against system Python, which doesn't have this project's packages.\n\n"
+        "Run it through the venv instead:\n\n"
+        "```\n.venv/Scripts/python -m streamlit run observability/dashboard/app.py\n```\n\n"
+        "(or activate the venv first: `.venv/Scripts/activate`)"
+    )
+    st.stop()
 
 
 def load_records() -> list[dict]:
@@ -151,9 +168,9 @@ if st.session_state.stage == "awaiting_answers":
 
             if st.session_state.do_funding:
                 with st.spinner("Assessing funding readiness..."):
-                    funding = FundingAgent().assess(business, _kpi_history())
+                    funding = FundingAgent().assess(business, kpi_history())
                     log_decision(
-                        DecisionRecord(PRECYCLE, "funding", {"kpi_history": _kpi_history()}, funding.__dict__)
+                        DecisionRecord(PRECYCLE, "funding", {"kpi_history": kpi_history()}, funding.__dict__)
                     )
 
         st.session_state.stage = "done"
@@ -163,7 +180,10 @@ if st.session_state.stage == "awaiting_answers":
 
 records = load_records()
 if not records:
-    st.info("No decision records yet. Click **Run new simulation** in the sidebar, or run `python orchestration/cycle.py --cycles N` from the terminal.")
+    st.info(
+        "Nothing run yet. Describe your business in the sidebar and hit **Analyse my idea**, "
+        "or switch to **Run engine only** to skip validation."
+    )
     st.stop()
 
 # Cycle 0 is the pre-engine validation gate (intake/research/advisor/

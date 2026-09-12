@@ -71,8 +71,8 @@ python orchestration/validate_flow.py --cycles 1 --skip-formation --skip-funding
 # engine only, generic cold start
 python orchestration/cycle.py --cycles 3
 
-# dashboard (both entry points in the sidebar)
-streamlit run observability/dashboard/app.py
+# dashboard -- must be the venv python, a system streamlit shadows it
+.venv/Scripts/python -m streamlit run observability/dashboard/app.py
 ```
 
 `--answers` exists for scripted demos but is **order-dependent**: it feeds
@@ -89,12 +89,29 @@ the wrong questions. Interactive mode is the honest path.
   midnight). Switched all 6 hosted-LLM agents to Groq's free tier instead.
   Every agent's `model` constructor param still accepts a plain Gemini
   string to switch back per-agent if wanted.
-- **Groq's free tier has its own limit**: ~1000 output tokens/minute per
-  model, not per-day. Running several agents back-to-back can trip it
-  (`litellm.RateLimitError` / `rate_limit_exceeded`), but it clears in
-  seconds (the error message includes the exact wait), and CrewAI/ADK's
-  built-in retry usually absorbs it without any code change needed. If it
-  persists, wait ~10-40s and retry.
+- **`streamlit run ...` uses the WRONG Python.** There is a system-wide
+  `streamlit.exe` on PATH that shadows the venv's. Because Streamlit doesn't
+  import the app until a browser connects, the server starts normally and
+  then dies on first render with `ModuleNotFoundError: No module named
+  'crewai'`. Always launch via `.venv/Scripts/python -m streamlit run ...`
+  (or activate the venv first). The dashboard now catches this and prints
+  the fix instead of a raw traceback.
+- **Groq's free tier has its own limit**: output tokens per minute (not
+  per-day), and it throttles *down* under sustained use. Two error shapes,
+  both retryable:
+  - `"Rate limit reached ... Please try again in 4.26s"` — transient, clears
+    in seconds.
+  - `"Request too large ... expected output tokens exceed the enforced
+    limit"` — reads permanent but isn't. It means the per-minute budget is
+    throttled down right now; the identical request succeeds after a window
+    reset (verified: a 2000-token completion this rejected went through fine
+    minutes later).
+
+  `agents/_retry.py` handles both on every agent, parsing Groq's own
+  "try again in Xs" hint where present. Do **not** rely on CrewAI's or ADK's
+  built-in retry — CrewAI/instructor gives up after one attempt in practice,
+  and ADK discards the 429 entirely and reports only
+  `DynamicNodeFailError: Dynamic node <name> failed`.
 - **google-adk[extensions] is NOT required for Groq**: `litellm` is already
   installed (a CrewAI dependency), which is all `google.adk.models.lite_llm.
   LiteLlm` actually checks for. Installing the `[extensions]` extra pulls in

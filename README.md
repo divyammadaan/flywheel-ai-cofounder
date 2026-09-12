@@ -204,8 +204,8 @@ python orchestration/validate_flow.py --cycles 2
 # just the engine, on a generic cold start
 python orchestration/cycle.py --cycles 3
 
-# the dashboard (both entry points available in the sidebar)
-streamlit run observability/dashboard/app.py
+# dashboard -- must be the venv python, a system streamlit shadows it
+.venv/Scripts/python -m streamlit run observability/dashboard/app.py
 
 pytest tests/ -q
 ```
