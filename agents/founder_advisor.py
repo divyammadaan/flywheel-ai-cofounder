@@ -11,12 +11,12 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import GROQ_MODEL
+from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 from agents.market_research import MarketResearchReport
 
-DEFAULT_MODEL = GROQ_MODEL
+DEFAULT_MODEL = AGENT_MODELS["founder_advisor"]
 
 _INSTRUCTION = """You are the Founder Advisor for an AI co-founder platform -- the final gate
 before a business plan starts running. Given the business summary, market research, and the
@@ -60,7 +60,7 @@ class AdvisorDecision:
 
 class FounderAdvisorAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model, response_format=AdvisorOutputSchema)
+        llm = LLM(model=model)
         self._agent = Agent(
             role="Founder Advisor",
             goal="Give a clear-eyed GO/PIVOT/NO-GO verdict grounded in real constraints",

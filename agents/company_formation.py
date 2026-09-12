@@ -16,11 +16,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import GROQ_MODEL
+from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 
-DEFAULT_MODEL = GROQ_MODEL
+DEFAULT_MODEL = AGENT_MODELS["company_formation"]
 
 DISCLAIMER = (
     "Informational only, not legal advice. Generated without live access to current "
@@ -84,7 +84,7 @@ class FormationPlan:
 
 class CompanyFormationAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model, response_format=FormationSchema)
+        llm = LLM(model=model)
         self._agent = Agent(
             role="Company Formation Advisor",
             goal="Give a founder a concrete, jurisdiction-appropriate incorporation checklist",

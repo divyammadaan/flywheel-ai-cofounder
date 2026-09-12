@@ -34,6 +34,33 @@ def test_falls_back_to_default_wait_without_a_hint():
     assert _wait_for(exc, default=15.0) == 15.0
 
 
+def test_connection_reset_is_retryable():
+    """Four concurrent execution agents against one provider drops a
+    connection often enough to fail a run. A reset is worth retrying."""
+    exc = RuntimeError("[WinError 10054] An existing connection was forcibly closed by the remote host")
+    assert _is_rate_limit(exc) is False
+    assert retry_on_rate_limit  # decorator still the public entry point
+
+    calls = []
+
+    @retry_on_rate_limit(max_attempts=3, wait_seconds=0.01)
+    def flaky_connection():
+        calls.append(1)
+        if len(calls) < 2:
+            raise RuntimeError("[WinError 10054] An existing connection was forcibly closed by the remote host")
+        return "ok"
+
+    assert flaky_connection() == "ok"
+    assert len(calls) == 2
+
+
+def test_connection_reset_retries_promptly_not_after_a_full_window():
+    """Nothing is refilling on a dropped connection, so waiting out a
+    rate-limit window would just waste a minute."""
+    exc = RuntimeError("ConnectError: server disconnected")
+    assert _wait_for(exc, default=15.0) < 5.0
+
+
 def test_retries_until_success_on_rate_limit():
     calls = []
 

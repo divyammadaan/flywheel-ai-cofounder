@@ -20,13 +20,13 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from agents._models import GROQ_MODEL
+from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 from simulator.market_simulator import SimulationResult
 
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"
-DEFAULT_MODEL = GROQ_MODEL
+DEFAULT_MODEL = AGENT_MODELS["analytics"]
 
 _INSTRUCTION = """You are the Analytics agent for Flywheel, a simulated startup run as
 closed-loop plan -> fund -> execute -> measure -> revise cycles.

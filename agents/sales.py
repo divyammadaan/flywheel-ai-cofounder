@@ -12,14 +12,14 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import GROQ_MODEL
+from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 
 # Groq, not Gemini: Strategy/Finance/Analytics already use Gemini's shared
 # 20-req/day free-tier quota (per project, per model) -- keeping the three
 # CrewAI execution agents on a different provider avoids all 6 agents
 # competing for the same daily cap.
-DEFAULT_MODEL = GROQ_MODEL
+DEFAULT_MODEL = AGENT_MODELS["sales"]
 
 
 class SalesOutputSchema(BaseModel):
@@ -39,7 +39,7 @@ class SalesAgent:
     given budget and leads carried over from the prior cycle."""
 
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model, response_format=SalesOutputSchema)
+        llm = LLM(model=model)
         self._agent = Agent(
             role="Sales Lead",
             goal="Convert available leads into deals within budget",

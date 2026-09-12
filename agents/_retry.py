@@ -38,6 +38,26 @@ _RATE_LIMIT_MARKERS = (
     "request too large",
 )
 
+# Transient network/server faults. These show up once the execution agents
+# run concurrently -- four simultaneous connections to the same provider
+# gets one reset often enough to fail a run, and a reset is exactly the
+# thing worth retrying. Kept separate from the rate-limit markers because
+# these need no cooldown: retry promptly rather than waiting out a window.
+_TRANSIENT_MARKERS = (
+    "connection forcibly closed",
+    "winerror 10054",
+    "connectionreset",
+    "connection reset",
+    "connecterror",
+    "remote end closed",
+    "server disconnected",
+    "internalservererror",
+    "502",
+    "503",
+    "504",
+)
+_TRANSIENT_WAIT_SECONDS = 2.0
+
 # "Please try again in 4.26s" / "in 21.06s"
 _RETRY_HINT = re.compile(r"try again in ([\d.]+)s", re.IGNORECASE)
 
@@ -66,6 +86,15 @@ def _is_rate_limit(exc: BaseException) -> bool:
     return any(marker in text for marker in _RATE_LIMIT_MARKERS)
 
 
+def _is_transient(exc: BaseException) -> bool:
+    text = _describe(exc)
+    return any(marker in text for marker in _TRANSIENT_MARKERS)
+
+
+def _is_retryable(exc: BaseException) -> bool:
+    return _is_rate_limit(exc) or _is_transient(exc)
+
+
 def _wait_for(exc: BaseException, default: float) -> float:
     """How long to sleep before retrying, preferring the provider's own hint."""
     text = _describe(exc)
@@ -76,6 +105,10 @@ def _wait_for(exc: BaseException, default: float) -> float:
         return min(float(match.group(1)) + 1.0, MAX_SLEEP_SECONDS)
     if _NEEDS_FULL_WINDOW in text:
         return FULL_WINDOW_SECONDS
+    # A dropped connection isn't a quota problem -- nothing is refilling, so
+    # waiting a full window just wastes time. Retry promptly.
+    if _is_transient(exc) and not _is_rate_limit(exc):
+        return _TRANSIENT_WAIT_SECONDS
     return default
 
 
@@ -88,7 +121,7 @@ def retry_on_rate_limit(max_attempts: int = 4, wait_seconds: float = 15.0):
                 try:
                     return fn(*args, **kwargs)
                 except Exception as e:
-                    if not _is_rate_limit(e):
+                    if not _is_retryable(e):
                         raise
                     last_exc = e
                     if attempt < max_attempts - 1:

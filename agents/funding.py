@@ -19,11 +19,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import GROQ_MODEL
+from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 
-DEFAULT_MODEL = GROQ_MODEL
+DEFAULT_MODEL = AGENT_MODELS["funding"]
 
 _INSTRUCTION = """You are the Funding agent for an AI co-founder platform. Given a business,
 its region, and its actual measured KPI history from the execution engine, decide whether
@@ -69,7 +69,7 @@ class FundingPlan:
 
 class FundingAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model, response_format=FundingSchema)
+        llm = LLM(model=model)
         self._agent = Agent(
             role="Funding Advisor",
             goal="Decide if this business should raise now, and prepare it if so",

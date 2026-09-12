@@ -16,11 +16,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import GROQ_MODEL
+from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 
-DEFAULT_MODEL = GROQ_MODEL
+DEFAULT_MODEL = AGENT_MODELS["market_research"]
 
 _INSTRUCTION = """You are the Market Research agent for an AI co-founder platform. Given a
 founder's business summary, industry, target region, and (if applicable) existing
@@ -60,7 +60,7 @@ class MarketResearchReport:
 
 class MarketResearchAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model, response_format=MarketResearchSchema)
+        llm = LLM(model=model)
         self._agent = Agent(
             role="Market Research Analyst",
             goal="Size the market and identify what's still unknown before a GO/NO-GO call",

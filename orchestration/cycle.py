@@ -6,6 +6,7 @@ Run with: python orchestration/cycle.py --cycles 5
 
 import argparse
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -63,10 +64,28 @@ def run(num_cycles: int, initial_context: str | None = None) -> None:
         allocation = finance.allocate(cycle, decision.priorities)
         log_decision(DecisionRecord(cycle, "finance", {"priorities": decision.priorities}, allocation.__dict__))
 
-        mkt_out = marketing.execute(cycle, allocation.marketing, decision.positioning, decision.pricing)
-        prod_out = product.execute(cycle, allocation.product, decision.positioning)
-        sales_out = sales.execute(cycle, allocation.sales, previous_leads)
-        crm_out = crm.execute(cycle, allocation.crm, previous_churn_rate)
+        # The four execution agents are genuinely independent: each needs only
+        # its own budget from Finance, and nothing reads another's output
+        # until the Simulator fans them back in. Running them concurrently
+        # cuts the heaviest stage from the sum of four calls to the slowest
+        # one. They sit on different providers (see agents/_models.py) so
+        # firing together doesn't just move the queue to one rate limit.
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            futures = {
+                "marketing": pool.submit(
+                    marketing.execute, cycle, allocation.marketing, decision.positioning, decision.pricing
+                ),
+                "product": pool.submit(product.execute, cycle, allocation.product, decision.positioning),
+                "sales": pool.submit(sales.execute, cycle, allocation.sales, previous_leads),
+                "crm": pool.submit(crm.execute, cycle, allocation.crm, previous_churn_rate),
+            }
+            # .result() re-raises in the caller, so a failing agent still
+            # surfaces rather than being silently swallowed by the pool.
+            mkt_out = futures["marketing"].result()
+            prod_out = futures["product"].result()
+            sales_out = futures["sales"].result()
+            crm_out = futures["crm"].result()
+
         for name, out in (("marketing", mkt_out), ("product", prod_out), ("sales", sales_out), ("crm", crm_out)):
             log_decision(DecisionRecord(cycle, name, {"budget": getattr(allocation, name)}, out.__dict__))
 
