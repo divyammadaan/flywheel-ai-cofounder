@@ -24,10 +24,10 @@ load_dotenv()
 from agents.analytics import AnalyticsAgent
 from agents.crm import CRMAgent
 from agents.finance import FinanceAgent
-from agents.marketing import MarketingAgent
 from agents.product import ProductAgent
 from agents.sales import SalesAgent
 from agents.strategy import StrategyAgent
+from orchestration.a2a_bridge import request_marketing
 from observability.decision_record import DecisionRecord, log_decision
 from simulator.market_simulator import ExecutionOutput, MarketSimulator
 
@@ -44,7 +44,6 @@ def run(num_cycles: int, initial_context: str | None = None) -> None:
     """
     strategy = StrategyAgent()
     finance = FinanceAgent(total_budget_per_cycle=TOTAL_BUDGET_PER_CYCLE)
-    marketing = MarketingAgent()
     product = ProductAgent()
     sales = SalesAgent()
     crm = CRMAgent()
@@ -68,12 +67,17 @@ def run(num_cycles: int, initial_context: str | None = None) -> None:
         # its own budget from Finance, and nothing reads another's output
         # until the Simulator fans them back in. Running them concurrently
         # cuts the heaviest stage from the sum of four calls to the slowest
-        # one. They sit on different providers (see agents/_models.py) so
-        # firing together doesn't just move the queue to one rate limit.
+        # one.
+        #
+        # Marketing goes through request_marketing() rather than being called
+        # directly: that routes over A2A when the bridge server is running
+        # (see orchestration/a2a_bridge.py) and falls back to an in-process
+        # call otherwise, so the protocol path is an upgrade rather than a
+        # hard dependency.
         with ThreadPoolExecutor(max_workers=4) as pool:
             futures = {
                 "marketing": pool.submit(
-                    marketing.execute, cycle, allocation.marketing, decision.positioning, decision.pricing
+                    request_marketing, cycle, allocation.marketing, decision.positioning, decision.pricing
                 ),
                 "product": pool.submit(product.execute, cycle, allocation.product, decision.positioning),
                 "sales": pool.submit(sales.execute, cycle, allocation.sales, previous_leads),
@@ -81,13 +85,19 @@ def run(num_cycles: int, initial_context: str | None = None) -> None:
             }
             # .result() re-raises in the caller, so a failing agent still
             # surfaces rather than being silently swallowed by the pool.
-            mkt_out = futures["marketing"].result()
+            mkt_out, mkt_transport = futures["marketing"].result()
             prod_out = futures["product"].result()
             sales_out = futures["sales"].result()
             crm_out = futures["crm"].result()
 
         for name, out in (("marketing", mkt_out), ("product", prod_out), ("sales", sales_out), ("crm", crm_out)):
-            log_decision(DecisionRecord(cycle, name, {"budget": getattr(allocation, name)}, out.__dict__))
+            snapshot = {"budget": getattr(allocation, name)}
+            # Record which transport Marketing used, so the Decision Record
+            # shows whether A2A was actually exercised rather than leaving it
+            # ambiguous after a silent fallback.
+            if name == "marketing":
+                snapshot["transport"] = mkt_transport
+            log_decision(DecisionRecord(cycle, name, snapshot, out.__dict__))
 
         exec_output = ExecutionOutput(
             marketing_spend=mkt_out.budget_spent,

@@ -113,7 +113,7 @@ A real run, unedited: Cycle 1 spent 45% of budget on marketing and came back wit
 
 - **Agent orchestration:** CrewAI (execution + advisory agents), Google ADK (Strategy/Finance/Analytics, session state/memory)
 - **Agent-to-tool:** MCP — a real FastMCP server exposing Decision Record history, which CRM queries over stdio as a separate process
-- **Agent-to-agent:** A2A — not yet implemented
+- **Agent-to-agent:** A2A — Marketing is exposed as an A2A server with a discoverable Agent Card; the engine calls it over the protocol and falls back to an in-process call if the server is down
 - **LLMs:** Groq free tier (`qwen/qwen3.8-27b`) for the 9 hosted agents; Ollama (`qwen3:4b`, local) for CRM. Gemini supported via a per-agent `model=` override — see `docs/setup.md` for why it isn't the default
 - **Storage:** SQLite (Decision Records)
 - **Dashboard:** Streamlit (React planned)
@@ -143,7 +143,7 @@ flywheel/
 ├── orchestration/
 │   ├── validate_flow.py    # front door: pitch -> verdict -> engine -> funding
 │   ├── cycle.py            # the engine loop
-│   └── a2a_bridge.py       # cross-framework agent communication -- TODO
+│   └── a2a_bridge.py       # A2A server + client for Marketing (ADK->CrewAI seam)
 ├── observability/
 │   ├── decision_record.py
 │   └── dashboard/          # Streamlit
@@ -162,9 +162,12 @@ flywheel/
 
 **Status.** All 12 agents are genuinely LLM-backed, no placeholders. MCP is
 real — a FastMCP server queried by CRM over stdio as a separate process.
-Still open: A2A, ad image generation for Marketing, a live deployable
-storefront for Product, and live web search for Market Research (which
-currently reasons from general knowledge and labels every estimate as such).
+A2A is real — Marketing is served behind an Agent Card and the engine calls
+it over the protocol (the Decision Record logs `transport: a2a` vs `direct`
+so you can see which path ran). Still open: ad image generation for
+Marketing, a live deployable storefront for Product, and live web search for
+Market Research (which currently reasons from general knowledge and labels
+every estimate as such).
 
 ---
 

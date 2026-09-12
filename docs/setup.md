@@ -80,6 +80,33 @@ answers positionally into whatever questions Market Research generates that
 run, and the model reorders them between runs, so answers can land against
 the wrong questions. Interactive mode is the honest path.
 
+## A2A (optional)
+
+Marketing is also reachable over Google's Agent2Agent protocol. Start the
+bridge in a second terminal:
+
+```bash
+.venv/Scripts/python orchestration/a2a_bridge.py
+# Agent Card: http://127.0.0.1:8600/.well-known/agent-card.json
+```
+
+With it running, the engine calls Marketing over A2A; with it stopped, it
+falls back to an in-process call. Either way the run completes — check
+`transport` in the marketing Decision Record to see which path was taken.
+
+Three things that cost time here, worth knowing before touching this file:
+
+- The JSON-RPC method is **`SendMessage`**, not the `message/send` spelling
+  in some A2A docs. This SDK routes by gRPC service method name; the other
+  spelling returns `-32601 Method not found`.
+- The **`A2A-Version: 1.0` header is required**. A missing header is read as
+  protocol `0.3` and rejected with `-32009`, not defaulted to current.
+- The server is **Starlette, not FastAPI**. `add_a2a_routes_to_fastapi()`
+  makes FastAPI generate an OpenAPI schema over the A2A protobuf types,
+  which crashes in a2a's own `_proto_schema.py` (`FieldDescriptor` has no
+  `is_repeated`) against the pinned protobuf. Both route builders work fine
+  on their own — only the FastAPI schema pass fails.
+
 ## Known issues
 
 - **Why Groq, not Gemini, is the default**: `gemini-3.6-flash` on Gemini's
