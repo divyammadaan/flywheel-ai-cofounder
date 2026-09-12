@@ -374,9 +374,23 @@ for col, (agent, label, extract) in zip(exec_cols, exec_agents):
     with col:
         st.markdown(f"**{label}**")
         if agent in cycle_records:
-            st.caption(extract(cycle_records[agent]))
-            if agent == "crm" and cycle_records[agent].get("at_risk_segments"):
-                st.caption("At risk: " + ", ".join(cycle_records[agent]["at_risk_segments"]))
+            record = cycle_records[agent]
+
+            # The generated ad creative, shown above its copy so the pair
+            # reads as the actual ad. Guarded on existence: image generation
+            # is allowed to fail without failing the cycle, and old runs may
+            # reference files since cleaned up.
+            if agent == "marketing":
+                image_path = record.get("ad_image_path")
+                if image_path and Path(image_path).exists():
+                    st.image(image_path, use_container_width=True)
+                elif image_path:
+                    st.caption("_(ad image missing from disk)_")
+
+            st.caption(extract(record))
+
+            if agent == "crm" and record.get("at_risk_segments"):
+                st.caption("At risk: " + ", ".join(record["at_risk_segments"]))
         else:
             st.caption("—")
 

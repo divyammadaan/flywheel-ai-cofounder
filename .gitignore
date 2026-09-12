@@ -12,6 +12,7 @@ env/
 data/*.db
 data/chroma/
 data/*.sqlite3
+data/ads/
 
 # logs
 *.log

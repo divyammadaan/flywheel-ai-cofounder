@@ -87,7 +87,7 @@ A real run, unedited: Cycle 1 spent 45% of budget on marketing and came back wit
 |---|---|
 | **Strategy** | Sets and revises positioning, pricing, and budget priorities each cycle based on prior results |
 | **Finance** | Allocates a fixed shared budget across Marketing, Product, Sales, and CRM; enforces hard spend caps (guardrail) |
-| **Marketing** | Generates ad copy within its approved budget (ad visuals still to come) |
+| **Marketing** | Generates ad copy **and the matching ad image** — it writes both the copy and the image brief in one pass, so the visual is grounded in the same positioning rather than being generic stock |
 | **Product** | Decides one concrete product/storefront change per cycle |
 | **Sales** | Sets outreach effort and approach against the leads carried over from last cycle |
 | **CRM** | Tracks churn signals and retention effort — **runs on a local model**, so customer data never leaves the machine |
@@ -148,6 +148,7 @@ flywheel/
 │   ├── decision_record.py
 │   └── dashboard/          # Streamlit
 ├── tools/
+│   ├── image_gen.py        # ad image generation (keyless, fails soft)
 │   ├── mcp_server.py       # FastMCP server: Decision Record query tools
 │   └── mcp_client_tool.py  # CrewAI tool, talks to mcp_server.py over stdio
 ├── data/                   # SQLite store (gitignored)
@@ -164,8 +165,9 @@ flywheel/
 real — a FastMCP server queried by CRM over stdio as a separate process.
 A2A is real — Marketing is served behind an Agent Card and the engine calls
 it over the protocol (the Decision Record logs `transport: a2a` vs `direct`
-so you can see which path ran). Still open: ad image generation for
-Marketing, a live deployable storefront for Product, and live web search for
+so you can see which path ran). Marketing is genuinely multimodal: it
+generates a real ad image per cycle into `data/ads/`, shown in the dashboard.
+Still open: a live deployable storefront for Product, and live web search for
 Market Research (which currently reasons from general knowledge and labels
 every estimate as such).
 

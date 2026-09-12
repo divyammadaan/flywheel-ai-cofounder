@@ -1,10 +1,10 @@
-"""Marketing agent — generates ad copy within its approved budget. Runs
-concurrently with Product/Sales/CRM via a CrewAI Flow.
+"""Marketing agent — generates ad copy AND the matching ad visual within its
+approved budget. Runs concurrently with Product/Sales/CRM.
 
-Ad visuals (multimodal) are deliberately out of scope here: image
-generation needs its own MCP tool integration, which deserves a focused
-build rather than being bolted onto copy generation. ad_image_path stays
-None until that pass lands.
+Multimodal by design: the agent writes both the copy and the image prompt in
+one pass, so the visual is grounded in the same positioning and price point
+rather than being a generic stock picture bolted on afterwards. Image
+generation itself is delegated to tools/image_gen.py.
 """
 
 from dataclasses import dataclass
@@ -14,16 +14,20 @@ from pydantic import BaseModel, Field
 
 from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
+from tools.image_gen import generate_ad_image
 
-# Groq, not Gemini: Strategy/Finance/Analytics already use Gemini's shared
-# 20-req/day free-tier quota (per project, per model) -- keeping the three
-# CrewAI execution agents on a different provider avoids all 6 agents
-# competing for the same daily cap.
 DEFAULT_MODEL = AGENT_MODELS["marketing"]
 
 
 class MarketingOutputSchema(BaseModel):
     ad_copy: str = Field(description="Ad copy for this cycle, 2-4 sentences")
+    image_prompt: str = Field(
+        description=(
+            "A visual description for the ad image, for a text-to-image model. Describe "
+            "the scene, subject, lighting and mood -- no text or words in the image, and "
+            "no brand names. One sentence."
+        )
+    )
     quality_score: float = Field(description="Self-assessed quality/confidence 0..1")
 
 
@@ -34,21 +38,26 @@ class MarketingOutput:
     ad_copy: str
     ad_image_path: str | None
     quality_score: float
+    image_prompt: str = ""
 
 
 class MarketingAgent:
-    """CrewAI agent backed by Groq -- writes ad copy grounded in
+    """CrewAI agent writing ad copy plus the image prompt, grounded in
     Strategy's positioning, price point, and this cycle's budget."""
 
-    def __init__(self, model: str = DEFAULT_MODEL):
+    def __init__(self, model: str = DEFAULT_MODEL, generate_image: bool = True):
+        # generate_image is off in tests and anywhere an external image
+        # service would make a run slow or flaky.
+        self._generate_image = generate_image
         llm = LLM(model=model)
         self._agent = Agent(
             role="Marketing Lead",
-            goal="Write ad copy that converts, grounded in this cycle's positioning and budget",
+            goal="Write ad copy that converts, plus the visual that should run alongside it",
             backstory=(
                 "You run marketing for a lean, fast-moving startup. You write ad copy that "
-                "reflects the current positioning and price point, and are honest about your "
-                "own confidence in it given the budget you have to work with this cycle."
+                "reflects the current positioning and price point, brief the accompanying "
+                "image, and are honest about your own confidence given the budget you have "
+                "to work with this cycle."
             ),
             llm=llm,
             verbose=False,
@@ -61,8 +70,9 @@ class MarketingAgent:
             description=(
                 f"Cycle {cycle}. Marketing budget this cycle: ${budget:.2f}. "
                 f"Current positioning: {positioning}{price_context}.\n"
-                "Write ad copy for this cycle and rate your own confidence in it (0..1), "
-                "considering whether the budget supports the reach this copy needs."
+                "Write ad copy for this cycle, brief the image that should run with it, and "
+                "rate your own confidence (0..1), considering whether the budget supports "
+                "the reach this copy needs."
             ),
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
@@ -72,10 +82,15 @@ class MarketingAgent:
         crew.kickoff()
         parsed: MarketingOutputSchema = task.output.pydantic
 
+        # None on failure -- an unreachable image service shouldn't fail the
+        # cycle, since the copy is the substantive output.
+        image_path = generate_ad_image(parsed.image_prompt, cycle) if self._generate_image else None
+
         return MarketingOutput(
             cycle=cycle,
             budget_spent=budget,
             ad_copy=parsed.ad_copy,
-            ad_image_path=None,
+            ad_image_path=image_path,
             quality_score=parsed.quality_score,
+            image_prompt=parsed.image_prompt,
         )

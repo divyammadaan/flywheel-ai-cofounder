@@ -80,6 +80,23 @@ answers positionally into whatever questions Market Research generates that
 run, and the model reorders them between runs, so answers can land against
 the wrong questions. Interactive mode is the honest path.
 
+## Ad images
+
+Marketing generates a real ad image per cycle into `data/ads/cycle_N.jpg`
+(gitignored). No key or setup needed — it uses Pollinations, which is
+keyless.
+
+Why not a hosted provider: **Gemini's image models have a free-tier quota of
+literally `0`** (the API returns `limit: 0`, not an exhausted quota), so they
+need billing and would block anyone cloning this repo. NVIDIA NIM has no
+image model on its chat-completions endpoint, and local diffusion is far too
+slow CPU-only.
+
+Generation is allowed to fail without failing the cycle — the ad copy is the
+substantive output, so a flaky image service returns `None` and the run
+continues. Note the free service stamps a small watermark despite
+`nologo=true`.
+
 ## A2A (optional)
 
 Marketing is also reachable over Google's Agent2Agent protocol. Start the
