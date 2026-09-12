@@ -262,19 +262,32 @@ for c in cycles:
             "churn_rate": a["churn_rate"],
         }
     )
-kpi_df = pd.DataFrame(kpi_rows).set_index("cycle")
+kpi_df = pd.DataFrame(kpi_rows)
+# String index keeps the axis reading "Cycle 1" instead of "1.000000".
+kpi_df["cycle"] = kpi_df["cycle"].map(lambda c: f"Cycle {c}")
+kpi_df = kpi_df.set_index("cycle")
 
-col1, col2 = st.columns(2)
-with col1:
-    st.caption("Revenue ($)")
-    st.line_chart(kpi_df[["revenue"]])
-    st.caption("Conversion rate")
-    st.line_chart(kpi_df[["conversion_rate"]])
-with col2:
-    st.caption("CAC ($) -- lower is better")
-    st.line_chart(kpi_df[["cac"]])
-    st.caption("Churn rate -- lower is better")
-    st.line_chart(kpi_df[["churn_rate"]])
+KPIS = (
+    ("Revenue", "revenue", "${:,.2f}", "higher is better"),
+    ("CAC", "cac", "${:,.2f}", "lower is better"),
+    ("Conversion", "conversion_rate", "{:.0%}", "higher is better"),
+    ("Churn", "churn_rate", "{:.1%}", "lower is better"),
+)
+
+if len(kpi_df) == 1:
+    # A one-point line chart draws nothing useful -- show the numbers, and
+    # say plainly that a trajectory needs more than one cycle.
+    st.caption("One cycle so far — run more to see a trajectory.")
+    for col, (label, key, fmt, _) in zip(st.columns(4), KPIS):
+        value = kpi_df.iloc[0][key]
+        col.metric(label, fmt.format(value) if pd.notna(value) else "N/A")
+else:
+    col1, col2 = st.columns(2)
+    for i, (label, key, _, direction) in enumerate(KPIS):
+        target = col1 if i % 2 == 0 else col2
+        with target:
+            st.caption(f"{label} — {direction}")
+            st.line_chart(kpi_df[[key]])
 
 # ------------------------------------------------------ budget allocation --
 st.subheader("Budget allocation by cycle")
@@ -287,12 +300,18 @@ for c in cycles:
         {"cycle": c, "marketing": f["marketing"], "product": f["product"], "sales": f["sales"], "crm": f["crm"]}
     )
 if budget_rows:
-    budget_df = pd.DataFrame(budget_rows).set_index("cycle")
-    st.bar_chart(budget_df)
+    budget_df = pd.DataFrame(budget_rows)
+    budget_df["cycle"] = budget_df["cycle"].map(lambda c: f"Cycle {c}")
+    st.bar_chart(budget_df.set_index("cycle"))
 
 # --------------------------------------------------------- per-cycle trail --
 st.subheader("Agent decision trail")
-selected_cycle = st.select_slider("Cycle", options=cycles, value=cycles[-1])
+# select_slider needs >1 option; with a single cycle there's nothing to pick.
+if len(cycles) > 1:
+    selected_cycle = st.select_slider("Cycle", options=cycles, value=cycles[-1])
+else:
+    selected_cycle = cycles[0]
+    st.caption(f"Cycle {selected_cycle}")
 
 cycle_records = {r["agent"]: r["decision"] for r in records if r["cycle"] == selected_cycle}
 

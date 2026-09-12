@@ -59,6 +59,27 @@ slow at that spec. qwen3:4b is a reasoning model, so a single call takes
 ~15-20s even for a trivial prompt; that's fine for CRM (not on any latency-
 critical path) but don't route anything time-sensitive through it.
 
+## Running it
+
+```bash
+# full product: pitch -> research -> Q&A -> verdict -> formation -> engine -> funding
+python orchestration/validate_flow.py --cycles 2
+
+# skip stages to save API calls while iterating
+python orchestration/validate_flow.py --cycles 1 --skip-formation --skip-funding
+
+# engine only, generic cold start
+python orchestration/cycle.py --cycles 3
+
+# dashboard (both entry points in the sidebar)
+streamlit run observability/dashboard/app.py
+```
+
+`--answers` exists for scripted demos but is **order-dependent**: it feeds
+answers positionally into whatever questions Market Research generates that
+run, and the model reorders them between runs, so answers can land against
+the wrong questions. Interactive mode is the honest path.
+
 ## Known issues
 
 - **Why Groq, not Gemini, is the default**: `gemini-3.6-flash` on Gemini's

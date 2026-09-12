@@ -1,7 +1,9 @@
-# Flywheel — Self-Revising Multi-Agent Business Engine
+# Flywheel — An AI Co-Founder
 
 
-Flywheel is a self-revising multi-agent system that runs a simulated business through repeated **plan → execute → measure → revise** cycles, instead of a single-shot agent pipeline. Each cycle, a Strategy agent sets direction based on the *previous* cycle's real performance, a Finance agent negotiates a shared budget across four competing execution agents, and an Analytics agent closes the loop by feeding results back into Strategy — making the system adapt over time rather than just execute once.
+A founder describes a business — a new idea, or one they already run — and Flywheel takes it from there: researches the market, asks the questions it still needs answered, rules GO / PIVOT / NO-GO, lays out how to incorporate, then actually *runs* the business through repeated **plan → fund → execute → measure → revise** cycles, and finally tells them whether they're ready to raise.
+
+The part that makes it more than a pipeline: the engine's decisions in one cycle are judged by outcomes in the next. Strategy revises because CAC came in too high, not because a script said to.
 
 ---
 
@@ -9,35 +11,56 @@ Flywheel is a self-revising multi-agent system that runs a simulated business th
 
 Most multi-agent projects fan out a set of agents in parallel and merge their outputs once. Flywheel is a **closed loop with persistent state**: decisions made in one cycle are judged by outcomes in the next, and agents must compete for a fixed, limited budget rather than act independently. This forces genuine multi-agent negotiation, dependency-aware orchestration, and cross-cycle memory — not just concurrent API calls.
 
+A real run, unedited: Cycle 1 spent 45% of budget on marketing and came back with CAC $150 against $100 revenue per customer and 18.9% churn. Strategy read that and moved budget out of marketing into CRM/retention on its own. Cycle 2: CAC $75, churn 8%, revenue up. Nobody scripted the correction.
+
 ---
 
 ## Architecture
 
 ```
-        ┌────────────┐
-        │  Strategy   │◄──────────────────────┐
-        └─────┬──────┘                        │
-              │                                │
-        ┌─────▼──────┐                        │
-        │  Finance    │  (budget negotiation)  │
-        └─────┬──────┘                        │
-              │  fan-out (parallel)            │
-   ┌──────────┼──────────┬──────────┐          │
-   ▼          ▼          ▼          ▼          │
-Marketing  Product     Sales       CRM          │
-   │          │          │          │           │
-   └──────────┴──────────┴──────────┘           │
-              │  fan-in                          │
-        ┌─────▼──────┐                          │
-        │ Simulator   │  (rule-based, not an LLM)│
-        └─────┬──────┘                          │
-              │                                 │
-        ┌─────▼──────┐                          │
-        │ Analytics   │──────────────────────────┘
-        └────────────┘   feeds next cycle
+  founder's pitch (text or voice)
+            │
+      ┌─────▼─────┐
+      │  Intake   │  normalise idea OR existing financials
+      └─────┬─────┘
+      ┌─────▼──────────┐
+      │ Market Research│  size it, name rivals, ask what's still unknown
+      └─────┬──────────┘
+            │  ← founder answers clarifying questions
+      ┌─────▼──────────┐
+      │Founder Advisor │  GO / PIVOT / NO-GO  ──► NO-GO stops here
+      └─────┬──────────┘
+      ┌─────▼──────────┐
+      │Company Formation│ entity, registrations, licences, cost/timeline
+      └─────┬──────────┘
+            │  seed plan
+╔═══════════▼════════════════════════════════════════╗
+║  THE ENGINE                                        ║
+║        ┌────────────┐                              ║
+║        │  Strategy   │◄──────────────────────┐     ║
+║        └─────┬──────┘                        │     ║
+║        ┌─────▼──────┐                        │     ║
+║        │  Finance    │  (budget negotiation)  │     ║
+║        └─────┬──────┘                        │     ║
+║              │  fan-out (parallel)            │     ║
+║   ┌──────────┼──────────┬──────────┐          │     ║
+║   ▼          ▼          ▼          ▼          │     ║
+║Marketing  Product     Sales       CRM          │     ║
+║   └──────────┴──────────┴──────────┘           │     ║
+║              │  fan-in                          │     ║
+║        ┌─────▼──────┐                          │     ║
+║        │ Simulator   │  (rule-based, not an LLM)│     ║
+║        └─────┬──────┘                          │     ║
+║        ┌─────▼──────┐                          │     ║
+║        │ Analytics   │──────────────────────────┘     ║
+║        └─────┬──────┘   feeds next cycle             ║
+╚══════════════│═════════════════════════════════════╝
+            ┌──▼──────┐
+            │ Funding │  ready to raise? if not, what has to be true first
+            └─────────┘
 ```
 
-**Flow per cycle:**
+**Flow per engine cycle:**
 1. **Strategy** reads the previous cycle's Analytics report and revises the business plan (serial — depends on prior cycle).
 2. **Finance** allocates a fixed budget across the four execution agents based on their requests (serial — depends on Strategy).
 3. **Marketing, Product, Sales, CRM** act concurrently, each within its approved budget (parallel — independent of each other).
@@ -48,40 +71,52 @@ Marketing  Product     Sales       CRM          │
 
 ## Agents
 
+**Validation & advisory** — runs once, before/after the engine:
+
 | Agent | Role |
 |---|---|
-| **Strategy** | Sets and revises the business plan, positioning, and pricing each cycle based on prior results |
-| **Finance** | Negotiates and allocates a fixed shared budget across Marketing, Product, Sales, and CRM; enforces hard spend caps (guardrail) |
-| **Marketing** | Generates ad copy **and visuals** (multimodal) within its approved budget |
-| **Product** | Writes, tests, and ships a real, deployable change to the storefront/landing page each cycle |
-| **Sales** | Handles simulated inbound leads, drafts outreach, closes simulated deals |
-| **CRM** | Tracks customer interactions/segments, flags churn signals |
-| **Analytics** | Aggregates all agent + simulator output into KPIs (revenue, conversion rate, CAC, churn) and a natural-language summary |
-| **Market Simulator** *(non-agent)* | Rule-based module that converts execution output into synthetic demand/conversion events |
+| **Intake** | Normalises a raw pitch, or an existing business's revenue/PAT/EBITDA/debt, into structured input. Told explicitly not to invent numbers the founder didn't give |
+| **Market Research** | Market sizing, competitor landscape, risks — and the clarifying questions that must be answered before a verdict (budget, sourcing, capacity). Reasons from general knowledge; says so, since no live search is wired in yet |
+| **Founder Advisor** | GO / PIVOT / NO-GO plus the seed plan that becomes Cycle 1's input. Instructed not to sugarcoat — it returns NO-GO when the budget doesn't match the market |
+| **Company Formation** | Entity type, registration steps, licences, tax registrations, cost/timeline — region-aware (Pvt Ltd/MCA/DIN for India, LLC/EIN for the US). Not legal advice, and says so |
+| **Funding** | Ready to raise? Grounded in the engine's *measured* KPIs, not a fresh guess. Names investor **type and profile**, never specific firms — fund mandates go stale and would send founders at the wrong people |
+
+**The engine** — runs every cycle:
+
+| Agent | Role |
+|---|---|
+| **Strategy** | Sets and revises positioning, pricing, and budget priorities each cycle based on prior results |
+| **Finance** | Allocates a fixed shared budget across Marketing, Product, Sales, and CRM; enforces hard spend caps (guardrail) |
+| **Marketing** | Generates ad copy within its approved budget (ad visuals still to come) |
+| **Product** | Decides one concrete product/storefront change per cycle |
+| **Sales** | Sets outreach effort and approach against the leads carried over from last cycle |
+| **CRM** | Tracks churn signals and retention effort — **runs on a local model**, so customer data never leaves the machine |
+| **Analytics** | Aggregates agent + simulator output into KPIs (revenue, conversion, CAC, churn) and the natural-language summary that closes the loop |
+| **Market Simulator** *(non-agent)* | Rule-based module converting execution output into synthetic demand/conversion events — seeded, so runs are reproducible |
 
 ---
 
 ## Key features
 
+- **Two entry points** — validate a new idea from a raw pitch, or run the engine directly on a plan you already have
+- **A verdict that can say no** — the Advisor returns NO-GO and stops the run when the numbers don't support the idea
 - **Closed-loop orchestration** — a genuine cycle with persistent cross-cycle state, not a one-shot DAG
 - **Real budget negotiation** — Finance allocates limited resources across competing agents every cycle
-- **Multimodal Marketing** — copy and ad visuals, evaluated together
-- **Live Product artifact** — an actual deployable storefront that evolves cycle over cycle
-- **Full observability** — every agent action logged as a structured **Decision Record** (agent, cycle, input snapshot, reasoning trace, decision, confidence), inspectable via dashboard
-- **Guardrails** — hard budget caps and safety checks enforced on every agent action
-- **Zero-cost inference** — local LLMs for the bulk of reasoning, free-tier hosted models for the highest-stakes steps
+- **Guardrails enforced in code, not prompts** — the per-agent spend cap is plain Python (`compute_capped_allocation`), so it holds even if a model reasons its way to a bad number. The LLM only narrates the allocation; it never computes it
+- **Privacy slice** — CRM, the agent touching customer/churn data, runs on a local Ollama model; that data never leaves the machine
+- **Funding advice grounded in measured results** — the Funding agent reads the engine's actual KPI history back out of the Decision Records
+- **Full observability** — every agent action logged as a structured **Decision Record** (agent, cycle, input snapshot, decision), inspectable in the dashboard
 
 ---
 
 ## Tech stack
 
-- **Agent orchestration:** CrewAI (Flows, parallel execution agents), Google ADK (Strategy/Finance/Analytics, session state)
-- **Agent-to-tool / agent-to-agent communication:** MCP, A2A
-- **LLMs:** Ollama (Llama 3.1 8B / Qwen2.5 7B, local) + Groq / Google Gemini free tier (hosted, for critical reasoning)
-- **Backend:** Python, FastAPI
-- **Storage:** SQLite (Decision Records, business state), ChromaDB (embeddings)
-- **Dashboard:** React or Streamlit
-- **Infra:** Docker, GitHub
+- **Agent orchestration:** CrewAI (execution + advisory agents), Google ADK (Strategy/Finance/Analytics, session state/memory)
+- **Agent-to-tool:** MCP — a real FastMCP server exposing Decision Record history, which CRM queries over stdio as a separate process
+- **Agent-to-agent:** A2A — not yet implemented
+- **LLMs:** Groq free tier (`qwen/qwen3.8-27b`) for the 9 hosted agents; Ollama (`qwen3:4b`, local) for CRM. Gemini supported via a per-agent `model=` override — see `docs/setup.md` for why it isn't the default
+- **Storage:** SQLite (Decision Records)
+- **Dashboard:** Streamlit (React planned)
 
 ---
 
@@ -90,25 +125,32 @@ Marketing  Product     Sales       CRM          │
 ```
 flywheel/
 ├── agents/
-│   ├── strategy.py        # ADK + Groq, session memory
-│   ├── finance.py         # guardrail deterministic; ADK + Groq narrates it
-│   ├── marketing.py       # CrewAI + Groq
-│   ├── product.py         # CrewAI + Groq
-│   ├── sales.py           # CrewAI + Groq
-│   ├── crm.py             # CrewAI + local Ollama (qwen3:4b) -- privacy slice
-│   └── analytics.py       # ADK + Groq, session memory
+│   ├── _retry.py           # shared rate-limit backoff (all 10 agents)
+│   ├── intake.py           # ─┐
+│   ├── market_research.py  #  │ validation & advisory
+│   ├── founder_advisor.py  #  │ (CrewAI + Groq)
+│   ├── company_formation.py#  │
+│   ├── funding.py          # ─┘
+│   ├── strategy.py         # ADK + Groq, session memory
+│   ├── finance.py          # guardrail deterministic; ADK + Groq narrates it
+│   ├── marketing.py        # CrewAI + Groq
+│   ├── product.py          # CrewAI + Groq
+│   ├── sales.py            # CrewAI + Groq
+│   ├── crm.py              # CrewAI + local Ollama (qwen3:4b) -- privacy slice
+│   └── analytics.py        # ADK + Groq, session memory
 ├── simulator/
 │   └── market_simulator.py
 ├── orchestration/
-│   ├── cycle.py           # main cycle loop
-│   └── a2a_bridge.py      # cross-framework agent communication -- TODO
+│   ├── validate_flow.py    # front door: pitch -> verdict -> engine -> funding
+│   ├── cycle.py            # the engine loop
+│   └── a2a_bridge.py       # cross-framework agent communication -- TODO
 ├── observability/
 │   ├── decision_record.py
-│   └── dashboard/         # Streamlit
+│   └── dashboard/          # Streamlit
 ├── tools/
-│   ├── mcp_server.py      # FastMCP server: Decision Record query tools
-│   └── mcp_client_tool.py # CrewAI tool, talks to mcp_server.py over stdio
-├── data/                  # SQLite + ChromaDB stores (gitignored)
+│   ├── mcp_server.py       # FastMCP server: Decision Record query tools
+│   └── mcp_client_tool.py  # CrewAI tool, talks to mcp_server.py over stdio
+├── data/                   # SQLite store (gitignored)
 ├── tests/
 ├── docs/
 │   ├── setup.md
@@ -118,34 +160,54 @@ flywheel/
 └── README.md
 ```
 
-Status: Strategy, Finance, Analytics, Marketing, Product, Sales, and CRM
-are all genuinely LLM-backed (not placeholders). MCP is real (FastMCP
-server + stdio client tool, wired into CRM). A2A is not yet implemented.
+**Status.** All 12 agents are genuinely LLM-backed, no placeholders. MCP is
+real — a FastMCP server queried by CRM over stdio as a separate process.
+Still open: A2A, ad image generation for Marketing, a live deployable
+storefront for Product, and live web search for Market Research (which
+currently reasons from general knowledge and labels every estimate as such).
 
 ---
 
 ## Getting started
 
 ```bash
-# clone the repo
 git clone <repo-url>
 cd flywheel
 
-# install dependencies
-pip install -r requirements.txt
+python -m venv .venv && .venv/Scripts/activate   # Windows
+# source .venv/bin/activate                       # macOS/Linux
+```
 
-# pull the local model
-ollama pull llama3.1:8b
+Install in **stages** — one shot fails, see `docs/setup.md` for why:
 
-# set free-tier API keys (optional, for Strategy/Finance reasoning)
-export GROQ_API_KEY=<your-key>
-export GEMINI_API_KEY=<your-key>
+```bash
+pip install crewai && pip install google-adk && pip install mcp a2a-sdk
+pip install ollama groq google-genai && pip install fastapi uvicorn python-dotenv pydantic
+pip install chromadb && pip install streamlit && pip install pytest
+```
 
-# run one full business cycle
-python orchestration/cycle.py --cycles 1
+Local model for CRM, plus your free Groq key:
 
-# launch the observability dashboard
+```bash
+winget install --id Ollama.Ollama -e   # or see ollama.com
+ollama pull qwen3:4b
+
+cp .env.example .env                   # then add GROQ_API_KEY (console.groq.com/keys)
+```
+
+Run it:
+
+```bash
+# the full product: pitch -> research -> verdict -> formation -> engine -> funding
+python orchestration/validate_flow.py --cycles 2
+
+# just the engine, on a generic cold start
+python orchestration/cycle.py --cycles 3
+
+# the dashboard (both entry points available in the sidebar)
 streamlit run observability/dashboard/app.py
+
+pytest tests/ -q
 ```
 
 ---

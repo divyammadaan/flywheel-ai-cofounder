@@ -39,7 +39,19 @@ and give the most likely default rather than inventing certainty.
 Recommend ONE entity type as primary and say plainly why it fits this business's size and
 risk profile. Keep cost and timeline as ranges, and flag that they're estimates.
 
-Never state a filing fee, statute, or deadline as though it were verified current fact."""
+Never state a filing fee, statute, or deadline as though it were verified current fact.
+
+Match your specificity to your actual confidence, which differs sharply by level:
+- National and state/province level (company registrar, national tax ID, state tax permit):
+  be specific -- name the form and the body, these are stable and you likely know them.
+- City, county, district and local office level: do NOT name a specific county, district,
+  ward or local office unless you are certain it is correct for this exact city. Write
+  "your city/county health department" or "the local municipal authority" instead. Naming
+  the wrong county reads as authoritative and sends the founder to the wrong office, which
+  is worse than being vague.
+
+If you are unsure whether a requirement applies, say it may apply and needs checking --
+do not list it as definitely required."""
 
 
 class FormationSchema(BaseModel):
