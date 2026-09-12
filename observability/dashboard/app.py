@@ -1,5 +1,12 @@
-"""Flywheel observability dashboard — KPI trends, budget allocation, and the
-full per-cycle agent decision trail, backed by the real Decision Record DB.
+"""Flywheel dashboard — the founder-facing front end.
+
+Two entry points, mirroring the product:
+  1. Validate an idea: pitch -> market research -> clarifying questions ->
+     GO/PIVOT/NO-GO -> company formation -> engine -> funding assessment
+  2. Run the engine directly on an existing plan
+
+Plus the observability view over everything that happened: KPI trends,
+budget allocation, and the full agent decision trail.
 
 Run with: streamlit run observability/dashboard/app.py
 """
@@ -16,10 +23,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from observability.decision_record import DB_PATH, get_records
+from agents.company_formation import CompanyFormationAgent
+from agents.founder_advisor import FounderAdvisorAgent
+from agents.funding import FundingAgent
+from agents.intake import IntakeAgent
+from agents.market_research import MarketResearchAgent
+from observability.decision_record import DB_PATH, DecisionRecord, get_records, log_decision
 from orchestration.cycle import run as run_cycles
+from orchestration.validate_flow import PRECYCLE, _kpi_history
 
-st.set_page_config(page_title="Flywheel Dashboard", layout="wide", page_icon="🔄")
+st.set_page_config(page_title="Flywheel", layout="wide", page_icon="🔄")
 
 
 def load_records() -> list[dict]:
@@ -43,31 +56,195 @@ def md_escape(text: str) -> str:
 
 
 # ---------------------------------------------------------------- sidebar --
+# Validation is a two-step round trip: Market Research has to run before we
+# know what to ask the founder, and the Advisor can't rule until they've
+# answered. session_state carries the half-finished state across the rerun
+# that Streamlit does on every interaction.
+st.session_state.setdefault("stage", "idle")
+
 with st.sidebar:
-    st.header("Run simulation")
-    num_cycles = st.number_input("Cycles to run", min_value=1, max_value=10, value=3)
-    st.caption(
-        "Starts a fresh run (clears existing Decision Records). "
-        "Strategy/Finance/Analytics on Groq, Marketing/Product/Sales on Groq, "
-        "CRM on local Ollama."
-    )
-    if st.button("Run new simulation", type="primary", use_container_width=True):
-        DB_PATH.unlink(missing_ok=True)
-        with st.spinner(f"Running {num_cycles} cycle(s) -- this calls real LLMs, expect ~10-30s per cycle..."):
-            run_cycles(num_cycles)
+    st.header("Start")
+    mode = st.radio("Entry point", ["Validate an idea", "Run engine only"], key="entry_mode")
+    num_cycles = st.number_input("Engine cycles", min_value=1, max_value=10, value=2)
+
+    if mode == "Validate an idea":
+        pitch = st.text_area(
+            "Describe your business",
+            placeholder="I want to open an e-commerce store selling sneakers in Bangalore...\n\n"
+            "Or, for an existing business: revenue, EBITDA, debt, industry, where you sell.",
+            height=160,
+            key="pitch_text",
+        )
+        do_formation = st.checkbox("Include company formation plan", value=True)
+        do_funding = st.checkbox("Include funding assessment", value=True)
+
+        if st.button("Analyse my idea", type="primary", use_container_width=True, disabled=not pitch.strip()):
+            DB_PATH.unlink(missing_ok=True)
+            with st.spinner("Intake + market research (real LLM calls, ~30s)..."):
+                business = IntakeAgent().process(pitch)
+                log_decision(DecisionRecord(PRECYCLE, "intake", {"raw_input": pitch}, business.__dict__))
+                report = MarketResearchAgent().research(business)
+                log_decision(DecisionRecord(PRECYCLE, "market_research", business.__dict__, report.__dict__))
+            st.session_state.update(
+                stage="awaiting_answers",
+                business=business,
+                report=report,
+                do_formation=do_formation,
+                do_funding=do_funding,
+                num_cycles=num_cycles,
+            )
+            st.rerun()
+    else:
+        st.caption(
+            "Runs the execution engine on a generic cold start, skipping validation. "
+            "Strategy/Finance/Analytics/Marketing/Product/Sales on Groq, CRM on local Ollama."
+        )
+        if st.button("Run engine", type="primary", use_container_width=True):
+            DB_PATH.unlink(missing_ok=True)
+            with st.spinner(f"Running {num_cycles} cycle(s) -- real LLM calls, ~30-60s per cycle..."):
+                run_cycles(num_cycles)
+            st.rerun()
+
+    if st.session_state.stage != "idle" and st.button("Reset", use_container_width=True):
+        st.session_state.stage = "idle"
         st.rerun()
 
-st.title("🔄 Flywheel — Decision Record Dashboard")
+st.title("🔄 Flywheel")
+
+# ------------------------------------------------- clarifying question step --
+if st.session_state.stage == "awaiting_answers":
+    business = st.session_state.business
+    report = st.session_state.report
+
+    st.subheader("A few questions before I can give you a verdict")
+    st.caption(f"{business.business_summary}  ·  {business.industry}  ·  {business.target_region}")
+
+    with st.form("clarifying"):
+        answers = {}
+        for i, q in enumerate(report.clarifying_questions):
+            answers[q] = st.text_input(q, key=f"answer_{i}")
+        submitted = st.form_submit_button("Get my verdict", type="primary")
+
+    if submitted:
+        with st.spinner("Founder Advisor is deciding..."):
+            decision = FounderAdvisorAgent().decide(business, report, answers)
+            log_decision(DecisionRecord(PRECYCLE, "founder_advisor", {"qa_answers": answers}, decision.__dict__))
+
+        if decision.verdict != "NO_GO":
+            if st.session_state.do_formation:
+                with st.spinner("Drafting company formation plan..."):
+                    formation = CompanyFormationAgent().plan(business)
+                    log_decision(
+                        DecisionRecord(PRECYCLE, "company_formation", business.__dict__, formation.__dict__)
+                    )
+
+            seed_context = (
+                f"Market Research found: {report.market_size_estimate} "
+                f"Competitors: {report.key_competitors} Opportunities: {report.opportunities} "
+                f"Risks: {report.risks}\n"
+                f"Founder Advisor verdict: {decision.verdict} -- {decision.rationale}\n"
+                f"Recommended starting plan: positioning '{decision.seed_positioning}' at "
+                f"${decision.seed_pricing:.2f}, budget priorities {decision.seed_priorities}."
+            )
+            with st.spinner(f"Running {st.session_state.num_cycles} engine cycle(s)..."):
+                run_cycles(st.session_state.num_cycles, initial_context=seed_context)
+
+            if st.session_state.do_funding:
+                with st.spinner("Assessing funding readiness..."):
+                    funding = FundingAgent().assess(business, _kpi_history())
+                    log_decision(
+                        DecisionRecord(PRECYCLE, "funding", {"kpi_history": _kpi_history()}, funding.__dict__)
+                    )
+
+        st.session_state.stage = "done"
+        st.rerun()
+
+    st.stop()
 
 records = load_records()
 if not records:
     st.info("No decision records yet. Click **Run new simulation** in the sidebar, or run `python orchestration/cycle.py --cycles N` from the terminal.")
     st.stop()
 
-cycles = sorted({r["cycle"] for r in records})
+# Cycle 0 is the pre-engine validation gate (intake/research/advisor/
+# formation/funding), not a business cycle -- keep it out of the KPI and
+# budget charts, which are about engine cycles only.
+cycles = sorted({r["cycle"] for r in records if r["cycle"] > 0})
+precycle = {r["agent"]: r["decision"] for r in records if r["cycle"] == 0}
 analytics = by_agent(records, "analytics")
 finance = by_agent(records, "finance")
 strategy = by_agent(records, "strategy")
+
+# ------------------------------------------------------ validation gate --
+if precycle:
+    st.subheader("Validation & advisory")
+
+    if "intake" in precycle:
+        d = precycle["intake"]
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Industry", d.get("industry", "—"))
+        c2.metric("Region", d.get("target_region", "—"))
+        c3.metric("Mode", d.get("mode", "—"))
+        st.caption(md_escape(d.get("business_summary", "")))
+
+    if "founder_advisor" in precycle:
+        d = precycle["founder_advisor"]
+        verdict = d.get("verdict", "?")
+        badge = {"GO": "🟢", "PIVOT": "🟡", "NO_GO": "🔴"}.get(verdict, "⚪")
+        with st.expander(f"{badge} Founder Advisor verdict: {verdict}", expanded=True):
+            st.markdown(md_escape(d.get("rationale", "")))
+            if d.get("seed_positioning"):
+                st.markdown(f"**Seed positioning:** {md_escape(d['seed_positioning'])}")
+                st.markdown(f"**Seed pricing:** \\${d.get('seed_pricing', 0):.2f}")
+
+    if "market_research" in precycle:
+        d = precycle["market_research"]
+        with st.expander("🔍 Market research", expanded=False):
+            for label, key in (
+                ("Market size", "market_size_estimate"),
+                ("Competitors", "key_competitors"),
+                ("Opportunities", "opportunities"),
+                ("Risks", "risks"),
+            ):
+                st.markdown(f"**{label}:** {md_escape(d.get(key, ''))}")
+            if d.get("clarifying_questions"):
+                st.markdown("**Questions asked the founder:**")
+                for q in d["clarifying_questions"]:
+                    st.markdown(f"- {md_escape(q)}")
+
+    if "company_formation" in precycle:
+        d = precycle["company_formation"]
+        with st.expander(f"🏛️ Company formation — {d.get('recommended_entity', '')}", expanded=False):
+            st.markdown(f"**Why:** {md_escape(d.get('entity_rationale', ''))}")
+            for label, key in (
+                ("Registration steps", "registration_steps"),
+                ("Licences & permits", "licenses_and_permits"),
+                ("Tax registrations", "tax_registrations"),
+            ):
+                st.markdown(f"**{label}:**")
+                st.markdown(md_escape(d.get(key, "")))
+            c1, c2 = st.columns(2)
+            c1.metric("Est. cost", d.get("estimated_cost", "—"))
+            c2.metric("Est. timeline", d.get("estimated_timeline", "—"))
+            st.warning(d.get("disclaimer", ""))
+
+    if "funding" in precycle:
+        d = precycle["funding"]
+        with st.expander(f"💸 Funding readiness: {d.get('readiness', '?')}", expanded=False):
+            st.markdown(md_escape(d.get("readiness_rationale", "")))
+            for label, key in (
+                ("Timing", "recommended_timing"),
+                ("Metrics to hit first", "metrics_to_hit"),
+                ("Investor profile to target", "investor_profile"),
+                ("Non-equity alternatives", "alternative_funding"),
+                ("Pitch deck outline", "pitch_deck_outline"),
+            ):
+                st.markdown(f"**{label}:**")
+                st.markdown(md_escape(d.get(key, "")))
+
+if not cycles:
+    st.info("Validation ran, but no engine cycles yet (a NO_GO verdict stops before the engine).")
+    st.stop()
 
 # ------------------------------------------------------------ KPI trends --
 st.subheader("KPI trajectory")

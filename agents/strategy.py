@@ -22,6 +22,8 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from pydantic import BaseModel, Field
 
+from agents._retry import retry_on_rate_limit
+
 DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
 
 APP_NAME = "flywheel"
@@ -123,5 +125,6 @@ class StrategyAgent:
             rationale=parsed.rationale,
         )
 
+    @retry_on_rate_limit()
     def decide(self, cycle: int, previous_analytics_summary: str | None) -> StrategyDecision:
         return asyncio.run(self._decide_async(cycle, previous_analytics_summary))

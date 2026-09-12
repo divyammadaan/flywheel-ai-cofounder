@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._retry import retry_on_rate_limit
+
 # Groq, not Gemini: Strategy/Finance/Analytics already use Gemini's shared
 # 20-req/day free-tier quota (per project, per model) -- keeping the three
 # CrewAI execution agents on a different provider avoids all 6 agents
@@ -52,6 +54,7 @@ class ProductAgent:
             verbose=False,
         )
 
+    @retry_on_rate_limit()
     def execute(self, cycle: int, budget: float, positioning: str | None = None) -> ProductOutput:
         context = f" Current positioning: {positioning}." if positioning else ""
         task = Task(

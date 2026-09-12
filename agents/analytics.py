@@ -20,6 +20,7 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
+from agents._retry import retry_on_rate_limit
 from simulator.market_simulator import SimulationResult
 
 APP_NAME = "flywheel"
@@ -97,5 +98,6 @@ class AnalyticsAgent:
             summary=summary.strip(),
         )
 
+    @retry_on_rate_limit()
     def summarize(self, cycle: int, sim_result: SimulationResult, leads: int) -> AnalyticsReport:
         return asyncio.run(self._summarize_async(cycle, sim_result, leads))

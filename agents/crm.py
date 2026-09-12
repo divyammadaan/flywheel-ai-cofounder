@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._retry import retry_on_rate_limit
 from tools.mcp_client_tool import DecisionRecordQueryTool
 
 OLLAMA_MODEL = "ollama/qwen3:4b"
@@ -57,6 +58,7 @@ class CRMAgent:
             verbose=False,
         )
 
+    @retry_on_rate_limit()
     def execute(self, cycle: int, budget: float, previous_churn_rate: float | None = None) -> CRMOutput:
         churn_context = (
             f"Last measured churn rate: {previous_churn_rate:.1%}."

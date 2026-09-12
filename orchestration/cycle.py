@@ -10,6 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+# See validate_flow.py -- Windows cp1252 consoles crash on characters the
+# models routinely emit (arrows, em-dashes, currency symbols).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,7 +34,13 @@ TOTAL_BUDGET_PER_CYCLE = 1000.0
 SIM_SEED = 42
 
 
-def run(num_cycles: int) -> None:
+def run(num_cycles: int, initial_context: str | None = None) -> None:
+    """Run num_cycles of the engine. If initial_context is given (e.g. from
+    validate_flow.py's Market Research + Founder Advisor output), Strategy's
+    first decision is grounded in that instead of a generic cold-start
+    prompt -- Strategy's interface already accepts arbitrary prior context
+    as a string, so no special-casing is needed here.
+    """
     strategy = StrategyAgent()
     finance = FinanceAgent(total_budget_per_cycle=TOTAL_BUDGET_PER_CYCLE)
     marketing = MarketingAgent()
@@ -38,7 +50,7 @@ def run(num_cycles: int) -> None:
     analytics = AnalyticsAgent()
     simulator = MarketSimulator(seed=SIM_SEED)
 
-    previous_summary = None
+    previous_summary = initial_context
     previous_churn_rate = None
     previous_leads = 0
 

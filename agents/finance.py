@@ -19,6 +19,8 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
+from agents._retry import retry_on_rate_limit
+
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"
 DEFAULT_MODEL = "groq/qwen/qwen3.8-27b"
@@ -126,5 +128,6 @@ class FinanceAgent:
             **amounts,
         )
 
+    @retry_on_rate_limit()
     def allocate(self, cycle: int, priorities: dict) -> BudgetAllocation:
         return asyncio.run(self._allocate_async(cycle, priorities))
