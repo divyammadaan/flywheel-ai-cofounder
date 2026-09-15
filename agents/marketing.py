@@ -18,9 +18,11 @@ from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
 from agents._brief import LAUNCH, PlanBrief
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fit_to_budget
 from agents._retry import retry_on_rate_limit
+from observability.usage import register_role
 from tools.image_gen import generate_ad_image
 
 DEFAULT_MODEL = AGENT_MODELS["marketing"]
@@ -71,7 +73,9 @@ class MarketingAgent:
         # generate_image is off in tests and anywhere an external image
         # service would make a run slow or flaky.
         self._generate_image = generate_image
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Marketing Lead", "marketing", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["marketing"])
         self._agent = Agent(
             role="Marketing Lead",
             goal="Plan specific campaigns that reach the right customers, plus the ad they will see",
@@ -85,6 +89,7 @@ class MarketingAgent:
             verbose=False,
         )
 
+    @cached("marketing", MarketingOutput)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float) -> MarketingOutput:
         if brief.mode == LAUNCH:

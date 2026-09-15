@@ -8,6 +8,9 @@ carries an explicit disclaimer and the flow prints it -- compliance rules
 change and vary by jurisdiction, so this is a starting checklist to take to
 a real professional, never a substitute for one.
 
+The same region and kind of business get the same checklist, so this is the
+agent the response cache helps most on repeat runs (agents/_cache.py).
+
 CrewAI + Groq, same pattern as the other execution agents.
 """
 
@@ -16,9 +19,11 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
+from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["company_formation"]
 
@@ -84,7 +89,9 @@ class FormationPlan:
 
 class CompanyFormationAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Company Formation Advisor", "company_formation", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["company_formation"])
         self._agent = Agent(
             role="Company Formation Advisor",
             goal="Give a founder a concrete, jurisdiction-appropriate incorporation checklist",
@@ -95,10 +102,12 @@ class CompanyFormationAgent:
             verbose=False,
         )
 
+    @cached("company_formation", FormationPlan)
     @retry_on_rate_limit()
     def plan(self, business: BusinessInput) -> FormationPlan:
         task = Task(
             description=(
+                f"{_INSTRUCTION}\n\n"
                 f"Business: {business.business_summary}\n"
                 f"Industry: {business.industry}. Product/service: {business.product_or_service}. "
                 f"Region: {business.target_region}. Stage: {business.mode}.\n"

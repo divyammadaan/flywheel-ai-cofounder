@@ -21,6 +21,7 @@ model="gemini-3.6-flash" to StrategyAgent to use Gemini directly instead.
 """
 
 import asyncio
+import time
 from dataclasses import dataclass
 
 from google.adk import Runner
@@ -31,8 +32,10 @@ from google.genai import types
 from pydantic import BaseModel, Field
 
 from agents._brief import LAUNCH
-from agents._models import GROQ_MODEL_ADK_JSON
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, GROQ_MODEL_ADK_JSON
 from agents._retry import retry_on_rate_limit
+from observability.usage import record_adk_usage
 
 # Not GROQ_MODEL: this is the one agent using ADK's output_schema, which
 # needs a model that returns bare JSON with no preamble. See _models.py.
@@ -67,6 +70,7 @@ Rules:
   price near that unless you say why.
 - Describe customers by what they want and can afford. Never characterise neighbourhoods
   or communities, and never use demeaning terms about any group of people.
+- Only name places you are sure exist in this region.
 
 Be specific to this business and region. BE CONCISE."""
 
@@ -115,7 +119,10 @@ class StrategyAgent:
     by the checker is revised in the same conversation, not from scratch."""
 
     def __init__(self, model: str = DEFAULT_MODEL, session_id: str = "strategy_session"):
-        resolved_model = LiteLlm(model=model) if model.startswith("groq/") else model
+        self.model_name = model
+        resolved_model = (
+            LiteLlm(model=model, max_tokens=AGENT_MAX_TOKENS["strategy"]) if model.startswith("groq/") else model
+        )
         self._agent = LlmAgent(
             name="strategy_agent",
             model=resolved_model,
@@ -148,9 +155,14 @@ class StrategyAgent:
         content = types.Content(role="user", parts=[types.Part(text=message)])
 
         final_text = None
+        usage = []
+        started = time.perf_counter()
         async for event in self._runner.run_async(user_id=USER_ID, session_id=self._session_id, new_message=content):
+            if getattr(event, "usage_metadata", None):
+                usage.append(event.usage_metadata)
             if event.is_final_response() and event.content and event.content.parts:
                 final_text = event.content.parts[0].text
+        record_adk_usage("strategy", self.model_name, usage, started)
 
         if final_text is None:
             raise RuntimeError("Strategy agent produced no response")
@@ -168,6 +180,7 @@ class StrategyAgent:
             rationale=parsed.rationale,
         )
 
+    @cached("strategy", StrategyDecision)
     @retry_on_rate_limit()
     def decide(self, cycle: int, mode: str, currency: str, context: str, business_line: str) -> StrategyDecision:
         return asyncio.run(self._decide_async(cycle, mode, currency, context, business_line))

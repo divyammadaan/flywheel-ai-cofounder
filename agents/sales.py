@@ -12,9 +12,11 @@ from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
 from agents._brief import LAUNCH, PlanBrief
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fit_to_budget
 from agents._retry import retry_on_rate_limit
+from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["sales"]
 
@@ -52,7 +54,9 @@ class SalesAgent:
     they become customers, grounded in the shared PlanBrief."""
 
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Sales Lead", "sales", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["sales"])
         self._agent = Agent(
             role="Sales Lead",
             goal="Say exactly where and how the business gets its leads, and how they become customers",
@@ -65,6 +69,7 @@ class SalesAgent:
             verbose=False,
         )
 
+    @cached("sales", SalesOutput)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float) -> SalesOutput:
         if brief.mode == LAUNCH:

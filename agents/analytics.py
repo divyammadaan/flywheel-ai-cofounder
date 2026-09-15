@@ -13,6 +13,7 @@ tools/orders_file.order_metrics for uploads) is plain Python and unit-tested
 """
 
 import asyncio
+import time
 from dataclasses import asdict, dataclass
 
 from google.adk import Runner
@@ -21,9 +22,11 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
+from observability.usage import record_adk_usage
 
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"
@@ -157,7 +160,10 @@ class AnalyticsAgent:
     Python (compute_kpis) and deterministic on purpose."""
 
     def __init__(self, model: str = DEFAULT_MODEL, session_id: str = "analytics_session"):
-        resolved_model = LiteLlm(model=model) if model.startswith("groq/") else model
+        self.model_name = model
+        resolved_model = (
+            LiteLlm(model=model, max_tokens=AGENT_MAX_TOKENS["analytics"]) if model.startswith("groq/") else model
+        )
         self._agent = LlmAgent(name="analytics_agent", model=resolved_model, instruction=_INSTRUCTION)
         self._session_service = InMemorySessionService()
         self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
@@ -202,9 +208,14 @@ class AnalyticsAgent:
         content = types.Content(role="user", parts=[types.Part(text="\n".join(lines))])
 
         summary = None
+        usage = []
+        started = time.perf_counter()
         async for event in self._runner.run_async(user_id=USER_ID, session_id=self._session_id, new_message=content):
+            if getattr(event, "usage_metadata", None):
+                usage.append(event.usage_metadata)
             if event.is_final_response() and event.content and event.content.parts:
                 summary = event.content.parts[0].text
+        record_adk_usage("analytics", self.model_name, usage, started)
 
         if summary is None:
             raise RuntimeError("Analytics agent produced no response")
@@ -219,6 +230,7 @@ class AnalyticsAgent:
             file_metrics=file_metrics,
         )
 
+    @cached("analytics", AnalyticsReport)
     @retry_on_rate_limit()
     def summarize(
         self,

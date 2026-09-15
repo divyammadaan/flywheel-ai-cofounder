@@ -13,6 +13,8 @@ data/*.db
 data/chroma/
 data/*.sqlite3
 data/ads/
+data/llm_cache/
+data/site/
 
 # logs
 *.log

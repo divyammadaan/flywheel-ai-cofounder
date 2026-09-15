@@ -19,9 +19,11 @@ from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
 from agents._brief import LAUNCH, PlanBrief
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fit_to_budget
 from agents._retry import retry_on_rate_limit
+from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["product"]
 
@@ -115,7 +117,9 @@ class ProductAgent:
     in the shared PlanBrief."""
 
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Product & Operations Lead", "product", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["product"])
         self._agent = Agent(
             role="Product & Operations Lead",
             goal="Plan exactly what the business needs to deliver, from whom, and when to add more",
@@ -129,6 +133,7 @@ class ProductAgent:
             verbose=False,
         )
 
+    @cached("product", ProductOutput)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float) -> ProductOutput:
         plan_type = plan_type_for(brief.offering_type)

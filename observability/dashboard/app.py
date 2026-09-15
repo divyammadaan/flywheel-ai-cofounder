@@ -54,6 +54,8 @@ try:
         run_funding,
         run_launch_plan,
     )
+    from observability.usage import usage_summary
+    from tools.landing_page import build_landing_page
     from tools.orders_file import OrdersFileError, load_orders
     from tools.sample_data import generate_orders, to_file_bytes
 except ModuleNotFoundError as exc:
@@ -421,7 +423,11 @@ if "founder_advisor" in precycle:
 if "market_research" in precycle:
     d = precycle["market_research"]
     with st.expander("🔍 Market research", expanded=False):
-        st.caption("Estimates from general knowledge — no live web search.")
+        st.caption(
+            "Grounded in live web search; [n] refers to the sources listed below."
+            if d.get("sources")
+            else "No web search results were available, so figures are estimates."
+        )
         for label, key in (
             ("Market size", "market_size_estimate"),
             ("Competitors", "key_competitors"),
@@ -433,6 +439,10 @@ if "market_research" in precycle:
             st.markdown("**Questions asked the founder:**")
             for q in d["clarifying_questions"]:
                 st.markdown(f"- {md_escape(q)}")
+        if d.get("sources"):
+            st.markdown("**Sources:**")
+            for i, source in enumerate(d["sources"], 1):
+                st.markdown(f"\\[{i}\\] [{md_escape(source.get('title') or source.get('url'))}]({source.get('url')})")
 
 if "company_formation" in precycle:
     d = precycle["company_formation"]
@@ -540,6 +550,11 @@ if "analytics" in trail:
 if "strategy" in trail:
     d = trail["strategy"]
     with st.expander("🎯 Strategy", expanded=True):
+        for rejected in (r for r in records if r["cycle"] == selected and r["agent"] == "strategy_rejected"):
+            st.caption(
+                "The plan checker sent a draft back: "
+                + md_escape(" ".join(rejected["input_snapshot"].get("problems", [])))
+            )
         left, right = st.columns([2, 1])
         with left:
             st.markdown(f"**Positioning:** {md_escape(d.get('positioning', ''))}")
@@ -672,6 +687,8 @@ with tabs[2]:
 if "crm" in trail:
     with tabs[3]:
         d = trail["crm"]
+        for warning in d.get("warnings", []):
+            st.warning(md_escape(warning))
         seg = d.get("segments", {})
         changes = d.get("changes") or {}
         st.caption(
@@ -725,6 +742,10 @@ if "funding" in trail:
     c1.metric("Ready to raise now?", d.get("readiness", "?"))
     c2.metric("Target raise", d.get("target_raise_date", "—"))
     st.markdown(f"**Stage:** {md_escape(d.get('target_stage'))}")
+    for warning in d.get("warnings", []):
+        st.warning("Check this: " + md_escape(warning))
+    if not d.get("warnings") and any(r["cycle"] == selected and r["agent"] == "funding_rejected" for r in records):
+        st.caption("The checker sent a first draft back for numbers that didn't add up; this version passed.")
     st.markdown(md_escape(d.get("readiness_rationale", "")))
     m1, m2, m3 = st.columns(3)
     for col, label, key in (
@@ -743,6 +764,33 @@ if "funding" in trail:
     ):
         st.markdown(f"**{label}:**")
         st.markdown(md_escape(d.get(key, "")))
+
+# ------------------------------------------------------------ launch page --
+if "strategy" in trail:
+    st.download_button(
+        "Download launch page (HTML)",
+        build_landing_page(intake, trail["strategy"], trail.get("marketing")),
+        file_name="index.html",
+        mime="text/html",
+        help="A one-page site built from this plan, ready for any static host. "
+        "Connect its form to a form service to collect sign-ups.",
+    )
+
+# ------------------------------------------------------------ model usage --
+usage = usage_summary()
+if usage["agents"]:
+    totals = usage["totals"]
+    with st.expander(
+        f"🧮 Model usage this run — {totals['calls']} calls, "
+        f"{totals['prompt_tokens'] + totals['completion_tokens']:,} tokens"
+    ):
+        u1, u2, u3, u4 = st.columns(4)
+        u1.metric("Model calls", totals["calls"])
+        u2.metric("Reused from cache", totals["cache_hits"])
+        u3.metric("Tokens in", f"{totals['prompt_tokens']:,}")
+        u4.metric("Tokens out", f"{totals['completion_tokens']:,}")
+        st.dataframe(pd.DataFrame(usage["agents"]), hide_index=True, width="stretch")
+        st.caption("Finance makes no model call: its maths and its explanation are both code.")
 
 # -------------------------------------------------------------- raw table --
 with st.expander("Raw Decision Records"):

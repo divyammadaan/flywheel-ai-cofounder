@@ -1,34 +1,37 @@
 """Market Research agent — sizes the market, surfaces competitors/risks, and
 asks the founder the follow-up questions needed before Founder Advisor can
-give a verdict (e.g. "how much can you invest?").
+give a verdict.
 
-NOTE: reasons from the LLM's own general knowledge, not live web search --
-no search API is wired in yet. Every report says so explicitly so it's
-never mistaken for verified current data. Wiring a real search tool (e.g.
-via MCP) is a natural fast-follow, not done here to avoid blocking on
-another API key signup mid-build.
+Grounded in live web search (tools/web_search.py: DuckDuckGo, free, no key).
+The agent cites results as [n], and the report keeps the sources so the
+founder can check them. If search is unavailable, the prompt says so and the
+agent labels its figures as estimates instead.
 
 CrewAI + Groq, same pattern as Marketing/Product/Sales.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
+from observability.usage import register_role
+from tools.web_search import describe_sources, search_business
 
 DEFAULT_MODEL = AGENT_MODELS["market_research"]
 
 _INSTRUCTION = """You are the Market Research agent for an AI co-founder platform. Given a
-founder's business summary, industry, target region, and (if applicable) existing
-financials, produce a market analysis.
+founder's business summary, industry, target region, (if applicable) existing financials,
+and web search results, produce a market analysis.
 
-IMPORTANT: You do not have live web/search access. Base your analysis on general knowledge
-and reasoning, and be explicit that figures are estimates, not verified current data.
+Use the web search results for competitors and market size, and cite them as [n]. Anything
+a result doesn't support is your own estimate -- say so. Only name competitors that appear in
+the results or that you are sure exist in this region.
 
 Also generate 2-3 clarifying questions the founder must answer before a GO/PIVOT/NO-GO
 call can be made. The founder's available capital is given to you when they stated it --
@@ -42,8 +45,8 @@ founder waiting time.)"""
 
 
 class MarketResearchSchema(BaseModel):
-    market_size_estimate: str = Field(description="Rough TAM/market size estimate with the caveat that it's an estimate")
-    key_competitors: str = Field(description="2-4 known competitors or competitor types in this space")
+    market_size_estimate: str = Field(description="Market size, citing sources as [n], or clearly labelled as an estimate")
+    key_competitors: str = Field(description="2-4 real competitors or competitor types in this space, citing sources as [n]")
     opportunities: str = Field(description="1-2 sentence opportunity assessment")
     risks: str = Field(description="1-2 sentence risk assessment")
     clarifying_question_1: str = Field(description="First question to ask the founder")
@@ -58,23 +61,36 @@ class MarketResearchReport:
     opportunities: str
     risks: str
     clarifying_questions: list[str]
+    # The web results the agent was given, in [n] order.
+    sources: list = field(default_factory=list)
 
 
 class MarketResearchAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Market Research Analyst", "market_research", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["market_research"])
         self._agent = Agent(
             role="Market Research Analyst",
             goal="Size the market and identify what's still unknown before a GO/NO-GO call",
-            backstory="You research markets for an AI co-founder platform. You're upfront "
-            "about the limits of your knowledge (no live web access) and focus on asking the "
+            backstory="You research markets for an AI co-founder platform. You ground claims in the "
+            "sources you're given, say plainly what is only an estimate, and focus on asking the "
             "right follow-up questions rather than pretending to have data you don't.",
             llm=llm,
             verbose=False,
         )
 
-    @retry_on_rate_limit()
+    @cached("market_research", MarketResearchReport)
     def research(self, business: BusinessInput) -> MarketResearchReport:
+        # Searched outside the rate-limit retry, so a Groq retry doesn't repeat
+        # ~30s of web search.
+        sources = search_business(business)
+        report = self._analyse(business, sources)
+        report.sources = sources
+        return report
+
+    @retry_on_rate_limit()
+    def _analyse(self, business: BusinessInput, sources: list[dict]) -> MarketResearchReport:
         metrics_note = f" Existing financials: {business.existing_metrics}." if business.existing_metrics else ""
         capital_note = (
             f" Founder's available capital: {fmt_money(business.starting_capital, business.currency)}."
@@ -83,9 +99,11 @@ class MarketResearchAgent:
         )
         task = Task(
             description=(
+                f"{_INSTRUCTION}\n\n"
                 f"Business: {business.business_summary}\n"
                 f"Industry: {business.industry}. Product/service: {business.product_or_service}. "
-                f"Target region: {business.target_region}.{metrics_note}{capital_note}\n"
+                f"Target region: {business.target_region}.{metrics_note}{capital_note}\n\n"
+                f"{describe_sources(sources)}\n\n"
                 "Produce the market analysis and clarifying questions."
             ),
             expected_output="A JSON object matching the required schema.",

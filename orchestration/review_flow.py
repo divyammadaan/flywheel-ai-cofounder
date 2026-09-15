@@ -2,7 +2,7 @@
 
     Intake (description) -> Analytics on the founder's numbers + uploaded orders
       -> Strategy -> Finance -> [Marketing, Sales, Product, CRM]
-      -> Funding roadmap
+      -> Funding roadmap -> launch page (data/site/index.html)
 
 Every number comes from the founder. Required: revenue, net profit, total
 debt, and the budget they can deploy next period. The optional numbers
@@ -44,8 +44,10 @@ from agents._money import SUPPORTED_CURRENCIES, fmt_money
 from agents.analytics import PeriodMetrics
 from agents.intake import BusinessInput, IntakeAgent
 from observability.decision_record import DB_PATH, DecisionRecord, get_records, log_decision
+from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, next_review_cycle, run_business_review, run_funding
-from orchestration.report import print_analytics, print_funding, print_plan, rule
+from orchestration.report import print_analytics, print_funding, print_plan, print_usage, rule
+from tools.landing_page import write_landing_page
 from tools.orders_file import OrdersFileError, load_orders
 
 
@@ -108,12 +110,18 @@ def review(
     except PlanBlocked as blocked:
         rule("PLAN BLOCKED")
         print(blocked)
+        print_usage(usage_summary())
         return
     print_analytics(plan.analytics)
     print_plan(plan)
 
+    page = write_landing_page(asdict(business), asdict(plan.strategy), asdict(plan.marketing))
+    print(f"\nLanding page: {page}")
+
     if not skip_funding:
         print_funding(run_funding(business, plan))
+
+    print_usage(usage_summary())
 
 
 if __name__ == "__main__":

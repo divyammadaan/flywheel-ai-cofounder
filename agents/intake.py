@@ -14,9 +14,11 @@ from dataclasses import dataclass, field
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._cache import cached
 from agents._cash import DEFAULT_RUNWAY_MONTHS
-from agents._models import AGENT_MODELS
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._retry import retry_on_rate_limit
+from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["intake"]
 OFFERING_TYPES = ("physical", "service", "software")
@@ -87,7 +89,9 @@ def _offering_type(value: str) -> str:
 
 class IntakeAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Intake Analyst", "intake", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["intake"])
         self._agent = Agent(
             role="Intake Analyst",
             goal="Turn a founder's raw pitch or business description into structured data",
@@ -97,6 +101,7 @@ class IntakeAgent:
             verbose=False,
         )
 
+    @cached("intake", BusinessInput)
     @retry_on_rate_limit()
     def process(self, raw_input: str) -> BusinessInput:
         task = Task(

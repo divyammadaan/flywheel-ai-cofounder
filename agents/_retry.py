@@ -6,7 +6,7 @@ on its own: CrewAI/instructor gives up after one attempt in practice, and
 ADK surfaces the failure as a bare `DynamicNodeFailError: Dynamic node
 <name> failed`.
 
-Two things this gets right that the obvious implementation doesn't:
+Three things this gets right that the obvious implementation doesn't:
 
 1. Detection walks the whole exception chain, not just the outer message.
    Each layer wraps the error differently -- litellm raises RateLimitError,
@@ -23,8 +23,15 @@ Two things this gets right that the obvious implementation doesn't:
    request succeeds once the window resets (verified directly: a 2000-token
    completion that this error rejected went through fine minutes later). It
    carries no hint, so it gets a full window wait.
+
+3. Random jitter on every real wait. The planning agents run in parallel, so
+   they hit the limit together, get the same "try again in 9.8s" hint, and
+   without jitter retry together and collide again. In a live run that
+   pile-up used up all four attempts and failed the Product agent; spreading
+   the retries out (plus more attempts) is the standard fix.
 """
 
+import random
 import re
 import time
 from functools import wraps
@@ -66,6 +73,11 @@ _NEEDS_FULL_WINDOW = "request too large"
 
 FULL_WINDOW_SECONDS = 62.0
 MAX_SLEEP_SECONDS = 90.0
+DEFAULT_MAX_ATTEMPTS = 8
+# Up to this fraction of the wait (capped at MAX_JITTER_SECONDS) is added at
+# random. Waits under a second -- only used in tests -- get no jitter.
+JITTER_FRACTION = 0.5
+MAX_JITTER_SECONDS = 6.0
 
 
 def _chain(exc: BaseException):
@@ -112,7 +124,13 @@ def _wait_for(exc: BaseException, default: float) -> float:
     return default
 
 
-def retry_on_rate_limit(max_attempts: int = 4, wait_seconds: float = 15.0):
+def _with_jitter(seconds: float) -> float:
+    if seconds < 1.0:
+        return seconds
+    return seconds + random.uniform(0.0, min(seconds * JITTER_FRACTION, MAX_JITTER_SECONDS))
+
+
+def retry_on_rate_limit(max_attempts: int = DEFAULT_MAX_ATTEMPTS, wait_seconds: float = 15.0):
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
@@ -125,7 +143,7 @@ def retry_on_rate_limit(max_attempts: int = 4, wait_seconds: float = 15.0):
                         raise
                     last_exc = e
                     if attempt < max_attempts - 1:
-                        time.sleep(_wait_for(e, wait_seconds))
+                        time.sleep(_with_jitter(_wait_for(e, wait_seconds)))
             raise last_exc
 
         return wrapper

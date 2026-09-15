@@ -13,6 +13,11 @@ Two entry points, one for each kind of business:
 
 run_funding() then turns either plan into a funding roadmap.
 
+Token discipline: the context is kept as named sections. Strategy and Funding
+see all of it; each planning agent gets only the sections it uses
+(AGENT_CONTEXT), instead of every agent receiving the whole research, all the
+founder's answers and every number.
+
 What is deliberately NOT here:
   - The market simulator. simulator/market_simulator.py and its tests still
     exist but aren't wired in: made-up revenue for a business that hasn't
@@ -21,16 +26,17 @@ What is deliberately NOT here:
 """
 
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields, replace
 
 import pandas as pd
 
 from agents._brief import EXISTING, LAUNCH, OFFERING_LABELS, PlanBrief
-from agents._guardrails import strategy_problems
+from agents._guardrails import clean_text_fields, funding_problems, strategy_problems
 from agents._money import fmt_money
 from agents._segments import customer_table, describe_segments, segment_summary
-from agents.analytics import AnalyticsAgent, AnalyticsReport, PeriodMetrics, describe_period
+from agents.analytics import AnalyticsAgent, AnalyticsReport, PeriodMetrics, describe_file_metrics, describe_period
 from agents.crm import CRMAgent, CRMOutput
 from agents.finance import BudgetAllocation, FinanceAgent
 from agents.founder_advisor import AdvisorDecision
@@ -52,6 +58,15 @@ PRECYCLE = 0
 # A launch plan is a single pass, so it's always period 1.
 LAUNCH_CYCLE = 1
 AREAS = ("marketing", "product", "sales", "crm")
+
+# Which context sections each planning agent actually uses.
+AGENT_CONTEXT = {
+    "marketing": ("research", "advisor", "analytics", "orders", "segments"),
+    "sales": ("research", "founder_answers", "advisor", "analytics", "orders"),
+    "product": ("capital_costs", "founder_answers", "numbers", "orders"),
+    # CRM gets its customer groups directly; the analytics summary is the only extra it needs.
+    "crm": ("analytics",),
+}
 
 
 class PlanBlocked(ValueError):
@@ -76,6 +91,17 @@ def planning_areas(mode: str, has_orders: bool) -> tuple[str, ...]:
     """CRM only plans when there are real customers to work with: an operating
     business that uploaded its order history."""
     return AREAS if mode == EXISTING and has_orders else AREAS[:3]
+
+
+def _clean_output(output):
+    """A planning agent's output with any leaked tool-call markup cut off.
+    Applied here rather than inside each agent, so cached answers stay valid."""
+    return replace(output, **{f.name: clean_text_fields(getattr(output, f.name)) for f in fields(output)})
+
+
+def join_context(sections: dict, keys=None) -> str:
+    """The named context sections as prompt text; all of them if keys is None."""
+    return "\n".join(sections[k] for k in (keys if keys is not None else sections) if sections.get(k))
 
 
 def previous_segments(cycle: int) -> dict | None:
@@ -122,7 +148,7 @@ def _plan(
     cycle: int,
     mode: str,
     business: BusinessInput,
-    context: str,
+    sections: dict,
     metrics: PeriodMetrics | None = None,
     budget: float | None = None,
     segments: dict | None = None,
@@ -130,7 +156,7 @@ def _plan(
 ) -> PlanResult:
     currency = business.currency
     areas = planning_areas(mode, segments is not None)
-    context = f"{context}\nBudget areas this period: {', '.join(areas)}."
+    context = f"{join_context(sections)}\nBudget areas this period: {', '.join(areas)}."
 
     strategy = _checked_strategy(cycle, mode, business, context, reference_price)
 
@@ -155,7 +181,7 @@ def _plan(
         reasons = " ".join(allocation.health.get("warnings", [])) or "The budget is zero."
         raise PlanBlocked(f"Nothing left to plan with. {reasons}")
 
-    brief = PlanBrief(
+    base_brief = PlanBrief(
         cycle=cycle,
         mode=mode,
         business_summary=business.business_summary,
@@ -167,34 +193,41 @@ def _plan(
         target_customer=strategy.target_customer,
         price=strategy.price,
         price_unit=strategy.price_unit,
-        context=context,
         offering_type=business.offering_type,
     )
+    briefs = {name: replace(base_brief, context=join_context(sections, AGENT_CONTEXT[name])) for name in areas}
 
-    # The planning agents are independent: each needs only the shared brief
-    # and its own slice of the budget, and none reads another's output.
-    # Running them concurrently makes this stage as slow as the slowest agent
-    # rather than the sum of all of them.
+    # The planning agents are independent: each needs only its brief and its
+    # own slice of the budget, and none reads another's output. Running them
+    # concurrently makes this stage as slow as the slowest agent rather than
+    # the sum of all of them.
     #
     # Marketing goes through request_marketing(), which routes over A2A when
     # the bridge server is running (see orchestration/a2a_bridge.py) and
     # falls back to an in-process call otherwise.
     with ThreadPoolExecutor(max_workers=len(areas)) as pool:
         futures = {
-            "marketing": pool.submit(request_marketing, brief, allocation.marketing),
-            "product": pool.submit(ProductAgent().execute, brief, allocation.product),
-            "sales": pool.submit(SalesAgent().execute, brief, allocation.sales),
+            "marketing": pool.submit(request_marketing, briefs["marketing"], allocation.marketing),
+            "product": pool.submit(ProductAgent().execute, briefs["product"], allocation.product),
+            "sales": pool.submit(SalesAgent().execute, briefs["sales"], allocation.sales),
         }
         if "crm" in areas:
-            futures["crm"] = pool.submit(CRMAgent().execute, brief, allocation.crm, segments, previous_segments(cycle))
+            futures["crm"] = pool.submit(
+                CRMAgent().execute, briefs["crm"], allocation.crm, segments, previous_segments(cycle)
+            )
         # .result() re-raises in the caller, so a failing agent still surfaces
         # rather than being silently swallowed by the pool.
         marketing, transport = futures["marketing"].result()
         outputs = {name: f.result() for name, f in futures.items() if name != "marketing"}
 
+    # Models occasionally leak raw tool-call markup into a text field (seen in a
+    # live Sales run); cut it off before anything is logged or shown.
+    marketing = _clean_output(marketing)
+    outputs = {name: _clean_output(out) for name, out in outputs.items()}
+
     logged = {"marketing": marketing, **outputs}
     for name, out in logged.items():
-        snapshot = {"budget": getattr(allocation, name), "brief": asdict(brief)}
+        snapshot = {"budget": getattr(allocation, name), "brief": asdict(briefs[name])}
         # Record which transport Marketing used, so the Decision Record shows
         # whether A2A was actually exercised rather than leaving it ambiguous
         # after a silent fallback.
@@ -203,36 +236,38 @@ def _plan(
         log_decision(DecisionRecord(cycle, name, snapshot, asdict(out)))
 
     return PlanResult(
-        brief, strategy, allocation, marketing, transport, outputs["product"], outputs["sales"], outputs.get("crm")
+        base_brief, strategy, allocation, marketing, transport, outputs["product"], outputs["sales"], outputs.get("crm")
     )
 
 
 # ------------------------------------------------------------- new idea --
 
 
-def launch_context(
+def launch_sections(
     business: BusinessInput,
     research: MarketResearchReport,
     decision: AdvisorDecision,
     qa_answers: dict[str, str] | None = None,
-) -> str:
+) -> dict:
     currency = business.currency
-    answers = "\n".join(f"- Q: {q} A: {a}" for q, a in (qa_answers or {}).items()) or "- none"
-    costs = (
-        f"Founder's monthly fixed costs: {fmt_money(business.monthly_fixed_costs, currency)}; "
-        f"cost to deliver one unit: {fmt_money(business.unit_cost, currency)} ('—' means not given)."
-    )
-    return (
-        f"Founder's capital for the launch: {fmt_money(business.starting_capital, currency)}. {costs}\n"
-        f"Market research (estimates, no live data): size {research.market_size_estimate} "
-        f"Competitors: {research.key_competitors} Opportunities: {research.opportunities} "
-        f"Risks: {research.risks}\n"
-        f"Founder's answers:\n{answers}\n"
-        f"Founder Advisor verdict: {decision.verdict} -- {decision.rationale}\n"
-        f"Advisor's seed plan: positioning '{decision.seed_positioning}', price "
-        f"{fmt_money(decision.seed_price, currency)} {decision.seed_price_unit}, "
-        f"budget priorities {decision.seed_priorities}."
-    )
+    answers = "\n".join(f"- Q: {q} A: {a}" for q, a in (qa_answers or {}).items())
+    return {
+        "capital_costs": (
+            f"Founder's capital for the launch: {fmt_money(business.starting_capital, currency)}. "
+            f"Monthly fixed costs: {fmt_money(business.monthly_fixed_costs, currency)}; cost to deliver one unit: "
+            f"{fmt_money(business.unit_cost, currency)} ('—' means not given)."
+        ),
+        "research": (
+            f"Market research: size {research.market_size_estimate} Competitors: {research.key_competitors} "
+            f"Opportunities: {research.opportunities} Risks: {research.risks}"
+        ),
+        "founder_answers": f"Founder's answers:\n{answers}" if answers else "",
+        "advisor": (
+            f"Founder Advisor verdict: {decision.verdict} -- {decision.rationale} Seed plan: positioning "
+            f"'{decision.seed_positioning}', price {fmt_money(decision.seed_price, currency)} "
+            f"{decision.seed_price_unit}, budget priorities {decision.seed_priorities}."
+        ),
+    }
 
 
 def run_launch_plan(
@@ -246,7 +281,7 @@ def run_launch_plan(
         LAUNCH_CYCLE,
         LAUNCH,
         business,
-        launch_context(business, research, decision, qa_answers),
+        launch_sections(business, research, decision, qa_answers),
         reference_price=decision.seed_price or None,
     )
 
@@ -288,19 +323,18 @@ def run_business_review(
         DecisionRecord(cycle, "analytics", {"metrics": asdict(metrics), "orders_uploaded": orders is not None}, asdict(report))
     )
 
-    context = (
-        f"Founder's reported numbers: {describe_period(report.metrics, report.kpis, currency)}\n"
-        f"Analytics summary: {report.summary}\n"
-        f"Budget the founder can deploy next period: {fmt_money(budget, currency)}."
-    )
-    if segments:
-        context += f"\nCustomer groups from the uploaded orders: {describe_segments(segments)}"
-
+    sections = {
+        "numbers": f"Founder's reported numbers: {describe_period(report.metrics, report.kpis, currency)}",
+        "analytics": f"Analytics summary: {report.summary}",
+        "budget": f"Budget the founder can deploy next period: {fmt_money(budget, currency)}.",
+        "orders": describe_file_metrics(file_metrics, currency) if file_metrics else "",
+        "segments": f"Customer groups from the uploaded orders: {describe_segments(segments)}" if segments else "",
+    }
     result = _plan(
         cycle,
         EXISTING,
         business,
-        context,
+        sections,
         metrics=metrics,
         budget=budget,
         segments=segments,
@@ -330,9 +364,26 @@ def plan_summary(result: PlanResult) -> str:
 
 
 def run_funding(business: BusinessInput, result: PlanResult) -> FundingPlan:
+    """Funding roadmap, checked by agents/_guardrails.funding_problems. A
+    roadmap that doesn't add up goes back once; anything still wrong after
+    that is kept as a visible warning rather than blocking the whole plan."""
     mode = result.brief.mode
+    cycle = result.brief.cycle
     summary = plan_summary(result)
     history = analytics_history() if mode == EXISTING else []
-    plan = FundingAgent().assess(business, mode, summary, history)
-    log_decision(DecisionRecord(result.brief.cycle, "funding", {"mode": mode, "plan_summary": summary}, asdict(plan)))
+    # The traction/revenue comparison assumes a monthly price.
+    monthly_price = result.strategy.price if re.search(r"month", result.strategy.price_unit or "", re.IGNORECASE) else None
+
+    agent = FundingAgent()
+    feedback = ""
+    for attempt in (1, 2):
+        plan = agent.assess(business, mode, summary, history, feedback)
+        problems = funding_problems(plan, business.currency, monthly_price)
+        if not problems:
+            break
+        log_decision(DecisionRecord(cycle, "funding_rejected", {"attempt": attempt, "problems": problems}, asdict(plan)))
+        feedback = "Your previous roadmap was rejected by the checker: " + " ".join(problems) + " Fix these.\n\n"
+
+    plan.warnings = problems
+    log_decision(DecisionRecord(cycle, "funding", {"mode": mode, "plan_summary": summary}, asdict(plan)))
     return plan

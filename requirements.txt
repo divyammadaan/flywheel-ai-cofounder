@@ -27,6 +27,9 @@ chromadb
 pandas
 openpyxl
 
+# Free web search for Market Research (DuckDuckGo, no API key)
+ddgs
+
 # Dashboard
 streamlit
 

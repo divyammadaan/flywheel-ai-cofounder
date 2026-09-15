@@ -7,48 +7,24 @@
             revenue, and whether next period's budget fits the cash in the bank.
 
 Then it splits the spendable budget across the planning areas based on
-Strategy's priorities, with a hard per-area cap.
+Strategy's priorities, with a hard per-area cap, and explains the result.
 
-All of that is plain Python (agents/_cash.py, compute_capped_allocation),
-deliberately NOT delegated to the LLM -- a guardrail must hold even if the
-model's reasoning is wrong. A Google ADK LlmAgent only explains the result and
-names the biggest cash risk in plain words.
-
-Backed by Groq (via LiteLlm), not Gemini directly -- see strategy.py for
-why (Gemini's free-tier 20 req/day cap).
+This agent makes no model call. Everything it produces is arithmetic
+(agents/_cash.py, compute_capped_allocation) -- a guardrail must hold even if
+a model's reasoning is wrong -- and the explanation only restates those
+numbers, so it is written from them in code too. An LLM used to write that
+explanation; it added a call per run and couldn't add anything the numbers
+didn't already say.
 """
 
-import asyncio
 from dataclasses import dataclass, field
 
-from google.adk import Runner
-from google.adk.agents import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
-
 from agents._cash import launch_cash_plan, operating_cash_position
-from agents._models import AGENT_MODELS
 from agents._money import fmt_money
-from agents._retry import retry_on_rate_limit
 from agents.analytics import PeriodMetrics
-
-APP_NAME = "flywheel"
-USER_ID = "flywheel_run"
-DEFAULT_MODEL = AGENT_MODELS["finance"]
 
 # Guardrail: no single area may receive more than this fraction of budget.
 MAX_SHARE_PER_AGENT = 0.6
-
-_INSTRUCTION = """You are the Finance agent for Flywheel, an AI co-founder. You're given a cash
-check computed in code (reserve, runway, break-even, debt -- whichever apply), the budget the
-founder can spend, Strategy's requested priority split, and the allocation after a hard
-per-area spend cap was applied in code.
-
-Write 2-3 sentences: explain the split, say if the cap trimmed anything, and state the most
-important cash risk from the cash check in plain words (e.g. "you need 223 subscribers a
-month to cover fixed costs"). Do not recompute or invent numbers -- use the ones you're
-given, in the same currency."""
 
 
 def compute_capped_allocation(total_budget: float, priorities: dict) -> dict:
@@ -68,6 +44,52 @@ def compute_capped_allocation(total_budget: float, priorities: dict) -> dict:
         "sales": round(capped(normalized.get("sales", 0)), 2),
         "crm": round(capped(normalized.get("crm", 0)), 2),
     }
+
+
+def _area_label(area: str) -> str:
+    return "CRM" if area == "crm" else area
+
+
+def _main_cash_risk(health: dict, currency: str) -> str:
+    if health.get("warnings"):
+        return health["warnings"][0]
+    if health.get("break_even_units_per_month") is not None:
+        return (
+            f"Break-even needs {health['break_even_units_per_month']:,} units a month at "
+            f"{fmt_money(health.get('contribution_margin'), currency)} margin each."
+        )
+    if "profitable" in health:
+        if health["profitable"]:
+            return "The business is profitable, so there is no monthly cash burn."
+        if health.get("runway_months"):
+            return f"At the current loss, cash lasts about {health['runway_months']} months."
+    return ""
+
+
+def explain_allocation(total_budget: float, priorities: dict, amounts: dict, health: dict, currency: str) -> str:
+    """The allocation and its biggest cash risk in plain words, from the numbers alone."""
+    spent = sorted(((area, amount) for area, amount in amounts.items() if amount), key=lambda item: -item[1])
+    if not total_budget or not spent:
+        sentences = ["There is no budget to split."]
+    else:
+        split = ", ".join(
+            f"{_area_label(area)} {fmt_money(amount, currency)} ({amount / total_budget:.0%})" for area, amount in spent
+        )
+        sentences = [f"{fmt_money(total_budget, currency)} split by Strategy's priorities: {split}."]
+
+    requested = sum(priorities.values()) or 1.0
+    capped = [_area_label(area) for area, weight in priorities.items() if weight / requested > MAX_SHARE_PER_AGENT]
+    if capped and total_budget:
+        left = total_budget - sum(amounts.values())
+        sentences.append(
+            f"{' and '.join(capped).capitalize()} asked for more than {MAX_SHARE_PER_AGENT:.0%} of the budget "
+            f"and was capped, leaving {fmt_money(left, currency)} unallocated."
+        )
+
+    risk = _main_cash_risk(health, currency)
+    if risk:
+        sentences.append(risk)
+    return " ".join(sentences)
 
 
 @dataclass
@@ -98,24 +120,10 @@ class BudgetAllocation:
 
 
 class FinanceAgent:
-    """Cash math and guardrail-enforced allocation (plain Python) plus an ADK
-    LlmAgent that explains them."""
+    """Cash math, guardrail-enforced allocation and its explanation -- all code."""
 
-    def __init__(self, currency: str, model: str = DEFAULT_MODEL, session_id: str = "finance_session"):
+    def __init__(self, currency: str):
         self.currency = currency
-        resolved_model = LiteLlm(model=model) if model.startswith("groq/") else model
-        self._agent = LlmAgent(name="finance_agent", model=resolved_model, instruction=_INSTRUCTION)
-        self._session_service = InMemorySessionService()
-        self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
-        self._session_id = session_id
-        self._session_ready = False
-
-    async def _ensure_session(self):
-        if not self._session_ready:
-            await self._session_service.create_session(
-                app_name=APP_NAME, user_id=USER_ID, session_id=self._session_id
-            )
-            self._session_ready = True
 
     def plan_launch(
         self,
@@ -136,33 +144,13 @@ class FinanceAgent:
         )
         return self.allocate(cycle, priorities, budget, health)
 
-    async def _allocate_async(self, cycle: int, priorities: dict, total_budget: float, health: dict) -> BudgetAllocation:
-        await self._ensure_session()
+    def allocate(self, cycle: int, priorities: dict, total_budget: float, health: dict) -> BudgetAllocation:
         amounts = compute_capped_allocation(total_budget, priorities)
-
-        message = (
-            f"Plan period {cycle}. Cash check (computed in code, {self.currency}): {health}\n"
-            f"Budget to spend: {fmt_money(total_budget, self.currency)}. "
-            f"Strategy requested priorities: {priorities}. "
-            f"After the guardrail cap ({MAX_SHARE_PER_AGENT:.0%} max per area), "
-            f"allocated in {self.currency}: {amounts}."
-        )
-        content = types.Content(role="user", parts=[types.Part(text=message)])
-
-        rationale = ""
-        async for event in self._runner.run_async(user_id=USER_ID, session_id=self._session_id, new_message=content):
-            if event.is_final_response() and event.content and event.content.parts:
-                rationale = event.content.parts[0].text.strip()
-
         return BudgetAllocation(
             cycle=cycle,
             total_budget=total_budget,
-            rationale=rationale,
+            rationale=explain_allocation(total_budget, priorities, amounts, health, self.currency),
             currency=self.currency,
             health=health,
             **amounts,
         )
-
-    @retry_on_rate_limit()
-    def allocate(self, cycle: int, priorities: dict, total_budget: float, health: dict) -> BudgetAllocation:
-        return asyncio.run(self._allocate_async(cycle, priorities, total_budget, health))

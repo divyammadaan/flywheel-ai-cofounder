@@ -88,6 +88,13 @@ a review plans with the `--budget` you give. The order file is optional, but wit
 it an existing business gets no CRM plan. Both flows start a fresh Decision Record
 history; `review_flow.py --append` adds a period to the existing one instead.
 
+Both flows end with a model-usage table (calls, tokens, seconds, cache hits per
+agent) and write a launch page to `data/site/index.html`. Model answers for
+identical inputs are reused from `data/llm_cache/`; set `FLYWHEEL_LLM_CACHE=0`
+to force fresh calls (e.g. when measuring). Market Research uses free web
+search via `ddgs` (`pip install ddgs`); if search fails, the run continues and
+the report labels its figures as estimates.
+
 `--answers` exists for scripted demos but is **order-dependent**: it feeds
 answers positionally into whatever questions Market Research generates that
 run, and the model reorders them between runs, so answers can land against

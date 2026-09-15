@@ -7,6 +7,11 @@ hit first.
   existing  readiness is judged from the founder's real reported numbers, read
             back out of the Analytics Decision Records.
 
+Every roadmap is checked in code (agents/_guardrails.funding_problems) for a
+round far too big for its stage and for traction and revenue milestones that
+contradict each other; a failing roadmap goes back once with the problems
+listed (orchestration/cycle.run_funding).
+
 NOTE: investor targeting is by TYPE and profile (e.g. "pre-seed angels in
 D2C food, ticket size Rs 25-50 lakh"), not named firms -- the model has no live
 access to current fund mandates or portfolio data, and naming specific
@@ -15,18 +20,20 @@ investors from stale training data would send founders at the wrong people.
 CrewAI + Groq, same pattern as the other agents.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
 from agents._brief import LAUNCH
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
 from agents.analytics import describe_period
 from agents.intake import BusinessInput
+from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["funding"]
 
@@ -42,9 +49,15 @@ reported numbers.
   targets, so call them targets.
 - OPERATING: judge readiness from the reported numbers, then give the same roadmap.
 
+Keep the numbers consistent with each other: the customer count in the traction milestone
+must be able to produce the revenue milestone at the plan's price, and the round size must
+fit the stage.
+
 Investor targeting: describe the TYPE and profile of investor (stage, ticket size, sector,
 geography) -- never name specific funds or people; you have no live data on current mandates.
-Pitch deck outline: one short line per slide, specific to this business.
+Pitch deck outline: one short line per slide, specific to this business. Use only numbers you
+were given, or targets clearly labelled as targets -- never present subscribers, revenue or
+other traction the business doesn't actually have.
 
 BE CONCISE. No field longer than ~60 words. (Output length is rate-limited, so verbosity
 directly costs the founder waiting time.)"""
@@ -85,11 +98,15 @@ class FundingPlan:
     investor_profile: str
     alternative_funding: str
     pitch_deck_outline: str
+    # Problems the checker still found after the one retry -- shown to the founder.
+    warnings: list = field(default_factory=list)
 
 
 class FundingAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Funding Advisor", "funding", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["funding"])
         self._agent = Agent(
             role="Funding Advisor",
             goal="Lay out when this business should raise, and what it must achieve first",
@@ -101,9 +118,16 @@ class FundingAgent:
             verbose=False,
         )
 
+    # Today's date is part of the prompt, so it's part of the cache key.
+    @cached("funding", FundingPlan, extra_key=lambda: date.today().isoformat())
     @retry_on_rate_limit()
     def assess(
-        self, business: BusinessInput, mode: str, plan_summary: str, history: list[dict] | None = None
+        self,
+        business: BusinessInput,
+        mode: str,
+        plan_summary: str,
+        history: list[dict] | None = None,
+        feedback: str = "",
     ) -> FundingPlan:
         currency = business.currency
         if mode == LAUNCH:
@@ -120,11 +144,13 @@ class FundingAgent:
 
         task = Task(
             description=(
+                f"{_INSTRUCTION}\n\n"
                 f"Today's date: {date.today().isoformat()}.\n"
                 f"Business: {business.business_summary}\n"
                 f"Industry: {business.industry}. Region: {business.target_region}. Currency: {currency}.\n\n"
                 f"{numbers}\n\n"
                 f"Current plan: {plan_summary}\n\n"
+                f"{feedback}"
                 "Give the funding roadmap."
             ),
             expected_output="A JSON object matching the required schema.",

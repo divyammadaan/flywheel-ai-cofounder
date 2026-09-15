@@ -11,11 +11,13 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
-from agents._models import AGENT_MODELS
+from agents._cache import cached
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 from agents.market_research import MarketResearchReport
+from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["founder_advisor"]
 
@@ -31,8 +33,8 @@ If GO (or PIVOT -- provide the seed plan for the PIVOTED direction), also produc
 plan: positioning, an initial price in the founder's currency together with what it buys
 (e.g. 799, "per month, 1kg subscription"), and initial budget priority weights across
 marketing/product/sales/crm (must sum to 1.0). This seed plan feeds directly into the launch
-plan, so ground it in the founder's actual capital and the market research, not generic
-advice.
+plan, so ground it in the founder's actual capital, their answers (including any price they
+said customers would pay) and the market research, not generic advice.
 
 BE CONCISE. Rationale is at most ~70 words and positioning is one sentence. Say the hard
 thing plainly rather than cushioning it. (Output length is rate-limited, so verbosity
@@ -68,7 +70,9 @@ class AdvisorDecision:
 
 class FounderAdvisorAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
-        llm = LLM(model=model)
+        self.model_name = model
+        register_role("Founder Advisor", "founder_advisor", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["founder_advisor"])
         self._agent = Agent(
             role="Founder Advisor",
             goal="Give a clear-eyed GO/PIVOT/NO-GO verdict grounded in real constraints",
@@ -79,6 +83,7 @@ class FounderAdvisorAgent:
             verbose=False,
         )
 
+    @cached("founder_advisor", AdvisorDecision)
     @retry_on_rate_limit()
     def decide(
         self, business: BusinessInput, research: MarketResearchReport, qa_answers: dict[str, str]
@@ -86,6 +91,7 @@ class FounderAdvisorAgent:
         qa_text = "\n".join(f"Q: {q}\nA: {a}" for q, a in qa_answers.items())
         task = Task(
             description=(
+                f"{_INSTRUCTION}\n\n"
                 f"Business: {business.business_summary} (industry: {business.industry}, "
                 f"region: {business.target_region})\n"
                 f"Founder's capital: {fmt_money(business.starting_capital, business.currency)} "

@@ -33,6 +33,15 @@ def _print_health(health: dict, currency: str) -> None:
         print(f"!! {warning}")
 
 
+def print_sources(sources: list[dict]) -> None:
+    if not sources:
+        print("\nSources      : none (web search unavailable -- figures are estimates)")
+        return
+    print("\nSources:")
+    for i, source in enumerate(sources, 1):
+        print(f"  [{i}] {source['title']} -- {source['url']}")
+
+
 def print_plan(result) -> None:
     currency = result.brief.currency
 
@@ -92,6 +101,10 @@ def print_plan(result) -> None:
     if cr is None:
         return
     rule(f"CRM -- {m(cr.budget)} (local Ollama, from your uploaded orders)")
+    if cr.warnings:
+        for warning in cr.warnings:
+            print(f"!! {warning}")
+        return
     for key in SEGMENTS:
         seg = cr.segments["segments"][key]
         change = f"  ({cr.changes[key]:+d} since last period)" if cr.changes else ""
@@ -126,3 +139,17 @@ def print_funding(plan) -> None:
     print(f"Investor profile   : {plan.investor_profile}")
     print(f"Alternatives       : {plan.alternative_funding}\n")
     print(f"Pitch deck outline:\n{plan.pitch_deck_outline}")
+    for warning in plan.warnings:
+        print(f"!! Check this: {warning}")
+
+
+def print_usage(summary: dict) -> None:
+    rule("MODEL USAGE THIS RUN")
+    print(f"{'agent':<18}{'calls':>6}{'cached':>8}{'tokens in':>11}{'tokens out':>12}{'seconds':>9}")
+    for a in summary["agents"]:
+        print(
+            f"{a['agent']:<18}{a['calls']:>6}{a['cache_hits']:>8}{a['prompt_tokens']:>11,}"
+            f"{a['completion_tokens']:>12,}{a['seconds']:>9.1f}"
+        )
+    t = summary["totals"]
+    print(f"{'TOTAL':<18}{t['calls']:>6}{t['cache_hits']:>8}{t['prompt_tokens']:>11,}{t['completion_tokens']:>12,}{t['seconds']:>9.1f}")

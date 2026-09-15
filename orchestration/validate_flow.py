@@ -1,9 +1,9 @@
 """Validate flow -- the founder's front door for a NEW idea, end to end.
 
-    Intake -> Market Research -> clarifying Q&A -> Founder Advisor verdict
+    Intake -> Market Research (web search) -> clarifying Q&A -> Founder Advisor
       -> (GO/PIVOT) Company Formation plan
       -> launch plan: Strategy -> Finance -> [Marketing, Sales, Product]
-      -> Funding roadmap
+      -> Funding roadmap -> launch page (data/site/index.html)
 
 No simulator, Analytics or CRM here: the business hasn't launched, so there's
 nothing to measure and no customers yet. For an operating business, use
@@ -23,11 +23,14 @@ interactive mode is the honest experience):
 Skip stages to save API calls / time:
     --skip-formation --skip-funding
 
-Each run starts a fresh Decision Record history (data/flywheel.db).
+Each run starts a fresh Decision Record history (data/flywheel.db). Identical
+inputs reuse saved model answers (data/llm_cache); set FLYWHEEL_LLM_CACHE=0 to
+force fresh calls.
 """
 
 import argparse
 import sys
+from dataclasses import asdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -52,8 +55,10 @@ from agents.founder_advisor import FounderAdvisorAgent
 from agents.intake import IntakeAgent
 from agents.market_research import MarketResearchAgent
 from observability.decision_record import DB_PATH, DecisionRecord, log_decision
+from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, run_funding, run_launch_plan
-from orchestration.report import print_funding, print_plan, rule
+from orchestration.report import print_funding, print_plan, print_sources, print_usage, rule
+from tools.landing_page import write_landing_page
 
 
 def validate(
@@ -97,6 +102,7 @@ def validate(
     print(f"Competitors  : {report.key_competitors}\n")
     print(f"Opportunities: {report.opportunities}\n")
     print(f"Risks        : {report.risks}")
+    print_sources(report.sources)
 
     rule("CLARIFYING QUESTIONS")
     qa_answers = {}
@@ -118,6 +124,7 @@ def validate(
 
     if decision.verdict == "NO_GO":
         print("\nAdvisor recommends NO-GO. Stopping here rather than building a launch plan.")
+        print_usage(usage_summary())
         return
 
     print(f"\nSeed plan: '{decision.seed_positioning}' at {fmt_money(decision.seed_price, currency)} {decision.seed_price_unit}")
@@ -141,11 +148,17 @@ def validate(
     except PlanBlocked as blocked:
         rule("PLAN BLOCKED")
         print(blocked)
+        print_usage(usage_summary())
         return
     print_plan(plan)
 
+    page = write_landing_page(asdict(business), asdict(plan.strategy), asdict(plan.marketing))
+    print(f"\nLaunch page: {page}")
+
     if not skip_funding:
         print_funding(run_funding(business, plan))
+
+    print_usage(usage_summary())
 
 
 def _ask_capital(currency: str) -> float:

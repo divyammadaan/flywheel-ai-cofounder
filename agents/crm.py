@@ -17,30 +17,38 @@ dev machine's CPU (~9.5 tokens/s), same prompt and sample data:
   own agent prompt, then makes a second call to convert the answer into the
   schema; a 4B model on CPU pays heavily for both.
 - Direct: one call to Ollama's native /api/chat with think:false and the JSON
-  schema passed as `format` -- 66s, 439 output tokens, valid on the first try.
+  schema passed as `format` -- about a minute, valid JSON.
   (think:false matters: qwen3 otherwise reasons first, roughly doubling output,
   and Ollama's OpenAI-compatible endpoint ignores reasoning_effort="none".)
 
-What the model gets wrong is fixed in code rather than trusted:
+What the model gets wrong is fixed or caught in code rather than trusted:
 - its per-group spends are cut to fit the budget (it allocated Rs 75k of a
   Rs 60k budget in testing);
 - messages always greet the customer by name, and any sentence with a
   placeholder nothing can fill (e.g. "[date]") or demeaning wording is dropped,
-  rather than leaving a broken sentence.
+  rather than leaving a broken sentence;
+- a reply that is itself a placeholder -- in one live run every action read
+  "Action for best customers", every message "message for slipping away",
+  and every spend was 0 -- is asked again once, and if it's still unusable
+  the output says there's no CRM plan this run instead of showing it. It
+  happened intermittently: the identical request gave real content next time.
 """
 
 import re
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
 
 import httpx
 from pydantic import BaseModel, Field
 
 from agents._brief import PlanBrief
-from agents._guardrails import demeaning_terms
-from agents._models import OLLAMA_BASE_URL, OLLAMA_MODEL
+from agents._cache import cached
+from agents._guardrails import crm_output_problems, demeaning_terms
+from agents._models import AGENT_MAX_TOKENS, OLLAMA_BASE_URL, OLLAMA_MODEL
 from agents._money import fit_to_budget, fmt_money
 from agents._retry import retry_on_rate_limit
 from agents._segments import SEGMENT_DEFINITIONS, SEGMENT_LABELS, SEGMENTS, describe_segments, segment_changes
+from observability.usage import record_usage
 
 REQUEST_TIMEOUT_SECONDS = 300
 PREVIEW_CUSTOMERS = 3
@@ -49,7 +57,16 @@ _SYSTEM = """You run customer retention for a small business. You work from real
 groups and write specific actions the founder can do this week, each with a spend in the
 plan currency. The spends together must not exceed the CRM budget. Messages are short and
 warm, sound like the business rather than a marketing department, and use {name} for the
-customer's first name -- no other placeholders, since nothing else can be filled in."""
+customer's first name -- no other placeholders, since nothing else can be filled in.
+
+Write real, specific content for every field -- concrete actions, spend amounts that use a
+sensible share of the budget, and complete messages. Never repeat a field's name or
+description as its value."""
+
+NO_PLAN_WARNING = (
+    "The local CRM model returned placeholder text twice, so there is no CRM plan this run. "
+    "Run the review again to get one."
+)
 
 
 class CRMPlanSchema(BaseModel):
@@ -90,6 +107,8 @@ class CRMOutput:
     slipping_message: str
     lost_message: str
     message_previews: list
+    # Set when the model's reply stayed unusable after one retry.
+    warnings: list = field(default_factory=list)
 
 
 _NAME_PLACEHOLDER = re.compile(r"[\[{<]\s*(?:customer[\s_]*|first[\s_]*)?name\s*[\]}>]", re.IGNORECASE)
@@ -132,19 +151,20 @@ class CRMAgent:
     machine, by design."""
 
     def __init__(self, model: str = OLLAMA_MODEL, base_url: str = OLLAMA_BASE_URL):
-        self.model = model
+        self.model_name = model
         self.base_url = base_url.rstrip("/")
 
     def _ask(self, prompt: str) -> CRMPlanSchema:
+        started = time.perf_counter()
         response = httpx.post(
             f"{self.base_url}/api/chat",
             json={
-                "model": self.model,
+                "model": self.model_name,
                 "messages": [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": prompt}],
                 "stream": False,
                 "think": False,
                 "format": CRMPlanSchema.model_json_schema(),
-                "options": {"temperature": 0.4},
+                "options": {"temperature": 0.4, "num_predict": AGENT_MAX_TOKENS["crm"]},
                 # Unload right after this one call. Ollama otherwise keeps the
                 # model in RAM for 5 minutes (~3.9 GB), and on a 16 GB machine
                 # that got the rest of the pipeline killed for low memory.
@@ -153,8 +173,14 @@ class CRMAgent:
             timeout=REQUEST_TIMEOUT_SECONDS,
         )
         response.raise_for_status()
-        return CRMPlanSchema.model_validate_json(response.json()["message"]["content"])
+        body = response.json()
+        record_usage(
+            "crm", self.model_name, body.get("prompt_eval_count", 0), body.get("eval_count", 0), time.perf_counter() - started
+        )
+        return CRMPlanSchema.model_validate_json(body["message"]["content"])
 
+    # A failed plan isn't saved, so the next run asks the model again.
+    @cached("crm", CRMOutput, should_cache=lambda result: not result.warnings)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float, segments: dict, previous: dict | None = None) -> CRMOutput:
         changes = segment_changes(segments, previous)
@@ -182,7 +208,30 @@ class CRMAgent:
             f"{change_text}\n{top_text}\n\n"
             "Write one specific action and spend per group, and the two messages."
         )
+
         parsed = self._ask(prompt)
+        problems = crm_output_problems(parsed.model_dump())
+        if problems:
+            parsed = self._ask(
+                f"{prompt}\n\nYour previous answer was unusable: {' '.join(problems)} Write real content for every field."
+            )
+            problems = crm_output_problems(parsed.model_dump())
+        if problems:
+            # Better to say CRM failed this run than to show placeholder text as a plan.
+            return CRMOutput(
+                cycle=brief.cycle,
+                budget=budget,
+                currency=brief.currency,
+                segments=segments,
+                changes=changes,
+                actions={k: "" for k in SEGMENTS},
+                spend={k: 0.0 for k in SEGMENTS},
+                budget_adjusted=False,
+                slipping_message="",
+                lost_message="",
+                message_previews=[],
+                warnings=[NO_PLAN_WARNING],
+            )
 
         spends, adjusted = fit_to_budget([getattr(parsed, f"{_FIELD_FOR_SEGMENT[k]}_spend") for k in SEGMENTS], budget)
         slipping_message = normalise_message(parsed.slipping_message)

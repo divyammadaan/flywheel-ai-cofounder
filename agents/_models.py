@@ -90,3 +90,22 @@ AGENT_MODELS = {
     "sales": GROQ_MODEL,
     "crm": OLLAMA_MODEL,
 }
+
+# Reply-length caps per agent, in output tokens. They stop a runaway answer
+# without cutting off a normal one -- a truncated JSON reply fails to parse, so
+# each cap keeps generous headroom over the longest reply measured in real runs
+# (see the llm_usage table and the dashboard's "Model usage" panel). Output
+# tokens are also what Groq's free tier rate-limits per minute.
+AGENT_MAX_TOKENS = {
+    "intake": 600,
+    "market_research": 1200,
+    "founder_advisor": 1000,
+    "company_formation": 1400,
+    "strategy": 900,
+    "analytics": 700,
+    "marketing": 1400,
+    "sales": 2000,
+    "product": 1400,
+    "funding": 1600,
+    "crm": 1024,
+}

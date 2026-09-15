@@ -17,12 +17,12 @@ An agent is only here if it does something a founder would otherwise do by hand.
 | Agent | Runs for | What it actually does for the founder |
 |---|---|---|
 | **Intake** | both | Turns a free-text description into structured fields, and classifies what the business delivers (physical / service / software) |
-| **Market Research** | new idea | Sizes the market, names competitors and risks, asks the questions still needed for a verdict |
+| **Market Research** | new idea | Sizes the market and names competitors from **live web search** (sources cited as [n]), flags risks, asks the questions still needed for a verdict |
 | **Founder Advisor** | new idea | GO / PIVOT / NO-GO — can stop a bad idea before money is spent |
 | **Company Formation** | new idea | Region-specific incorporation checklist: entity, registrations, licences, cost, timeline |
 | **Analytics** | existing | Ratios from the founder's numbers and their uploaded orders (average order, repeat rate, revenue trend) — computed in code; the model writes what they mean |
 | **Strategy** | both | Positioning, target customer, a real price, and budget priorities |
-| **Finance** | both | **Cash math in code:** launch reserve and break-even for a new idea; runway, debt load and budget-vs-cash for an existing business. Then splits the spendable budget with a hard per-area cap |
+| **Finance** | both | **Cash math in code:** launch reserve and break-even for a new idea; runway, debt load and budget-vs-cash for an existing business. Then splits the spendable budget with a hard per-area cap and explains it — all code, **no model call** |
 | **Marketing** | both | 2–4 specific campaigns (platform, localities/audience, format, timing, spend) plus ad copy and a matching ad image |
 | **Sales** | both | 2–4 lead sources with a weekly cadence and spend, and the steps from lead to paying customer |
 | **Product** | both | Physical goods: opening inventory and sourcing. Services/software: tools, equipment and hires needed to deliver. Totals computed in code and cut to fit the budget |
@@ -83,12 +83,31 @@ The rule-based market simulator from earlier versions is **parked**: it produced
 - `agents/product.py` `price_line_items` — line totals multiplied by the program, quantities cut to fit
 - `agents/_segments.py` — customer groups, with cut-offs scaled to how often *this* business's customers re-order
 - `tools/orders_file.py` — reads messy exports (loose column names, `₹1,599.00`, day-first dates)
+- Funding roadmaps are checked for a round too big for its stage and for traction and revenue milestones that contradict each other; a failing roadmap goes back once, and anything still wrong is shown as a warning
+
+---
+
+## Keeping model usage low
+
+Model calls are treated as a cost to justify, without making the plans worse:
+
+- **Measured per agent:** every call logs tokens in/out, time and cache hits (`observability/usage.py`). See the dashboard's *Model usage* panel or the table at the end of each CLI run.
+- **No model where code is enough:** Finance's explanation is written from the numbers it computed — one fewer call per run.
+- **Identical inputs reuse the saved answer** (`agents/_cache.py`): same agent code, model and inputs cost zero calls on a repeat run. Editing an agent invalidates only its own entries. Set `FLYWHEEL_LLM_CACHE=0` to force fresh calls.
+- **Each planning agent gets only the context it uses** (`AGENT_CONTEXT` in `orchestration/cycle.py`) instead of the whole research, every answer and every number.
+- **Reply-length caps per agent** (`AGENT_MAX_TOKENS` in `agents/_models.py`) with headroom over measured replies.
+- **The local CRM model makes one direct call with thinking off** — 66s instead of two CrewAI calls taking over 14 minutes.
+
+**Measured:** a fresh launch plan made 9 model calls (18,630 tokens in, 3,417 out, 169s). Running it again with identical inputs made **0 calls** and finished in **24s**. Per-agent context trimming saves about 760–1,050 prompt tokens per run. Details in `docs/project_report.md`.
+
+Merging agents into one big call was rejected: it loses parallelism and focus, and one failure means redoing everything.
 
 ---
 
 ## Tech stack
 
-- **Agent orchestration:** CrewAI (planning + advisory agents), Google ADK (Strategy/Finance/Analytics)
+- **Agent orchestration:** CrewAI (planning + advisory agents), Google ADK (Strategy/Analytics)
+- **Web search:** DuckDuckGo via `ddgs` — free, no API key — for Market Research
 - **Agent-to-tool:** MCP — a real FastMCP server exposing Decision Record history; the engine fetches last period's CRM record from it over stdio, as a separate process
 - **Agent-to-agent:** A2A — Marketing is exposed as an A2A server with a discoverable Agent Card; the engine calls it over the protocol and falls back to an in-process call if the server is down
 - **LLMs:** Groq free tier (`qwen/qwen3.8-27b`) for the hosted agents; Ollama (`qwen3:4b`, local, thinking turned off) for CRM. Gemini supported via a per-agent `model=` override — see `docs/setup.md`
@@ -103,6 +122,8 @@ The rule-based market simulator from earlier versions is **parked**: it produced
 flywheel/
 ├── agents/
 │   ├── _brief.py           # PlanBrief: the shared context every planning agent gets
+│   ├── _cache.py           # reuse saved model answers for identical inputs
+│   ├── _guardrails.py      # checks on Strategy plans and Funding roadmaps
 │   ├── _cash.py            # reserve, break-even, runway (Finance's maths)
 │   ├── _money.py           # currency formatting + fit_to_budget guardrail
 │   ├── _segments.py        # customer groups from an order history (CRM's maths)
@@ -114,7 +135,7 @@ flywheel/
 │   ├── company_formation.py# ─┘
 │   ├── analytics.py        # ADK + Groq (existing businesses)
 │   ├── strategy.py         # ADK + Groq
-│   ├── finance.py          # cash math + capped split in code; ADK + Groq explains it
+│   ├── finance.py          # cash math, capped split and explanation -- all code
 │   ├── marketing.py        # CrewAI + Groq; campaigns + copy + image
 │   ├── sales.py            # CrewAI + Groq; lead sources
 │   ├── product.py          # CrewAI + Groq; inventory or delivery capacity
@@ -130,10 +151,13 @@ flywheel/
 │   └── a2a_bridge.py       # A2A server + client for Marketing
 ├── observability/
 │   ├── decision_record.py
+│   ├── usage.py            # tokens, calls, time and cache hits per agent
 │   └── dashboard/          # Streamlit
 ├── tools/
 │   ├── orders_file.py      # read + clean uploaded .csv/.xlsx order histories
 │   ├── sample_data.py      # generate realistic sample order files for demos
+│   ├── web_search.py       # free DuckDuckGo search for Market Research
+│   ├── landing_page.py     # one-page launch site built from the plan
 │   ├── image_gen.py        # ad image generation (keyless, fails soft)
 │   ├── mcp_server.py       # FastMCP server: Decision Record query tools
 │   └── mcp_client_tool.py  # MCP client over stdio
@@ -144,7 +168,7 @@ flywheel/
 └── README.md
 ```
 
-**Status.** All agents are genuinely LLM-backed. MCP is real (a separate-process FastMCP server queried over stdio). A2A is real — the Decision Record logs `transport: a2a` vs `direct` (start `orchestration/a2a_bridge.py` first, or it falls back). Marketing generates a real ad image per plan into `data/ads/`. Still open: live web search for Market Research, and a deployable storefront.
+**Status.** All agents are genuinely LLM-backed. MCP is real (a separate-process FastMCP server queried over stdio). A2A is real — the Decision Record logs `transport: a2a` vs `direct` (start `orchestration/a2a_bridge.py` first, or it falls back). Marketing generates a real ad image per plan into `data/ads/`. Every plan also produces a self-contained launch page (`data/site/index.html`, or *Download launch page* on the dashboard) ready for any static host. Still open: connecting that page's sign-up form to a real form service, and a place-lookup tool so agents can't name local spots that don't exist.
 
 ---
 
@@ -163,7 +187,7 @@ Install in **stages** — one shot fails, see `docs/setup.md` for why:
 ```bash
 pip install crewai && pip install google-adk && pip install mcp a2a-sdk
 pip install ollama groq google-genai && pip install fastapi uvicorn python-dotenv pydantic
-pip install chromadb && pip install pandas openpyxl && pip install streamlit && pip install pytest
+pip install chromadb && pip install pandas openpyxl ddgs && pip install streamlit && pip install pytest
 ```
 
 Local model for CRM, plus your free Groq key:
