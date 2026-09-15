@@ -45,7 +45,7 @@ try:
     from agents.founder_advisor import FounderAdvisorAgent
     from agents.intake import BusinessInput, IntakeAgent
     from agents.market_research import MarketResearchAgent
-    from observability.decision_record import DB_PATH, DecisionRecord, get_records, log_decision
+    from observability.decision_record import DecisionRecord, get_records, log_decision, reset_records
     from orchestration.cycle import (
         PRECYCLE,
         PlanBlocked,
@@ -176,7 +176,7 @@ with st.sidebar:
         st.caption("Takes a few minutes: real LLM calls on Groq's rate-limited free tier.")
 
         if st.button("Analyse my idea", type="primary", width="stretch", disabled=not (pitch.strip() and capital)):
-            DB_PATH.unlink(missing_ok=True)
+            reset_records()
             st.session_state.plan_error = None
             with st.spinner("Intake + market research..."):
                 business = IntakeAgent().process(pitch)
@@ -300,7 +300,7 @@ with st.sidebar:
                 if append:
                     business = BusinessInput(**precycle["intake"])
                 else:
-                    DB_PATH.unlink(missing_ok=True)
+                    reset_records()
                     with st.spinner("Intake..."):
                         business = IntakeAgent().process(description)
                     business.mode = "existing_business"

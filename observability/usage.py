@@ -22,6 +22,7 @@ import re
 import sqlite3
 import threading
 import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 
 from observability import decision_record
@@ -48,12 +49,19 @@ _CREW_PROMPT_ROLE = re.compile(r"^\s*SYSTEM:\s*You are (.+?)\.")
 _hook_installed = False
 
 
-def _connect() -> sqlite3.Connection:
+@contextmanager
+def _connect():
+    """Committed and closed when the block ends -- an unclosed connection keeps
+    the file locked on Windows (see decision_record._connect)."""
     path = decision_record.DB_PATH  # read at call time, so tests can point it elsewhere
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path)
-    conn.execute(_SCHEMA)
-    return conn
+    try:
+        conn.execute(_SCHEMA)
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def record_usage(

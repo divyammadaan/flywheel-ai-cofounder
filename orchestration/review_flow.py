@@ -43,7 +43,7 @@ load_dotenv()
 from agents._money import SUPPORTED_CURRENCIES, fmt_money
 from agents.analytics import PeriodMetrics
 from agents.intake import BusinessInput, IntakeAgent
-from observability.decision_record import DB_PATH, DecisionRecord, get_records, log_decision
+from observability.decision_record import DecisionRecord, get_records, log_decision, reset_records
 from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, next_review_cycle, run_business_review, run_funding
 from orchestration.report import print_analytics, print_funding, print_plan, print_usage, rule
@@ -85,7 +85,7 @@ def review(
     else:
         if not description:
             raise SystemExit("--description is required unless you use --append.")
-        DB_PATH.unlink(missing_ok=True)
+        reset_records()
         rule("INTAKE")
         business = IntakeAgent().process(description)
         business.mode = "existing_business"

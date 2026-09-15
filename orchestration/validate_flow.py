@@ -54,7 +54,7 @@ from agents.company_formation import CompanyFormationAgent
 from agents.founder_advisor import FounderAdvisorAgent
 from agents.intake import IntakeAgent
 from agents.market_research import MarketResearchAgent
-from observability.decision_record import DB_PATH, DecisionRecord, log_decision
+from observability.decision_record import DecisionRecord, log_decision, reset_records
 from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, run_funding, run_launch_plan
 from orchestration.report import print_funding, print_plan, print_sources, print_usage, rule
@@ -72,7 +72,7 @@ def validate(
     skip_formation: bool = False,
     skip_funding: bool = False,
 ) -> None:
-    DB_PATH.unlink(missing_ok=True)
+    reset_records()
 
     rule("INTAKE")
     business = IntakeAgent().process(raw_pitch)

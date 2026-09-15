@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -33,11 +34,23 @@ class DecisionRecord:
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
-def _connect() -> sqlite3.Connection:
+@contextmanager
+def _connect():
+    """A connection that is committed and then CLOSED when the block ends.
+
+    `with sqlite3.connect(...) as conn` only commits: the connection stays open
+    until garbage collection, and on Windows an open connection keeps the file
+    locked. That made the dashboard's fresh start fail with WinError 32 while
+    its own earlier reads still held the database open.
+    """
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
-    conn.execute(_SCHEMA)
-    return conn
+    try:
+        conn.execute(_SCHEMA)
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def log_decision(record: DecisionRecord) -> int:
@@ -77,3 +90,20 @@ def get_records(cycle: int | None = None, agent: str | None = None) -> list[dict
         conn.row_factory = sqlite3.Row
         rows = conn.execute(query, params).fetchall()
         return [dict(r) for r in rows]
+
+
+def reset_records() -> None:
+    """Start a fresh history by emptying the tables, not deleting the file.
+
+    Deleting data/flywheel.db fails on Windows whenever anything still has it
+    open -- a Streamlit page between reruns, or the MCP server -- so a fresh run
+    clears the rows instead. Covers the llm_usage table too, which lives in the
+    same file.
+    """
+    with _connect() as conn:
+        conn.execute("DELETE FROM decision_records")
+        has_usage = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'llm_usage'"
+        ).fetchone()
+        if has_usage:
+            conn.execute("DELETE FROM llm_usage")
