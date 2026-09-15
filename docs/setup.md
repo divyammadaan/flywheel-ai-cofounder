@@ -55,25 +55,38 @@ ollama pull qwen3:4b
 
 `qwen3:4b` was picked over a larger model because this is a CPU-only,
 no-GPU dev machine (Ryzen 7 5800U, 16GB RAM) — 7-8B models are painfully
-slow at that spec. qwen3:4b is a reasoning model, so a single call takes
-~15-20s even for a trivial prompt; that's fine for CRM (not on any latency-
-critical path) but don't route anything time-sensitive through it.
+slow at that spec. qwen3:4b is a reasoning model and generates ~9.5 tokens/s on this CPU. CRM
+calls Ollama's native `/api/chat` directly with `think: false` and its JSON
+schema as `format`: one call, about 66s. Going through CrewAI took two calls
+and over 14 minutes, and Ollama's OpenAI-compatible endpoint ignores
+`reasoning_effort="none"`. Details in `agents/crm.py`.
 
 ## Running it
 
 ```bash
-# full product: pitch -> research -> Q&A -> verdict -> formation -> engine -> funding
-python orchestration/validate_flow.py --cycles 2
+# new idea: pitch -> research -> Q&A -> verdict -> formation -> launch plan -> funding roadmap
+python orchestration/validate_flow.py --capital 1500000 --currency INR
+
+# add running costs so Finance can hold back a reserve and compute break-even
+python orchestration/validate_flow.py --capital 1500000 --fixed-costs 100000 --unit-cost 350
 
 # skip stages to save API calls while iterating
-python orchestration/validate_flow.py --cycles 1 --skip-formation --skip-funding
+python orchestration/validate_flow.py --capital 1500000 --skip-formation --skip-funding
 
-# engine only, generic cold start
-python orchestration/cycle.py --cycles 3
+# existing business: sample order file, then numbers + orders -> analytics -> plan -> funding
+python tools/sample_data.py --out data/sample_orders.xlsx
+python orchestration/review_flow.py --description "..." --period "FY2025-26" \
+    --revenue 2400000 --net-profit 180000 --debt 500000 --budget 400000 --cash 700000 \
+    --orders data/sample_orders.xlsx
 
 # dashboard -- must be the venv python, a system streamlit shadows it
 .venv/Scripts/python -m streamlit run observability/dashboard/app.py
 ```
+
+There is no hardcoded budget: the launch plan works from the capital you pass, and
+a review plans with the `--budget` you give. The order file is optional, but without
+it an existing business gets no CRM plan. Both flows start a fresh Decision Record
+history; `review_flow.py --append` adds a period to the existing one instead.
 
 `--answers` exists for scripted demos but is **order-dependent**: it feeds
 answers positionally into whatever questions Market Research generates that
@@ -82,7 +95,7 @@ the wrong questions. Interactive mode is the honest path.
 
 ## Ad images
 
-Marketing generates a real ad image per cycle into `data/ads/cycle_N.jpg`
+Marketing generates a real ad image per plan into `data/ads/cycle_N.jpg`
 (gitignored). No key or setup needed — it uses Pollinations, which is
 keyless.
 
@@ -92,8 +105,8 @@ need billing and would block anyone cloning this repo. NVIDIA NIM has no
 image model on its chat-completions endpoint, and local diffusion is far too
 slow CPU-only.
 
-Generation is allowed to fail without failing the cycle — the ad copy is the
-substantive output, so a flaky image service returns `None` and the run
+Generation is allowed to fail without failing the plan — the campaigns and
+copy are the substantive output, so a flaky image service returns `None` and the run
 continues. Note the free service stamps a small watermark despite
 `nologo=true`.
 

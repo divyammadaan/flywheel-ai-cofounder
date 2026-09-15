@@ -1,0 +1,13 @@
+# Streamlit reads this from the directory it's launched in, so run the
+# dashboard from the project root:
+#     .venv/Scripts/python -m streamlit run observability/dashboard/app.py
+
+[server]
+# Bind to this machine only. Streamlit's default listens on every network
+# interface and prints a Network/External URL -- the dashboard triggers paid
+# (or rate-limited) LLM calls and shows a founder's financials, so it
+# shouldn't be reachable from the rest of the network by default.
+address = "localhost"
+
+[browser]
+gatherUsageStats = false

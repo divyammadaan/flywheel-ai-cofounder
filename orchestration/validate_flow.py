@@ -1,24 +1,32 @@
-"""Validate flow -- the founder's front door, end to end.
+"""Validate flow -- the founder's front door for a NEW idea, end to end.
 
     Intake -> Market Research -> clarifying Q&A -> Founder Advisor verdict
       -> (GO/PIVOT) Company Formation plan
-      -> execution engine cycles
-      -> Funding assessment grounded in the engine's real KPIs
+      -> launch plan: Strategy -> Finance -> [Marketing, Sales, Product]
+      -> Funding roadmap
+
+No simulator, Analytics or CRM here: the business hasn't launched, so there's
+nothing to measure and no customers yet. For an operating business, use
+orchestration/review_flow.py instead.
 
 Run interactively:
-    python orchestration/validate_flow.py --cycles 3
+    python orchestration/validate_flow.py --capital 1500000 --currency INR
+
+With running costs, so Finance can hold back a reserve and work out break-even:
+    python orchestration/validate_flow.py --capital 1500000 --fixed-costs 100000 --unit-cost 350
 
 Run scripted (for demos -- answers are consumed in the order Market Research
 asks its questions, so they can land mismatched if the model reorders them;
 interactive mode is the honest experience):
-    python orchestration/validate_flow.py --pitch "..." --answers "a,b,c" --cycles 3
+    python orchestration/validate_flow.py --pitch "..." --capital 1500000 --answers "a,b,c"
 
 Skip stages to save API calls / time:
     --skip-formation --skip-funding
+
+Each run starts a fresh Decision Record history (data/flywheel.db).
 """
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -37,59 +45,52 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from agents._cash import DEFAULT_RUNWAY_MONTHS
+from agents._money import SUPPORTED_CURRENCIES, fmt_money
 from agents.company_formation import CompanyFormationAgent
 from agents.founder_advisor import FounderAdvisorAgent
-from agents.funding import FundingAgent
 from agents.intake import IntakeAgent
 from agents.market_research import MarketResearchAgent
-from observability.decision_record import DecisionRecord, get_records, log_decision
-from orchestration.cycle import run as run_cycles
-
-# Pre-cycle agents log under cycle 0 -- there's no business cycle yet, just
-# the validation gate before one starts.
-PRECYCLE = 0
-
-
-def _rule(title: str) -> None:
-    print(f"\n{'=' * 70}\n{title}\n{'=' * 70}")
-
-
-def kpi_history() -> list[dict]:
-    """Pull the engine's measured KPIs back out of the Decision Records so
-    Funding reasons over what actually happened, not a fresh guess."""
-    history = []
-    for r in get_records(agent="analytics"):
-        d = json.loads(r["decision"])
-        history.append(
-            {
-                "cycle": d["cycle"],
-                "revenue": d["revenue"],
-                "conversion_rate": d["conversion_rate"],
-                "cac": d["cac"],
-                "churn_rate": d["churn_rate"],
-            }
-        )
-    return sorted(history, key=lambda k: k["cycle"])
+from observability.decision_record import DB_PATH, DecisionRecord, log_decision
+from orchestration.cycle import PRECYCLE, PlanBlocked, run_funding, run_launch_plan
+from orchestration.report import print_funding, print_plan, rule
 
 
 def validate(
     raw_pitch: str,
-    num_cycles: int,
+    capital: float,
+    currency: str,
+    monthly_fixed_costs: float | None = None,
+    unit_cost: float | None = None,
+    runway_months: int = DEFAULT_RUNWAY_MONTHS,
     scripted_answers: list[str] | None = None,
     skip_formation: bool = False,
     skip_funding: bool = False,
 ) -> None:
-    _rule("INTAKE")
+    DB_PATH.unlink(missing_ok=True)
+
+    rule("INTAKE")
     business = IntakeAgent().process(raw_pitch)
+    # Money comes from the founder directly, never from the model's reading
+    # of the pitch.
+    business.currency = currency
+    business.starting_capital = capital
+    business.monthly_fixed_costs = monthly_fixed_costs
+    business.unit_cost = unit_cost
+    business.runway_months = runway_months
     log_decision(DecisionRecord(PRECYCLE, "intake", {"raw_input": raw_pitch}, business.__dict__))
     print(f"Summary : {business.business_summary}")
-    print(f"Industry: {business.industry}")
+    print(f"Industry: {business.industry} ({business.offering_type})")
     print(f"Region  : {business.target_region}")
     print(f"Mode    : {business.mode}")
-    if business.existing_metrics:
-        print(f"Financials: {business.existing_metrics}")
+    print(f"Capital : {fmt_money(capital, currency)}")
 
-    _rule("MARKET RESEARCH")
+    if business.mode == "existing_business":
+        print("\nThis sounds like an existing business. Its plan should come from your real numbers,")
+        print("so run orchestration/review_flow.py instead.")
+        return
+
+    rule("MARKET RESEARCH")
     report = MarketResearchAgent().research(business)
     log_decision(DecisionRecord(PRECYCLE, "market_research", business.__dict__, report.__dict__))
     print(f"Market size  : {report.market_size_estimate}\n")
@@ -97,7 +98,7 @@ def validate(
     print(f"Opportunities: {report.opportunities}\n")
     print(f"Risks        : {report.risks}")
 
-    _rule("CLARIFYING QUESTIONS")
+    rule("CLARIFYING QUESTIONS")
     qa_answers = {}
     for i, question in enumerate(report.clarifying_questions):
         if scripted_answers is not None and i < len(scripted_answers):
@@ -109,21 +110,21 @@ def validate(
             print()
         qa_answers[question] = answer
 
-    _rule("FOUNDER ADVISOR")
+    rule("FOUNDER ADVISOR")
     decision = FounderAdvisorAgent().decide(business, report, qa_answers)
     log_decision(DecisionRecord(PRECYCLE, "founder_advisor", {"qa_answers": qa_answers}, decision.__dict__))
     print(f"VERDICT: {decision.verdict}\n")
     print(f"{decision.rationale}")
 
     if decision.verdict == "NO_GO":
-        print("\nAdvisor recommends NO-GO. Stopping here rather than running the engine.")
+        print("\nAdvisor recommends NO-GO. Stopping here rather than building a launch plan.")
         return
 
-    print(f"\nSeed plan: '{decision.seed_positioning}' at ${decision.seed_pricing:.2f}")
+    print(f"\nSeed plan: '{decision.seed_positioning}' at {fmt_money(decision.seed_price, currency)} {decision.seed_price_unit}")
     print(f"Seed budget priorities: {decision.seed_priorities}")
 
     if not skip_formation:
-        _rule("COMPANY FORMATION")
+        rule("COMPANY FORMATION")
         formation = CompanyFormationAgent().plan(business)
         log_decision(DecisionRecord(PRECYCLE, "company_formation", business.__dict__, formation.__dict__))
         print(f"Recommended entity: {formation.recommended_entity}")
@@ -135,44 +136,52 @@ def validate(
         print(f"Estimated timeline: {formation.estimated_timeline}\n")
         print(f"!! {formation.disclaimer}")
 
-    seed_context = (
-        f"Market Research found: {report.market_size_estimate} Competitors: {report.key_competitors} "
-        f"Opportunities: {report.opportunities} Risks: {report.risks}\n"
-        f"Founder Advisor verdict: {decision.verdict} -- {decision.rationale}\n"
-        f"Recommended starting plan: positioning '{decision.seed_positioning}' at "
-        f"${decision.seed_pricing:.2f}, budget priorities {decision.seed_priorities}."
-    )
-
-    _rule(f"EXECUTION ENGINE ({num_cycles} cycle(s))")
-    run_cycles(num_cycles, initial_context=seed_context)
+    try:
+        plan = run_launch_plan(business, report, decision, qa_answers)
+    except PlanBlocked as blocked:
+        rule("PLAN BLOCKED")
+        print(blocked)
+        return
+    print_plan(plan)
 
     if not skip_funding:
-        _rule("FUNDING ASSESSMENT")
-        funding = FundingAgent().assess(business, kpi_history())
-        log_decision(DecisionRecord(PRECYCLE, "funding", {"kpi_history": kpi_history()}, funding.__dict__))
-        print(f"Readiness: {funding.readiness}\n")
-        print(f"{funding.readiness_rationale}\n")
-        print(f"Timing           : {funding.recommended_timing}\n")
-        print(f"Metrics to hit   : {funding.metrics_to_hit}\n")
-        print(f"Investor profile : {funding.investor_profile}\n")
-        print(f"Alternatives     : {funding.alternative_funding}\n")
-        print(f"Pitch deck outline:\n{funding.pitch_deck_outline}")
+        print_funding(run_funding(business, plan))
+
+
+def _ask_capital(currency: str) -> float:
+    while True:
+        raw = input(f"Capital you can put into the launch ({currency}): ").replace(",", "").strip()
+        try:
+            value = float(raw)
+        except ValueError:
+            continue
+        if value > 0:
+            return value
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Validate a business idea, then run the engine")
+    parser = argparse.ArgumentParser(description="Validate a new business idea, then build its launch plan")
     parser.add_argument("--pitch", type=str, default=None, help="raw pitch text (interactive prompt if omitted)")
-    parser.add_argument("--cycles", type=int, default=3, help="engine cycles to run after a GO/PIVOT")
+    parser.add_argument("--capital", type=float, default=None, help="capital you can put into the launch")
+    parser.add_argument("--currency", choices=SUPPORTED_CURRENCIES, default="INR")
+    parser.add_argument("--fixed-costs", type=float, default=None, help="monthly fixed costs (rent, salaries, subscriptions)")
+    parser.add_argument("--unit-cost", type=float, default=None, help="cost to deliver one unit of what you sell")
+    parser.add_argument("--runway-months", type=int, default=DEFAULT_RUNWAY_MONTHS, help="months of fixed costs to keep in reserve")
     parser.add_argument("--answers", type=str, default=None, help="comma-separated scripted answers, in order")
     parser.add_argument("--skip-formation", action="store_true", help="skip the company formation stage")
-    parser.add_argument("--skip-funding", action="store_true", help="skip the funding assessment stage")
+    parser.add_argument("--skip-funding", action="store_true", help="skip the funding roadmap")
     args = parser.parse_args()
 
-    pitch = args.pitch or input("Describe your business idea (or existing business): ")
+    pitch = args.pitch or input("Describe your business idea: ")
+    capital = args.capital if args.capital and args.capital > 0 else _ask_capital(args.currency)
     answers = args.answers.split(",") if args.answers else None
     validate(
         pitch,
-        args.cycles,
+        capital,
+        args.currency,
+        monthly_fixed_costs=args.fixed_costs,
+        unit_cost=args.unit_cost,
+        runway_months=args.runway_months,
         scripted_answers=answers,
         skip_formation=args.skip_formation,
         skip_funding=args.skip_funding,

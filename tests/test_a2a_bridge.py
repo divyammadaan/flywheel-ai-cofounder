@@ -7,12 +7,14 @@ the response-shape parsing, and the fallback path.
 
 import json
 import sys
+from dataclasses import fields
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest
 
+from agents._brief import PlanBrief
 from orchestration.a2a_bridge import _extract_text, build_agent_card, server_is_up
 
 
@@ -20,7 +22,7 @@ def test_agent_card_advertises_the_marketing_skill():
     card = build_agent_card()
     assert card.name == "flywheel-marketing"
     skill_ids = {s.id for s in card.skills}
-    assert "generate_ad_copy" in skill_ids
+    assert "plan_campaigns" in skill_ids
 
 
 def test_agent_card_example_is_valid_json_matching_the_executor_contract():
@@ -28,7 +30,8 @@ def test_agent_card_example_is_valid_json_matching_the_executor_contract():
     from the keys MarketingExecutor actually reads, discovery is misleading."""
     card = build_agent_card()
     example = json.loads(card.skills[0].examples[0])
-    assert {"cycle", "budget", "positioning"} <= set(example)
+    assert set(example) == {"budget", "brief"}
+    assert set(example["brief"]) == {f.name for f in fields(PlanBrief)}
 
 
 def test_extract_text_handles_direct_message_shape():

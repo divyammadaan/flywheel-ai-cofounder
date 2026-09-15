@@ -40,7 +40,7 @@ def query_decision_records(cycle: int | None = None, agent: str | None = None) -
     Args:
         cycle: only return records from this cycle number, if given.
         agent: only return records from this agent (e.g. "strategy", "finance",
-            "marketing", "product", "sales", "crm", "analytics", "simulator"),
+            "marketing", "product", "sales", "crm", "analytics", "funding"),
             if given.
     """
     return [_parse_record(r) for r in get_records(cycle=cycle, agent=agent)]

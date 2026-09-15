@@ -17,6 +17,7 @@ from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
 from agents._models import AGENT_MODELS
+from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
 from agents.intake import BusinessInput
 
@@ -29,10 +30,11 @@ financials, produce a market analysis.
 IMPORTANT: You do not have live web/search access. Base your analysis on general knowledge
 and reasoning, and be explicit that figures are estimates, not verified current data.
 
-Also generate 2-4 clarifying questions the founder must answer before a GO/PIVOT/NO-GO
-call can be made -- at minimum ask about available investment budget if it wasn't already
-given. Ask about anything else genuinely decision-relevant (e.g. timeline, existing
-customer base, unique advantage) but keep the list short.
+Also generate 2-3 clarifying questions the founder must answer before a GO/PIVOT/NO-GO
+call can be made. The founder's available capital is given to you when they stated it --
+don't ask for it again. Ask about what is genuinely decision-relevant and still unknown
+(e.g. sourcing and unit costs, timeline, existing customers or waitlist, unique advantage)
+and keep the list short.
 
 BE CONCISE. No field longer than ~50 words, and each question one sentence. Dense and
 specific beats long. (Output length is rate-limited, so verbosity directly costs the
@@ -74,11 +76,16 @@ class MarketResearchAgent:
     @retry_on_rate_limit()
     def research(self, business: BusinessInput) -> MarketResearchReport:
         metrics_note = f" Existing financials: {business.existing_metrics}." if business.existing_metrics else ""
+        capital_note = (
+            f" Founder's available capital: {fmt_money(business.starting_capital, business.currency)}."
+            if business.starting_capital
+            else ""
+        )
         task = Task(
             description=(
                 f"Business: {business.business_summary}\n"
                 f"Industry: {business.industry}. Product/service: {business.product_or_service}. "
-                f"Target region: {business.target_region}.{metrics_note}\n"
+                f"Target region: {business.target_region}.{metrics_note}{capital_note}\n"
                 "Produce the market analysis and clarifying questions."
             ),
             expected_output="A JSON object matching the required schema.",

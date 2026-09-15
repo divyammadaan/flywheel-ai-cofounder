@@ -23,6 +23,10 @@ pydantic
 # Storage
 chromadb
 
+# Uploaded order files (.csv / .xlsx)
+pandas
+openpyxl
+
 # Dashboard
 streamlit
 

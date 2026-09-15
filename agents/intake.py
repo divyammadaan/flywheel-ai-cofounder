@@ -1,19 +1,25 @@
 """Intake agent — the front door. Takes a founder's raw pitch (new idea) or
-existing-business data and normalizes it into a structured BusinessInput
-that Market Research and the Founder Advisor can reason over.
+existing-business description and normalizes it into a structured
+BusinessInput that the other agents reason over.
+
+It also classifies what the business delivers (physical goods, a service, or
+software), which decides whether Product plans inventory or delivery capacity.
 
 CrewAI + Groq, same pattern as Marketing/Product/Sales.
 """
 
+import re
 from dataclasses import dataclass, field
 
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from agents._cash import DEFAULT_RUNWAY_MONTHS
 from agents._models import AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 
 DEFAULT_MODEL = AGENT_MODELS["intake"]
+OFFERING_TYPES = ("physical", "service", "software")
 
 _INSTRUCTION = """You are the Intake agent for an AI co-founder platform. A founder gives you
 either a raw pitch for a new business idea, or a description of an existing business
@@ -26,7 +32,11 @@ If they described an EXISTING business: extract whatever financial figures they 
 (revenue, PAT, EBITDA, debt) -- use 0 for anything not mentioned, don't invent numbers.
 
 target_region: use what they said; if truly unspecified, write "unspecified" rather than
-guessing a country."""
+guessing a country.
+
+offering_type: "physical" if they sell physical goods (food, clothing, hardware),
+"service" if they sell work done for customers (salon, agency, tutoring, repairs),
+"software" if they sell an app, SaaS or other digital product."""
 
 
 class IntakeOutputSchema(BaseModel):
@@ -34,6 +44,7 @@ class IntakeOutputSchema(BaseModel):
     business_summary: str = Field(description="1-2 sentence clean summary of the business")
     industry: str = Field(description="e.g. 'e-commerce', 'fintech', 'D2C footwear'")
     product_or_service: str = Field(description="What they actually sell/build")
+    offering_type: str = Field(description="One of: physical, service, software")
     target_region: str = Field(description="Region/country/market they're targeting, or 'unspecified'")
     existing_revenue: float = Field(default=0.0, description="Annual revenue if existing business, else 0")
     existing_pat: float = Field(default=0.0, description="Profit after tax if existing business, else 0")
@@ -50,6 +61,28 @@ class BusinessInput:
     target_region: str
     existing_metrics: dict = field(default_factory=dict)
     raw_input: str = ""
+    # Everything below is set from the founder's own input (dashboard/CLI),
+    # never extracted by the model: budgets and costs must be numbers the
+    # founder actually gave.
+    currency: str = "INR"
+    starting_capital: float = 0.0
+    offering_type: str = "physical"
+    monthly_fixed_costs: float | None = None
+    unit_cost: float | None = None
+    runway_months: int = DEFAULT_RUNWAY_MONTHS
+
+
+def _offering_type(value: str) -> str:
+    """Normalise the model's classification to one of OFFERING_TYPES."""
+    v = str(value).strip().lower()
+    if v in OFFERING_TYPES:
+        return v
+    # Word boundaries so "apparel" isn't read as an "app".
+    if re.search(r"\b(saas|software|apps?|digital|platform)\b", v):
+        return "software"
+    if "serv" in v:
+        return "service"
+    return "physical"
 
 
 class IntakeAgent:
@@ -67,7 +100,7 @@ class IntakeAgent:
     @retry_on_rate_limit()
     def process(self, raw_input: str) -> BusinessInput:
         task = Task(
-            description=f"Founder's input:\n\n{raw_input}\n\nExtract the structured record.",
+            description=f"{_INSTRUCTION}\n\nFounder's input:\n\n{raw_input}\n\nExtract the structured record.",
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=IntakeOutputSchema,
@@ -93,4 +126,5 @@ class IntakeAgent:
             target_region=parsed.target_region,
             existing_metrics=existing_metrics,
             raw_input=raw_input,
+            offering_type=_offering_type(parsed.offering_type),
         )

@@ -40,6 +40,7 @@ from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import AgentCapabilities, AgentCard, AgentSkill, Message, Part, Role
 from a2a.utils.constants import PROTOCOL_VERSION_CURRENT, VERSION_HEADER
 
+from agents._brief import PlanBrief
 from agents.marketing import MarketingAgent, MarketingOutput
 
 HOST = "127.0.0.1"
@@ -54,6 +55,23 @@ DISCOVERY_TIMEOUT = 2.0
 CALL_TIMEOUT = 180.0
 
 
+# The example other agents copy from the Agent Card. Built from PlanBrief
+# itself, so it can't drift from the fields the executor actually reads.
+_EXAMPLE_BRIEF = PlanBrief(
+    cycle=1,
+    mode="launch",
+    business_summary="Custom celebration cakes made to order in Pune",
+    industry="D2C bakery",
+    product_or_service="custom cakes",
+    region="Pune, India",
+    currency="INR",
+    positioning="Designer cakes delivered the same day",
+    target_customer="Parents aged 28-45 in Baner and Aundh",
+    price=1800.0,
+    price_unit="per 1kg cake",
+)
+
+
 def build_agent_card() -> AgentCard:
     """The manifest other agents discover. Describes capability, not
     implementation -- nothing here reveals that Marketing runs on CrewAI,
@@ -61,8 +79,9 @@ def build_agent_card() -> AgentCard:
     return AgentCard(
         name="flywheel-marketing",
         description=(
-            "Generates ad copy for a business cycle, grounded in the positioning, "
-            "price point and budget it is given."
+            "Plans specific ad campaigns (platform, targeting, format, timing, spend) "
+            "and writes the matching ad copy and image, from a business brief and a "
+            "marketing budget."
         ),
         version="1.0.0",
         default_input_modes=["text/plain"],
@@ -70,18 +89,15 @@ def build_agent_card() -> AgentCard:
         capabilities=AgentCapabilities(streaming=False, push_notifications=False),
         skills=[
             AgentSkill(
-                id="generate_ad_copy",
-                name="Generate ad copy",
+                id="plan_campaigns",
+                name="Plan marketing campaigns",
                 description=(
-                    "Given cycle number, marketing budget, positioning and price point, "
-                    "returns ad copy and a self-assessed quality score."
+                    "Given a plan brief (business, region, currency, positioning, target "
+                    "customer, price) and a marketing budget, returns 2-4 campaigns whose "
+                    "budgets fit, the ad copy, and the ad image path."
                 ),
-                tags=["marketing", "copywriting", "flywheel"],
-                examples=[
-                    json.dumps(
-                        {"cycle": 1, "budget": 400.0, "positioning": "Premium custom cakes", "pricing": 85.0}
-                    )
-                ],
+                tags=["marketing", "campaigns", "copywriting", "flywheel"],
+                examples=[json.dumps({"budget": 200000.0, "brief": asdict(_EXAMPLE_BRIEF)})],
                 input_modes=["text/plain"],
                 output_modes=["application/json"],
             )
@@ -102,16 +118,11 @@ class MarketingExecutor(AgentExecutor):
         # active event loop ("Agent execution was invoked synchronously from
         # within a running event loop"). The A2A server is async, so the
         # blocking work has to move off the loop thread.
-        result = await asyncio.to_thread(
-            self._agent.execute,
-            int(payload["cycle"]),
-            float(payload["budget"]),
-            payload["positioning"],
-            payload.get("pricing"),
-        )
+        brief = PlanBrief(**payload["brief"])
+        result = await asyncio.to_thread(self._agent.execute, brief, float(payload["budget"]))
         await event_queue.enqueue_event(
             Message(
-                message_id=f"marketing-{payload['cycle']}",
+                message_id=f"marketing-{brief.cycle}",
                 role=Role.ROLE_AGENT,
                 parts=[Part(text=json.dumps(asdict(result)))],
             )
@@ -169,13 +180,11 @@ def server_is_up(base_url: str = BASE_URL) -> bool:
 
 
 def request_marketing(
-    cycle: int,
+    brief: PlanBrief,
     budget: float,
-    positioning: str,
-    pricing: float | None = None,
     base_url: str = BASE_URL,
 ) -> tuple[MarketingOutput, str]:
-    """Ask Marketing for ad copy, over A2A if the server is reachable.
+    """Ask Marketing for its campaign plan, over A2A if the server is reachable.
 
     Returns (result, transport) so callers can log which path was taken --
     a silent fallback would make it impossible to tell whether the protocol
@@ -183,41 +192,32 @@ def request_marketing(
     """
     if server_is_up(base_url):
         try:
-            return _request_over_a2a(cycle, budget, positioning, pricing, base_url), "a2a"
+            return _request_over_a2a(brief, budget, base_url), "a2a"
         except Exception as exc:  # noqa: BLE001 - fall back, but say why
             print(f"[a2a] call failed ({type(exc).__name__}: {exc}); falling back to direct call")
 
     return (
-        MarketingAgent().execute(cycle, budget, positioning, pricing),
+        MarketingAgent().execute(brief, budget),
         "direct",
     )
 
 
-def _request_over_a2a(
-    cycle: int, budget: float, positioning: str, pricing: float | None, base_url: str
-) -> MarketingOutput:
+def _request_over_a2a(brief: PlanBrief, budget: float, base_url: str) -> MarketingOutput:
     # "SendMessage", not the "message/send" spelling seen in some A2A docs:
     # this SDK routes JSON-RPC by gRPC service method name (see
     # jsonrpc_dispatcher.METHOD_TO_MODEL). The other spelling returns
     # -32601 Method not found.
     request = {
         "jsonrpc": "2.0",
-        "id": f"cycle-{cycle}",
+        "id": f"cycle-{brief.cycle}",
         "method": "SendMessage",
         "params": {
             "message": {
-                "messageId": f"req-{cycle}",
+                "messageId": f"req-{brief.cycle}",
                 "role": "ROLE_USER",
                 "parts": [
                     {
-                        "text": json.dumps(
-                            {
-                                "cycle": cycle,
-                                "budget": budget,
-                                "positioning": positioning,
-                                "pricing": pricing,
-                            }
-                        )
+                        "text": json.dumps({"budget": budget, "brief": asdict(brief)})
                     }
                 ],
             }

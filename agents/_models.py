@@ -49,11 +49,12 @@ Model choice notes:
 Every agent takes a `model=` argument, so all of this is overridable.
 """
 
-# --- NVIDIA NIM: the workhorse. No output-token cap, so it carries both the
-# parallel execution agents and the advisory ones.
+# --- NVIDIA NIM: tested and rejected at ~140s per real agent call (see the
+# docstring above). Not routed to any agent; kept so one can still opt in
+# with model=NVIDIA_MODEL.
 NVIDIA_MODEL = "nvidia_nim/z-ai/glm-5.3-flash"
 
-# --- Groq: fast per call, low output-token ceiling. Kept for the ADK agents.
+# --- Groq: fast per call, low output-token ceiling. Carries every hosted agent.
 GROQ_MODEL = "groq/qwen/qwen3.8-27b"
 
 # Strategy specifically (ADK output_schema -- needs bare JSON, no preamble).
@@ -64,7 +65,9 @@ GEMINI_MODEL = "gemini/gemini-3.6-flash"
 
 # --- Ollama: CRM stays local on purpose. Customer/churn data never leaves
 # the machine.
-OLLAMA_MODEL = "ollama/qwen3:4b"
+# A plain Ollama model name, not a litellm "ollama/..." string: CRM calls
+# Ollama's native /api/chat directly (think:false + JSON schema). See crm.py.
+OLLAMA_MODEL = "qwen3:4b"
 OLLAMA_BASE_URL = "http://localhost:11434"
 
 

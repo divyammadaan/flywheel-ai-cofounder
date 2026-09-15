@@ -102,6 +102,7 @@ class CompanyFormationAgent:
                 f"Business: {business.business_summary}\n"
                 f"Industry: {business.industry}. Product/service: {business.product_or_service}. "
                 f"Region: {business.target_region}. Stage: {business.mode}.\n"
+                f"Give cost estimates in {business.currency}.\n"
                 "Produce the company formation plan."
             ),
             expected_output="A JSON object matching the required schema.",
