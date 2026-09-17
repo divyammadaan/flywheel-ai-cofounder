@@ -762,6 +762,7 @@ if "crm" in trail:
                     for key in SEGMENTS
                 ]
             ),
+            column_config={"What to do": st.column_config.TextColumn(width="large")},
             hide_index=True,
             width="stretch",
         )
