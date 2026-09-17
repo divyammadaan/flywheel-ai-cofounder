@@ -54,6 +54,7 @@ try:
         run_funding,
         run_launch_plan,
     )
+    from observability.dashboard.format import as_bullets, headline, numbered_items
     from observability.usage import usage_summary
     from tools.landing_page import build_landing_page
     from tools.orders_file import OrdersFileError, load_orders
@@ -398,8 +399,36 @@ operating = intake.get("mode") == "existing_business"
 cycles = sorted({r["cycle"] for r in records if r["cycle"] > PRECYCLE})
 analytics = {r["cycle"]: r["decision"] for r in records if r["agent"] == "analytics"}
 
+# ------------------------------------------------------ rendering helpers --
+# The agents write paragraphs, and a plan read as a wall of text is unusable.
+# So every section leads with its numbers, then a one-line takeaway, then
+# bullets, and keeps the long reasoning behind an expander.
+def prose(text, lead: bool = True) -> None:
+    """First sentence as the lead, the rest as bullets."""
+    first, rest = headline(text)
+    if not first:
+        return
+    st.markdown(f"**{md_escape(first)}**" if lead else md_escape(first))
+    for item in rest:
+        st.markdown(f"- {md_escape(item)}")
+
+
+def bullets(text) -> None:
+    """Bullets when the text has structure, an untouched paragraph when not."""
+    items = as_bullets(text)
+    for item in items:
+        st.markdown(f"- {md_escape(item)}")
+    if not items and str(text or "").strip():
+        st.markdown(md_escape(text))
+
+
+def labelled(label: str, text) -> None:
+    st.markdown(f"**{label}**")
+    bullets(text)
+
+
 # ------------------------------------------------------------ the business --
-st.subheader("Your business")
+st.markdown(f"#### {md_escape(intake.get('business_summary', ''))}")
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Industry", intake.get("industry", "—"))
 c2.metric("Region", intake.get("target_region", "—"))
@@ -408,57 +437,64 @@ if operating:
     c4.metric("Periods reported", len(analytics))
 else:
     c4.metric("Launch capital", fmt_money(intake.get("starting_capital") or None, cur))
-st.caption(md_escape(intake.get("business_summary", "")))
 
 if "founder_advisor" in precycle:
     d = precycle["founder_advisor"]
     verdict = d.get("verdict", "?")
     badge = {"GO": "🟢", "PIVOT": "🟡", "NO_GO": "🔴"}.get(verdict, "⚪")
-    with st.expander(f"{badge} Founder Advisor verdict: {verdict}", expanded=True):
-        st.markdown(md_escape(d.get("rationale", "")))
+    banner = {"GO": st.success, "PIVOT": st.warning, "NO_GO": st.error}.get(verdict, st.info)
+    first, _ = headline(d.get("rationale", ""))
+    banner(f"**{badge} Founder Advisor: {verdict}** — {md_escape(first)}")
+    with st.expander("The advisor's full reasoning"):
+        prose(d.get("rationale", ""), lead=False)
         if d.get("seed_positioning"):
-            st.markdown(f"**Seed positioning:** {md_escape(d['seed_positioning'])}")
-            st.markdown(f"**Seed price:** {money(d.get('seed_price'), cur)} {md_escape(d.get('seed_price_unit', ''))}")
+            s1, s2 = st.columns([2, 1])
+            s1.markdown(f"**Seed positioning**  \n{md_escape(d['seed_positioning'])}")
+            s2.metric("Seed price", fmt_money(d.get("seed_price"), cur), d.get("seed_price_unit", ""))
 
+detail_cols = st.columns(2)
 if "market_research" in precycle:
     d = precycle["market_research"]
-    with st.expander("🔍 Market research", expanded=False):
-        st.caption(
-            "Grounded in live web search; [n] refers to the sources listed below."
-            if d.get("sources")
-            else "No web search results were available, so figures are estimates."
-        )
-        for label, key in (
-            ("Market size", "market_size_estimate"),
-            ("Competitors", "key_competitors"),
-            ("Opportunities", "opportunities"),
-            ("Risks", "risks"),
-        ):
-            st.markdown(f"**{label}:** {md_escape(d.get(key, ''))}")
-        if d.get("clarifying_questions"):
-            st.markdown("**Questions asked the founder:**")
-            for q in d["clarifying_questions"]:
-                st.markdown(f"- {md_escape(q)}")
-        if d.get("sources"):
-            st.markdown("**Sources:**")
-            for i, source in enumerate(d["sources"], 1):
-                st.markdown(f"\\[{i}\\] [{md_escape(source.get('title') or source.get('url'))}]({source.get('url')})")
+    with detail_cols[0]:
+        with st.expander("🔍 Market research"):
+            st.caption(
+                "Grounded in live web search; [n] refers to the sources listed below."
+                if d.get("sources")
+                else "No web search results were available, so figures are estimates."
+            )
+            for label, key in (
+                ("Market size", "market_size_estimate"),
+                ("Competitors", "key_competitors"),
+                ("Opportunities", "opportunities"),
+                ("Risks", "risks"),
+            ):
+                labelled(label, d.get(key, ""))
+            if d.get("clarifying_questions"):
+                st.markdown("**Questions asked the founder**")
+                for q in d["clarifying_questions"]:
+                    st.markdown(f"- {md_escape(q)}")
+            if d.get("sources"):
+                st.markdown("**Sources**")
+                for i, source in enumerate(d["sources"], 1):
+                    st.markdown(
+                        f"\\[{i}\\] [{md_escape(source.get('title') or source.get('url'))}]({source.get('url')})"
+                    )
 
 if "company_formation" in precycle:
     d = precycle["company_formation"]
-    with st.expander(f"🏛️ Company formation — {d.get('recommended_entity', '')}", expanded=False):
-        st.markdown(f"**Why:** {md_escape(d.get('entity_rationale', ''))}")
-        for label, key in (
-            ("Registration steps", "registration_steps"),
-            ("Licences & permits", "licenses_and_permits"),
-            ("Tax registrations", "tax_registrations"),
-        ):
-            st.markdown(f"**{label}:**")
-            st.markdown(md_escape(d.get(key, "")))
-        c1, c2 = st.columns(2)
-        c1.metric("Est. cost", d.get("estimated_cost", "—"))
-        c2.metric("Est. timeline", d.get("estimated_timeline", "—"))
-        st.warning(d.get("disclaimer", ""))
+    with detail_cols[1]:
+        with st.expander(f"🏛️ Company formation — {d.get('recommended_entity', '')}"):
+            f1, f2 = st.columns(2)
+            f1.metric("Est. cost", d.get("estimated_cost", "—"))
+            f2.metric("Est. timeline", d.get("estimated_timeline", "—"))
+            labelled("Why this entity", d.get("entity_rationale", ""))
+            for label, key in (
+                ("Registration steps", "registration_steps"),
+                ("Licences & permits", "licenses_and_permits"),
+                ("Tax registrations", "tax_registrations"),
+            ):
+                labelled(label, d.get(key, ""))
+            st.warning(d.get("disclaimer", ""))
 
 if not cycles:
     st.info("No plan yet (a NO_GO verdict stops before the launch plan).")
@@ -466,38 +502,28 @@ if not cycles:
 
 # ------------------------------------------------- reported numbers (ops) --
 if operating and analytics:
-    st.subheader("Your reported numbers")
-    rows = []
-    for c in sorted(analytics):
-        a = analytics[c]
-        m, k = a.get("metrics", {}), a.get("kpis", {})
-        rows.append(
+    numbers = pd.DataFrame(
+        [
             {
                 "Period": a.get("period_label") or f"Period {c}",
-                "Revenue": m.get("revenue"),
-                "Net profit": m.get("net_profit"),
-                "Total debt": m.get("total_debt"),
-                "Cash in bank": m.get("cash_in_bank"),
-                "EBITDA": m.get("ebitda"),
-                "Marketing spend": m.get("marketing_spend"),
-                "CAC": k.get("cac"),
-                "New customers": m.get("new_customers"),
-                "Customers lost": m.get("customers_lost"),
-                "Net margin": k.get("net_margin"),
-                "Churn": k.get("churn_rate"),
+                "Revenue": a.get("metrics", {}).get("revenue"),
+                "Net profit": a.get("metrics", {}).get("net_profit"),
+                "Total debt": a.get("metrics", {}).get("total_debt"),
+                "Cash in bank": a.get("metrics", {}).get("cash_in_bank"),
+                "EBITDA": a.get("metrics", {}).get("ebitda"),
+                "Marketing spend": a.get("metrics", {}).get("marketing_spend"),
+                "CAC": a.get("kpis", {}).get("cac"),
+                "New customers": a.get("metrics", {}).get("new_customers"),
+                "Customers lost": a.get("metrics", {}).get("customers_lost"),
+                "Net margin": a.get("kpis", {}).get("net_margin"),
+                "Churn": a.get("kpis", {}).get("churn_rate"),
             }
-        )
-    numbers = pd.DataFrame(rows).set_index("Period")
-    shown = numbers.astype(object)
-    for col in ("Revenue", "Net profit", "Total debt", "Cash in bank", "EBITDA", "Marketing spend", "CAC"):
-        shown[col] = numbers[col].map(lambda v: fmt_money(v, cur) if pd.notna(v) else "not reported")
-    for col in ("New customers", "Customers lost"):
-        shown[col] = numbers[col].map(lambda v: f"{int(v):,}" if pd.notna(v) else "not reported")
-    for col in ("Net margin", "Churn"):
-        shown[col] = numbers[col].map(pct)
-    st.dataframe(shown, width="stretch")
+            for c, a in sorted(analytics.items())
+        ]
+    ).set_index("Period")
 
     if len(numbers) > 1:
+        st.divider()
         left, right = st.columns(2)
         with left:
             st.caption(f"Revenue and net profit ({cur})")
@@ -508,7 +534,18 @@ if operating and analytics:
                 st.caption("Net margin and churn")
                 st.line_chart(numbers[ratio_cols].astype(float))
 
+    with st.expander("📋 The numbers you reported"):
+        shown = numbers.astype(object)
+        for col in ("Revenue", "Net profit", "Total debt", "Cash in bank", "EBITDA", "Marketing spend", "CAC"):
+            shown[col] = numbers[col].map(lambda v: fmt_money(v, cur) if pd.notna(v) else "not reported")
+        for col in ("New customers", "Customers lost"):
+            shown[col] = numbers[col].map(lambda v: f"{int(v):,}" if pd.notna(v) else "not reported")
+        for col in ("Net margin", "Churn"):
+            shown[col] = numbers[col].map(pct)
+        st.dataframe(shown, width="stretch")
+
 # ------------------------------------------------------------------ plan --
+st.divider()
 st.subheader("Plan for the next period" if operating else "Launch plan")
 if len(cycles) > 1:
     labels = {c: analytics.get(c, {}).get("period_label") or f"Period {c}" for c in cycles}
@@ -525,16 +562,18 @@ transport = next(
 if "analytics" in trail:
     a = trail["analytics"]
     k = a.get("kpis", {})
-    with st.expander(f"📊 Analytics — {a.get('period_label', '')}", expanded=True):
-        st.markdown(md_escape(a.get("summary", "")))
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Net margin", pct(k.get("net_margin")))
-        m2.metric("Debt / annual revenue", pct(k.get("debt_to_revenue")))
-        m3.metric("CAC", fmt_money(k.get("cac"), cur) if k.get("cac") is not None else "not reported")
-        m4.metric("Churn", pct(k.get("churn_rate")))
-        fm = a.get("file_metrics")
-        if fm:
-            st.markdown(f"**From your uploaded orders** ({fm['first_order']} to {fm['last_order']})")
+    st.markdown(f"##### 📊 What your numbers say — {md_escape(a.get('period_label', ''))}")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Net margin", pct(k.get("net_margin")))
+    m2.metric("Debt / annual revenue", pct(k.get("debt_to_revenue")))
+    m3.metric("CAC", fmt_money(k.get("cac"), cur) if k.get("cac") is not None else "not reported")
+    m4.metric("Churn", pct(k.get("churn_rate")))
+    prose(a.get("summary", ""))
+
+    fm = a.get("file_metrics")
+    if fm:
+        with st.container(border=True):
+            st.markdown(f"**From your uploaded orders** — {fm['first_order']} to {fm['last_order']}")
             f1, f2, f3, f4 = st.columns(4)
             f1.metric("Orders", f"{fm['orders']:,}")
             f2.metric("Average order", fmt_money(fm["average_order_value"], cur))
@@ -542,52 +581,33 @@ if "analytics" in trail:
             change = fm.get("revenue_change_last_3m_vs_prior_3m")
             f4.metric("Last 3 months vs previous 3", f"{change:+.0%}" if change is not None else "—")
             if fm.get("monthly_revenue"):
-                st.caption(f"Monthly revenue from the file ({cur})")
-                st.bar_chart(pd.Series(fm["monthly_revenue"], name="revenue"))
+                with st.expander(f"Monthly revenue from the file ({cur})"):
+                    st.bar_chart(pd.Series(fm["monthly_revenue"], name="revenue"))
             if fm.get("skipped_rows"):
                 st.caption(f"{fm['skipped_rows']} unusable rows in the file were skipped.")
 
 if "strategy" in trail:
     d = trail["strategy"]
-    with st.expander("🎯 Strategy", expanded=True):
+    st.markdown("##### 🎯 Strategy")
+    with st.container(border=True):
+        left, right = st.columns([3, 1])
+        with left:
+            st.markdown(f"**{md_escape(d.get('positioning', ''))}**")
+            st.markdown(f"**Target customer:** {md_escape(d.get('target_customer', '—'))}")
+        with right:
+            st.metric("Price", fmt_money(d.get("price"), cur), md_escape(d.get("price_unit", "")))
+    with st.expander("Why this strategy"):
+        bullets(d.get("rationale", ""))
         for rejected in (r for r in records if r["cycle"] == selected and r["agent"] == "strategy_rejected"):
             st.caption(
                 "The plan checker sent a draft back: "
                 + md_escape(" ".join(rejected["input_snapshot"].get("problems", [])))
             )
-        left, right = st.columns([2, 1])
-        with left:
-            st.markdown(f"**Positioning:** {md_escape(d.get('positioning', ''))}")
-            st.markdown(f"**Target customer:** {md_escape(d.get('target_customer', '—'))}")
-            st.markdown(f"**Rationale:** {md_escape(d.get('rationale', ''))}")
-        with right:
-            st.metric("Price", fmt_money(d.get("price"), cur))
-            st.caption(md_escape(d.get("price_unit", "")))
 
 if "finance" in trail:
     d = trail["finance"]
     health = d.get("health", {})
-    st.markdown(f"#### 💰 Finance — {money(d.get('total_budget'), cur)} to spend")
-    h1, h2, h3, h4 = st.columns(4)
-    if "launch_budget" in health:
-        h1.metric("Capital", fmt_money(health.get("capital"), cur))
-        reserve_months = health.get("runway_months_reserved")
-        h2.metric(
-            "Held in reserve",
-            fmt_money(health.get("reserve"), cur),
-            help=f"{reserve_months} months of fixed costs" if reserve_months else "No fixed costs given",
-        )
-        h3.metric("Launch budget", fmt_money(health.get("launch_budget"), cur))
-        be = health.get("break_even_units_per_month")
-        h4.metric("Break-even", f"{be:,} units/month" if be is not None else "—")
-    elif health:
-        h1.metric("Monthly net profit", fmt_money(health.get("monthly_net_profit"), cur))
-        runway = health.get("runway_months")
-        h2.metric("Runway", "No burn" if health.get("profitable") else (f"{runway} months" if runway else "—"))
-        h3.metric("Debt / annual revenue", pct(health.get("debt_to_annual_revenue")))
-        h4.metric("Budget as share of cash", pct(health.get("budget_share_of_cash")))
-    for warning in health.get("warnings", []):
-        st.warning(md_escape(warning))
+    st.markdown(f"##### 💰 Money — {money(d.get('total_budget'), cur)} to deploy")
 
     spent_areas = [key for key in AREAS if d.get(key)]
     for col, key in zip(st.columns(max(len(spent_areas), 1)), spent_areas):
@@ -598,8 +618,32 @@ if "finance" in trail:
             f"{money(unallocated, cur)} left unallocated: no area may take more than "
             f"{MAX_SHARE_PER_AGENT:.0%} of the budget."
         )
-    st.caption(md_escape(d.get("rationale", "")))
+    for warning in health.get("warnings", []):
+        st.warning(md_escape(warning))
 
+    with st.expander("Cash position, and how this split was decided"):
+        h1, h2, h3, h4 = st.columns(4)
+        if "launch_budget" in health:
+            h1.metric("Capital", fmt_money(health.get("capital"), cur))
+            reserve_months = health.get("runway_months_reserved")
+            h2.metric(
+                "Held in reserve",
+                fmt_money(health.get("reserve"), cur),
+                help=f"{reserve_months} months of fixed costs" if reserve_months else "No fixed costs given",
+            )
+            h3.metric("Launch budget", fmt_money(health.get("launch_budget"), cur))
+            be = health.get("break_even_units_per_month")
+            h4.metric("Break-even", f"{be:,} units/month" if be is not None else "—")
+        elif health:
+            h1.metric("Monthly net profit", fmt_money(health.get("monthly_net_profit"), cur))
+            runway = health.get("runway_months")
+            h2.metric("Runway", "No burn" if health.get("profitable") else (f"{runway} months" if runway else "—"))
+            h3.metric("Debt / annual revenue", pct(health.get("debt_to_annual_revenue")))
+            h4.metric("Budget as share of cash", pct(health.get("budget_share_of_cash")))
+        bullets(d.get("rationale", ""))
+        st.caption("Finance makes no model call: both the maths and this explanation are code.")
+
+st.markdown("##### 🚀 What to actually do")
 tab_names = ["📣 Marketing", "📈 Sales", "📦 Product"]
 if "crm" in trail:
     tab_names.append("🤝 CRM")
@@ -625,7 +669,9 @@ with tabs[0]:
         with right:
             for c in d.get("campaigns", []):
                 with st.container(border=True):
-                    st.markdown(f"**{md_escape(c.get('channel'))}** — {money(c.get('budget'), cur)}")
+                    top, spend = st.columns([3, 1])
+                    top.markdown(f"**{md_escape(c.get('channel'))}**")
+                    spend.markdown(f"**{money(c.get('budget'), cur)}**")
                     st.markdown(f"**Where:** {md_escape(c.get('where'))}")
                     st.caption(
                         f"{md_escape(c.get('ad_format'))} · {md_escape(c.get('objective'))} · "
@@ -642,13 +688,14 @@ with tabs[1]:
         st.caption(f"Budget {money(d.get('budget'), cur)}")
         for src in d.get("lead_sources", []):
             with st.container(border=True):
-                st.markdown(f"**{md_escape(src.get('where'))}** — {money(src.get('budget'), cur)}")
+                top, spend = st.columns([3, 1])
+                top.markdown(f"**{md_escape(src.get('where'))}**")
+                spend.markdown(f"**{money(src.get('budget'), cur)}**")
                 st.markdown(f"**How:** {md_escape(src.get('how'))}")
                 st.markdown(f"**Every week:** {md_escape(src.get('weekly_actions'))}")
         if d.get("budget_adjusted"):
             st.warning("The lead sources asked for more than the sales budget, so they were scaled down to fit.")
-        st.markdown("**From lead to paying customer:**")
-        st.markdown(md_escape(d.get("conversion_process", "")))
+        labelled("From lead to paying customer", d.get("conversion_process", ""))
 
 with tabs[2]:
     d = trail.get("product")
@@ -656,7 +703,9 @@ with tabs[2]:
         st.caption("—")
     else:
         is_inventory = d.get("plan_type") == "inventory"
-        st.caption(
+        p1, p2 = st.columns([1, 3])
+        p1.metric("Total", fmt_money(d.get("line_items_total"), cur))
+        p2.caption(
             ("Opening inventory" if is_inventory else "Delivery capacity: tools, equipment and hires")
             + f" · budget {money(d.get('budget'), cur)}"
         )
@@ -677,11 +726,10 @@ with tabs[2]:
                 hide_index=True,
                 width="stretch",
             )
-        st.metric("Total", fmt_money(d.get("line_items_total"), cur))
         if d.get("budget_adjusted"):
             st.warning("The plan cost more than the product budget, so quantities were cut to fit.")
-        st.markdown(f"**Sourcing:** {md_escape(d.get('sourcing_plan'))}")
-        st.markdown(f"**{'Reorder' if is_inventory else 'Adding capacity'}:** {md_escape(d.get('replenish_policy'))}")
+        labelled("Sourcing", d.get("sourcing_plan"))
+        labelled("Reorder" if is_inventory else "Adding capacity", d.get("replenish_policy"))
         st.caption(f"Cost basis: {md_escape(d.get('cost_basis'))}")
 
 if "crm" in trail:
@@ -691,32 +739,33 @@ if "crm" in trail:
             st.warning(md_escape(warning))
         seg = d.get("segments", {})
         changes = d.get("changes") or {}
+        spent = sum((d.get("spend") or {}).values())
         st.caption(
             f"From your uploaded orders, as of {seg.get('as_of', '—')} · customers typically re-order every "
-            f"{seg.get('typical_gap_days', '—')} days · runs on the local model, so customer data stays on this machine"
+            f"{seg.get('typical_gap_days', '—')} days · {money(spent, cur)} of the "
+            f"{money(d.get('budget'), cur)} CRM budget planned · runs on the local model, so customer data "
+            "stays on this machine"
         )
-        rows = []
-        for key in SEGMENTS:
-            s = seg.get("segments", {}).get(key, {})
-            rows.append(
-                {
-                    "Group": SEGMENT_LABELS[key],
-                    "Customers": s.get("customers", 0),
-                    "Change": f"{changes[key]:+d}" if key in changes else "—",
-                    "Share of revenue": pct(s.get("revenue_share")),
-                    "What to do": d.get("actions", {}).get(key, ""),
-                    "Spend": fmt_money(d.get("spend", {}).get(key), cur),
-                }
-            )
-        st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "Group": SEGMENT_LABELS[key],
+                        "Customers": seg.get("segments", {}).get(key, {}).get("customers", 0),
+                        "Change": f"{changes[key]:+d}" if key in changes else "—",
+                        "Share of revenue": pct(seg.get("segments", {}).get(key, {}).get("revenue_share")),
+                        "What to do": d.get("actions", {}).get(key, ""),
+                        "Spend": fmt_money(d.get("spend", {}).get(key), cur),
+                    }
+                    for key in SEGMENTS
+                ]
+            ),
+            hide_index=True,
+            width="stretch",
+        )
+        if d.get("budget_adjusted"):
+            st.warning("The suggested spends added up to more than the CRM budget, so they were scaled down to fit.")
 
-        if seg.get("top_slipping"):
-            st.markdown("**Worth a personal call — your biggest spenders going quiet:**")
-            for c in seg["top_slipping"]:
-                st.markdown(
-                    f"- {md_escape(c['customer'])}: {money(c['spent'], cur)} over {c['orders']} orders, "
-                    f"{c['days_since_last_order']} days since the last one"
-                )
         m1, m2 = st.columns(2)
         with m1:
             st.markdown("**Message for customers slipping away**")
@@ -724,29 +773,46 @@ if "crm" in trail:
         with m2:
             st.markdown("**Win-back message for lost customers**")
             st.code(d.get("lost_message", ""), language=None, wrap_lines=True)
-        spent = sum((d.get("spend") or {}).values())
-        st.caption(f"Planned spend {money(spent, cur)} of the {money(d.get('budget'), cur)} CRM budget.")
-        if d.get("budget_adjusted"):
-            st.warning("The suggested spends added up to more than the CRM budget, so they were scaled down to fit.")
+
+        if seg.get("top_slipping"):
+            with st.expander("☎️ Worth a personal call — your biggest spenders going quiet", expanded=True):
+                st.dataframe(
+                    pd.DataFrame(
+                        [
+                            {
+                                "Customer": c["customer"],
+                                "Spent": fmt_money(c["spent"], cur),
+                                "Orders": c["orders"],
+                                "Days since last order": c["days_since_last_order"],
+                            }
+                            for c in seg["top_slipping"]
+                        ]
+                    ),
+                    hide_index=True,
+                    width="stretch",
+                )
         if d.get("message_previews"):
-            st.markdown("**Ready to send to the customers above:**")
-            for preview in d["message_previews"]:
-                st.markdown(f"- **{md_escape(preview['customer'])}:** {md_escape(preview['message'])}")
+            with st.expander("✉️ Ready to send to those customers"):
+                for preview in d["message_previews"]:
+                    st.markdown(f"**{md_escape(preview['customer'])}**")
+                    st.code(preview["message"], language=None, wrap_lines=True)
 elif operating:
     st.caption("Upload your order history to also get a CRM plan: customer groups, retention actions and messages.")
 
 if "funding" in trail:
     d = trail["funding"]
+    st.divider()
     st.subheader("💸 Funding roadmap")
-    c1, c2 = st.columns(2)
+    c1, c2, c3 = st.columns(3)
     c1.metric("Ready to raise now?", d.get("readiness", "?"))
     c2.metric("Target raise", d.get("target_raise_date", "—"))
-    st.markdown(f"**Stage:** {md_escape(d.get('target_stage'))}")
+    c3.metric("Stage", d.get("target_stage", "—"))
     for warning in d.get("warnings", []):
         st.warning("Check this: " + md_escape(warning))
     if not d.get("warnings") and any(r["cycle"] == selected and r["agent"] == "funding_rejected" for r in records):
         st.caption("The checker sent a first draft back for numbers that didn't add up; this version passed.")
-    st.markdown(md_escape(d.get("readiness_rationale", "")))
+
+    st.markdown("**Hit these before you raise**")
     m1, m2, m3 = st.columns(3)
     for col, label, key in (
         (m1, "Revenue milestone", "revenue_milestone"),
@@ -756,14 +822,22 @@ if "funding" in trail:
         with col:
             with st.container(border=True):
                 st.markdown(f"**{label}**")
-                st.markdown(md_escape(d.get(key, "")))
-    for label, key in (
-        ("Investor profile to target", "investor_profile"),
-        ("Non-equity alternatives", "alternative_funding"),
-        ("Pitch deck outline", "pitch_deck_outline"),
-    ):
-        st.markdown(f"**{label}:**")
-        st.markdown(md_escape(d.get(key, "")))
+                bullets(d.get(key, ""))
+
+    left, right = st.columns(2)
+    with left:
+        labelled("Investors to target", d.get("investor_profile", ""))
+    with right:
+        labelled("Non-equity alternatives", d.get("alternative_funding", ""))
+    with st.expander("📑 Pitch deck outline"):
+        slides = numbered_items(d.get("pitch_deck_outline", ""))
+        if slides:
+            for i, slide in enumerate(slides, 1):
+                st.markdown(f"{i}. {md_escape(slide)}")
+        else:
+            bullets(d.get("pitch_deck_outline", ""))
+    with st.expander("Why this readiness call"):
+        prose(d.get("readiness_rationale", ""), lead=False)
 
 # ------------------------------------------------------------ launch page --
 if "strategy" in trail:
