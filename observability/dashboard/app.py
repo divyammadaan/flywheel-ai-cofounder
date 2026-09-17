@@ -429,14 +429,14 @@ def labelled(label: str, text) -> None:
 
 # ------------------------------------------------------------ the business --
 st.markdown(f"#### {md_escape(intake.get('business_summary', ''))}")
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Industry", intake.get("industry", "—"))
-c2.metric("Region", intake.get("target_region", "—"))
-c3.metric("Stage", "Operating" if operating else "Pre-launch")
+st.caption(
+    f"{md_escape(intake.get('industry', '—'))}  ·  {md_escape(intake.get('target_region', '—'))}  ·  "
+    + ("Operating" if operating else "Pre-launch")
+)
 if operating:
-    c4.metric("Periods reported", len(analytics))
+    st.metric("Periods reported", len(analytics))
 else:
-    c4.metric("Launch capital", fmt_money(intake.get("starting_capital") or None, cur))
+    st.metric("Launch capital", fmt_money(intake.get("starting_capital") or None, cur))
 
 if "founder_advisor" in precycle:
     d = precycle["founder_advisor"]
@@ -450,7 +450,8 @@ if "founder_advisor" in precycle:
         if d.get("seed_positioning"):
             s1, s2 = st.columns([2, 1])
             s1.markdown(f"**Seed positioning**  \n{md_escape(d['seed_positioning'])}")
-            s2.metric("Seed price", fmt_money(d.get("seed_price"), cur), d.get("seed_price_unit", ""))
+            s2.metric("Seed price", fmt_money(d.get("seed_price"), cur))
+            s2.caption(md_escape(d.get("seed_price_unit", "")))
 
 detail_cols = st.columns(2)
 if "market_research" in precycle:
@@ -595,7 +596,8 @@ if "strategy" in trail:
             st.markdown(f"**{md_escape(d.get('positioning', ''))}**")
             st.markdown(f"**Target customer:** {md_escape(d.get('target_customer', '—'))}")
         with right:
-            st.metric("Price", fmt_money(d.get("price"), cur), md_escape(d.get("price_unit", "")))
+            st.metric("Price", fmt_money(d.get("price"), cur))
+            st.caption(md_escape(d.get("price_unit", "")))
     with st.expander("Why this strategy"):
         bullets(d.get("rationale", ""))
         for rejected in (r for r in records if r["cycle"] == selected and r["agent"] == "strategy_rejected"):
@@ -803,10 +805,10 @@ if "funding" in trail:
     d = trail["funding"]
     st.divider()
     st.subheader("💸 Funding roadmap")
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     c1.metric("Ready to raise now?", d.get("readiness", "?"))
     c2.metric("Target raise", d.get("target_raise_date", "—"))
-    c3.metric("Stage", d.get("target_stage", "—"))
+    st.markdown(f"**Stage:** {md_escape(d.get('target_stage', '—'))}")
     for warning in d.get("warnings", []):
         st.warning("Check this: " + md_escape(warning))
     if not d.get("warnings") and any(r["cycle"] == selected and r["agent"] == "funding_rejected" for r in records):
