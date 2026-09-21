@@ -4,6 +4,7 @@ code."""
 
 from agents._money import fmt_money
 from agents._segments import SEGMENT_LABELS, SEGMENTS
+from agents._text import as_list
 from agents.analytics import describe_file_metrics, describe_period
 
 
@@ -33,6 +34,16 @@ def _print_health(health: dict, currency: str) -> None:
         print(f"!! {warning}")
 
 
+def bullets(value, indent: str = "  ") -> str:
+    """A list-valued field as CLI bullets.
+
+    Agents return these as arrays now; as_list also covers a Decision Record
+    written before that change, where the same field is one paragraph.
+    """
+    items = as_list(value)
+    return "\n".join(f"{indent}- {item}" for item in items) if items else f"{indent}-- none given"
+
+
 def print_sources(sources: list[dict]) -> None:
     if not sources:
         print("\nSources      : none (web search unavailable -- figures are estimates)")
@@ -53,7 +64,7 @@ def print_plan(result) -> None:
     print(f"Positioning     : {s.positioning}")
     print(f"Target customer : {s.target_customer}")
     print(f"Price           : {m(s.price)} {s.price_unit}")
-    print(f"Rationale       : {s.rationale}")
+    print(f"Rationale       :\n{bullets(s.rationale)}")
 
     a = result.allocation
     rule(f"FINANCE -- {m(a.total_budget)} to spend")
@@ -84,7 +95,7 @@ def print_plan(result) -> None:
         print(f"   Weekly: {src['weekly_actions']}")
     if sa.budget_adjusted:
         print("   (lead-source budgets were scaled down to fit the sales allocation)")
-    print(f"\nLead -> customer:\n{sa.conversion_process}")
+    print(f"\nLead -> customer:\n{bullets(sa.conversion_process)}")
 
     p = result.product
     rule(f"PRODUCT ({p.plan_type}) -- {m(p.budget)}")
@@ -93,8 +104,8 @@ def print_plan(result) -> None:
         print(f"         @ {m(item['unit_cost'])} = {m(item['total_cost'])}")
     note = "  (quantities cut to fit the budget)" if p.budget_adjusted else ""
     print(f"  Total: {m(p.line_items_total)}{note}")
-    print(f"\nSourcing : {p.sourcing_plan}")
-    print(f"{'Reorder' if p.plan_type == 'inventory' else 'Scale up'} : {p.replenish_policy}")
+    print(f"\nSourcing :\n{bullets(p.sourcing_plan)}")
+    print(f"{'Reorder' if p.plan_type == 'inventory' else 'Scale up'} :\n{bullets(p.replenish_policy)}")
     print(f"Costs    : {p.cost_basis}")
 
     cr = result.crm
@@ -131,14 +142,14 @@ def print_analytics(report) -> None:
 def print_funding(plan) -> None:
     rule("FUNDING ROADMAP")
     print(f"Ready to raise now : {plan.readiness}")
-    print(f"{plan.readiness_rationale}\n")
+    print(f"{bullets(plan.readiness_rationale)}\n")
     print(f"Target raise       : {plan.target_raise_date} -- {plan.target_stage}")
     print(f"Revenue milestone  : {plan.revenue_milestone}")
     print(f"Profit milestone   : {plan.profit_milestone}")
-    print(f"Traction milestones: {plan.traction_milestones}\n")
+    print(f"Traction milestones:\n{bullets(plan.traction_milestones)}\n")
     print(f"Investor profile   : {plan.investor_profile}")
     print(f"Alternatives       : {plan.alternative_funding}\n")
-    print(f"Pitch deck outline:\n{plan.pitch_deck_outline}")
+    print(f"Pitch deck outline:\n{bullets(plan.pitch_deck_outline)}")
     for warning in plan.warnings:
         print(f"!! Check this: {warning}")
 

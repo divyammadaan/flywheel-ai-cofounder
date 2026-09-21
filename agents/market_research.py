@@ -19,6 +19,7 @@ from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from agents.intake import BusinessInput
 from observability.usage import register_role
 from tools.web_search import describe_sources, search_business
@@ -39,16 +40,30 @@ don't ask for it again. Ask about what is genuinely decision-relevant and still 
 (e.g. sourcing and unit costs, timeline, existing customers or waitlist, unique advantage)
 and keep the list short.
 
-BE CONCISE. No field longer than ~50 words, and each question one sentence. Dense and
-specific beats long. (Output length is rate-limited, so verbosity directly costs the
-founder waiting time.)"""
+key_competitors, opportunities and risks are JSON arrays of strings: one competitor,
+one opportunity, one risk per entry, each a complete sentence that stands on its own.
+Never put several into one entry separated by semicolons -- the founder reads these as
+a list, and a run-on entry defeats that.
+
+BE CONCISE. No field longer than ~50 words, each array entry one sentence, and each
+question one sentence. Dense and specific beats long. (Output length is rate-limited,
+so verbosity directly costs the founder waiting time.)"""
 
 
 class MarketResearchSchema(BaseModel):
     market_size_estimate: str = Field(description="Market size, citing sources as [n], or clearly labelled as an estimate")
-    key_competitors: str = Field(description="2-4 real competitors or competitor types in this space, citing sources as [n]")
-    opportunities: str = Field(description="1-2 sentence opportunity assessment")
-    risks: str = Field(description="1-2 sentence risk assessment")
+    # Arrays, not paragraphs: each competitor, opportunity and risk is its own
+    # item so the founder sees them as a list rather than a block of prose.
+    key_competitors: list[str] = Field(
+        default_factory=list,
+        description="2-4 real competitors or competitor types, one per entry, each citing its source as [n]",
+    )
+    opportunities: list[str] = Field(
+        default_factory=list, description="1-3 opportunities, one per entry, each a complete sentence"
+    )
+    risks: list[str] = Field(
+        default_factory=list, description="1-3 risks, one per entry, each a complete sentence"
+    )
     clarifying_question_1: str = Field(description="First question to ask the founder")
     clarifying_question_2: str = Field(default="", description="Second question, empty string if not needed")
     clarifying_question_3: str = Field(default="", description="Third question, empty string if not needed")
@@ -57,9 +72,9 @@ class MarketResearchSchema(BaseModel):
 @dataclass
 class MarketResearchReport:
     market_size_estimate: str
-    key_competitors: str
-    opportunities: str
-    risks: str
+    key_competitors: list
+    opportunities: list
+    risks: list
     clarifying_questions: list[str]
     # The web results the agent was given, in [n] order.
     sources: list = field(default_factory=list)
@@ -120,8 +135,8 @@ class MarketResearchAgent:
 
         return MarketResearchReport(
             market_size_estimate=parsed.market_size_estimate,
-            key_competitors=parsed.key_competitors,
-            opportunities=parsed.opportunities,
-            risks=parsed.risks,
+            key_competitors=as_list(parsed.key_competitors),
+            opportunities=as_list(parsed.opportunities),
+            risks=as_list(parsed.risks),
             clarifying_questions=questions,
         )

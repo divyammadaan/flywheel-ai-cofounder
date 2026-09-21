@@ -21,28 +21,45 @@ from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+from pydantic import BaseModel, Field
 
 from agents._cache import cached
-from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
+from agents._models import AGENT_MAX_TOKENS, GROQ_MODEL_ADK_JSON
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from observability.usage import record_adk_usage
 
 APP_NAME = "flywheel"
 USER_ID = "flywheel_run"
-DEFAULT_MODEL = AGENT_MODELS["analytics"]
+# Analytics is on ADK's output_schema, which parses whatever text comes back --
+# so it needs a model that emits bare JSON with no preamble, same as Strategy.
+DEFAULT_MODEL = GROQ_MODEL_ADK_JSON
 
 _INSTRUCTION = """You are the Analytics agent for Flywheel, an AI co-founder. You're given an
 operating business's REAL numbers for a period, as entered by the founder, the ratios
 computed from them, any earlier periods, and -- if they uploaded one -- figures computed
 from their order history.
 
-Write a 3-4 sentence summary for the Strategy agent: what these numbers say about the
-business's health, how they compare with earlier periods or recent months, and what the
-plan should change. Use only the numbers you're given. Anything marked "not reported" is
-unknown -- say so if it matters, but never estimate it. If the form's revenue and the
-order file's revenue differ a lot, say so: they may cover different periods. Keep amounts
-in the stated currency."""
+Return JSON with two fields and nothing else -- no preamble, no code fence:
+- headline: ONE sentence, the single most important thing these numbers say. This is
+  what the founder reads first, so it must carry the finding, not introduce it. Write
+  "Revenue grew 18% but net margin fell to 4%", never "Here is a summary of the numbers".
+- points: 2-4 further findings as a JSON array of strings, one finding per entry, each a
+  complete sentence. Cover how the numbers compare with earlier periods or recent months,
+  and what the plan should change. Never put two findings in one entry.
+
+Use only the numbers you're given. Anything marked "not reported" is unknown -- say so if
+it matters, but never estimate it. If the form's revenue and the order file's revenue
+differ a lot, say so: they may cover different periods. Keep amounts in the stated
+currency."""
+
+
+class AnalyticsSchema(BaseModel):
+    headline: str = Field(description="One sentence: the single most important finding in these numbers")
+    points: list[str] = Field(
+        default_factory=list, description="2-4 further findings, one per entry, each a complete sentence"
+    )
 
 
 @dataclass
@@ -151,6 +168,13 @@ class AnalyticsReport:
     period_label: str
     metrics: dict
     kpis: dict
+    # headline + points are what the UI renders. `summary` is the same content
+    # as one string, and is what Strategy is given as prompt context and what
+    # the CLIs print -- keeping it means no downstream consumer has to join the
+    # points back together, and Decision Records written before this change
+    # still read back.
+    headline: str
+    points: list
     summary: str
     file_metrics: dict | None = None
 
@@ -164,7 +188,13 @@ class AnalyticsAgent:
         resolved_model = (
             LiteLlm(model=model, max_tokens=AGENT_MAX_TOKENS["analytics"]) if model.startswith("groq/") else model
         )
-        self._agent = LlmAgent(name="analytics_agent", model=resolved_model, instruction=_INSTRUCTION)
+        self._agent = LlmAgent(
+            name="analytics_agent",
+            model=resolved_model,
+            instruction=_INSTRUCTION,
+            output_schema=AnalyticsSchema,
+            output_key="analytics_output",
+        )
         self._session_service = InMemorySessionService()
         self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
         self._session_id = session_id
@@ -220,13 +250,18 @@ class AnalyticsAgent:
         if summary is None:
             raise RuntimeError("Analytics agent produced no response")
 
+        parsed = AnalyticsSchema.model_validate_json(summary)
+        headline = parsed.headline.strip()
+        points = as_list(parsed.points)
         return AnalyticsReport(
             cycle=cycle,
             currency=currency,
             period_label=metrics.period_label,
             metrics=asdict(metrics),
             kpis=kpis,
-            summary=summary.strip(),
+            headline=headline,
+            points=points,
+            summary=" ".join([headline, *points]).strip(),
             file_metrics=file_metrics,
         )
 

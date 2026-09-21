@@ -23,6 +23,7 @@ from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fit_to_budget
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["product"]
@@ -49,10 +50,13 @@ class CapacityItem(BaseModel):
 
 class InventoryPlanSchema(BaseModel):
     line_items: list[StockItem] = Field(description="1-5 line items: stock, packaging, equipment")
-    sourcing_plan: str = Field(
-        description="Who to source from and where (supplier type and region), payment terms and lead time"
+    sourcing_plan: list[str] = Field(
+        default_factory=list,
+        description="Who to source from and where, payment terms and lead time -- one point per entry",
     )
-    replenish_policy: str = Field(description="When to reorder and how much")
+    replenish_policy: list[str] = Field(
+        default_factory=list, description="When to reorder and how much -- one rule per entry"
+    )
     cost_basis: str = Field(
         description="Where the unit costs come from: the founder's own figures, or clearly labelled estimates"
     )
@@ -62,9 +66,12 @@ class CapacityPlanSchema(BaseModel):
     line_items: list[CapacityItem] = Field(
         description="1-5 line items: the tools, equipment, subscriptions or hires needed to deliver"
     )
-    sourcing_plan: str = Field(description="Which vendors or where to hire from, with terms")
-    replenish_policy: str = Field(
-        description="When to add capacity, e.g. 'hire a second stylist once bookings pass 60 a week'"
+    sourcing_plan: list[str] = Field(
+        default_factory=list, description="Which vendors or where to hire from, with terms -- one point per entry"
+    )
+    replenish_policy: list[str] = Field(
+        default_factory=list,
+        description="When to add capacity, one rule per entry, e.g. 'hire a second stylist once bookings pass 60 a week'",
     )
     cost_basis: str = Field(
         description="Where the unit costs come from: the founder's own figures, or clearly labelled estimates"
@@ -79,8 +86,8 @@ class ProductOutput:
     plan_type: str
     line_items: list
     line_items_total: float
-    sourcing_plan: str
-    replenish_policy: str
+    sourcing_plan: list
+    replenish_policy: list
     cost_basis: str
     budget_adjusted: bool = False
 
@@ -173,8 +180,8 @@ class ProductAgent:
             plan_type=plan_type,
             line_items=lines,
             line_items_total=total,
-            sourcing_plan=parsed.sourcing_plan,
-            replenish_policy=parsed.replenish_policy,
+            sourcing_plan=as_list(parsed.sourcing_plan),
+            replenish_policy=as_list(parsed.replenish_policy),
             cost_basis=parsed.cost_basis,
             budget_adjusted=adjusted,
         )

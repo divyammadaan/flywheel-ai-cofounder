@@ -35,6 +35,7 @@ from agents._brief import LAUNCH
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, GROQ_MODEL_ADK_JSON
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from observability.usage import record_adk_usage
 
 # Not GROQ_MODEL: this is the one agent using ADK's output_schema, which
@@ -61,7 +62,9 @@ Set:
   (e.g. price 799, price_unit "per month, 1kg subscription"). Never a 0..1 weight.
 - priority_marketing, priority_product, priority_sales, priority_crm: weights that sum to
   1.0, for how the budget should be split.
-- rationale: 2-3 sentences tied to the research or to the reported numbers.
+- rationale: 2-3 separate reasons, each one complete sentence, each tied to the research
+  or to the reported numbers. Return them as a JSON array of strings, one reason per
+  entry -- not one paragraph.
 
 Rules:
 - Stay on the business you are given. Don't turn it into a different product.
@@ -90,7 +93,10 @@ class StrategyOutput(BaseModel):
     priority_product: float = Field(description="Budget priority weight for product, 0..1")
     priority_sales: float = Field(description="Budget priority weight for sales, 0..1")
     priority_crm: float = Field(description="Budget priority weight for crm, 0..1")
-    rationale: str = Field(description="2-3 sentences tied to the research or the reported numbers")
+    rationale: list[str] = Field(
+        default_factory=list,
+        description="2-3 reasons, each a complete sentence, tied to the research or the reported numbers",
+    )
 
     def priorities_dict(self) -> dict:
         return {
@@ -111,7 +117,7 @@ class StrategyDecision:
     price: float
     price_unit: str
     priorities: dict
-    rationale: str
+    rationale: list
 
 
 class StrategyAgent:
@@ -177,7 +183,7 @@ class StrategyAgent:
             price=parsed.price,
             price_unit=parsed.price_unit,
             priorities=parsed.priorities_dict(),
-            rationale=parsed.rationale,
+            rationale=as_list(parsed.rationale),
         )
 
     @cached("strategy", StrategyDecision)

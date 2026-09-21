@@ -16,6 +16,7 @@ from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fit_to_budget
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from observability.usage import register_role
 
 DEFAULT_MODEL = AGENT_MODELS["sales"]
@@ -36,7 +37,10 @@ class SalesOutputSchema(BaseModel):
     lead_sources: list[LeadSource] = Field(
         description="2-4 lead sources whose budgets add up to no more than the sales budget"
     )
-    conversion_process: str = Field(description="The numbered steps that turn a lead into a paying customer")
+    conversion_process: list[str] = Field(
+        default_factory=list,
+        description="The ordered steps that turn a lead into a paying customer, one step per entry",
+    )
 
 
 @dataclass
@@ -45,7 +49,7 @@ class SalesOutput:
     budget: float
     currency: str
     lead_sources: list
-    conversion_process: str
+    conversion_process: list
     budget_adjusted: bool = False
 
 
@@ -101,6 +105,6 @@ class SalesAgent:
             budget=budget,
             currency=brief.currency,
             lead_sources=sources,
-            conversion_process=parsed.conversion_process,
+            conversion_process=as_list(parsed.conversion_process),
             budget_adjusted=adjusted,
         )

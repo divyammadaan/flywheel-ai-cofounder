@@ -57,7 +57,7 @@ from agents.market_research import MarketResearchAgent
 from observability.decision_record import DecisionRecord, log_decision, reset_records
 from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, run_funding, run_launch_plan
-from orchestration.report import print_funding, print_plan, print_sources, print_usage, rule
+from orchestration.report import bullets, print_funding, print_plan, print_sources, print_usage, rule
 from tools.landing_page import write_landing_page
 
 
@@ -99,9 +99,9 @@ def validate(
     report = MarketResearchAgent().research(business)
     log_decision(DecisionRecord(PRECYCLE, "market_research", business.__dict__, report.__dict__))
     print(f"Market size  : {report.market_size_estimate}\n")
-    print(f"Competitors  : {report.key_competitors}\n")
-    print(f"Opportunities: {report.opportunities}\n")
-    print(f"Risks        : {report.risks}")
+    print(f"Competitors  :\n{bullets(report.key_competitors)}\n")
+    print(f"Opportunities:\n{bullets(report.opportunities)}\n")
+    print(f"Risks        :\n{bullets(report.risks)}")
     print_sources(report.sources)
 
     rule("CLARIFYING QUESTIONS")
@@ -120,7 +120,7 @@ def validate(
     decision = FounderAdvisorAgent().decide(business, report, qa_answers)
     log_decision(DecisionRecord(PRECYCLE, "founder_advisor", {"qa_answers": qa_answers}, decision.__dict__))
     print(f"VERDICT: {decision.verdict}\n")
-    print(f"{decision.rationale}")
+    print(f"{bullets(decision.rationale)}")
 
     if decision.verdict == "NO_GO":
         print("\nAdvisor recommends NO-GO. Stopping here rather than building a launch plan.")
@@ -136,9 +136,9 @@ def validate(
         log_decision(DecisionRecord(PRECYCLE, "company_formation", business.__dict__, formation.__dict__))
         print(f"Recommended entity: {formation.recommended_entity}")
         print(f"Why              : {formation.entity_rationale}\n")
-        print(f"Registration steps:\n{formation.registration_steps}\n")
-        print(f"Licences/permits :\n{formation.licenses_and_permits}\n")
-        print(f"Tax registrations:\n{formation.tax_registrations}\n")
+        print(f"Registration steps:\n{bullets(formation.registration_steps)}\n")
+        print(f"Licences/permits :\n{bullets(formation.licenses_and_permits)}\n")
+        print(f"Tax registrations:\n{bullets(formation.tax_registrations)}\n")
         print(f"Estimated cost   : {formation.estimated_cost}")
         print(f"Estimated timeline: {formation.estimated_timeline}\n")
         print(f"!! {formation.disclaimer}")

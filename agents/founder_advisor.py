@@ -15,6 +15,7 @@ from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from agents.intake import BusinessInput
 from agents.market_research import MarketResearchReport
 from observability.usage import register_role
@@ -43,7 +44,11 @@ directly costs the founder waiting time.)"""
 
 class AdvisorOutputSchema(BaseModel):
     verdict: str = Field(description="One of: GO, PIVOT, NO_GO")
-    rationale: str = Field(description="2-4 sentence justification citing the market research and founder's answers")
+    rationale: list[str] = Field(
+        default_factory=list,
+        description="2-4 reasons, one per entry, each a complete sentence citing the market research "
+        "or the founder's answers",
+    )
     seed_positioning: str = Field(description="One-sentence positioning for the launch (empty if NO_GO)")
     seed_price: float = Field(
         default=0.0,
@@ -61,7 +66,7 @@ class AdvisorOutputSchema(BaseModel):
 @dataclass
 class AdvisorDecision:
     verdict: str
-    rationale: str
+    rationale: list
     seed_positioning: str
     seed_price: float
     seed_price_unit: str
@@ -114,7 +119,7 @@ class FounderAdvisorAgent:
 
         return AdvisorDecision(
             verdict=parsed.verdict,
-            rationale=parsed.rationale,
+            rationale=as_list(parsed.rationale),
             seed_positioning=parsed.seed_positioning,
             seed_price=parsed.seed_price,
             seed_price_unit=parsed.seed_price_unit,

@@ -1,37 +1,34 @@
-# Flywheel — An AI Co-Founder
+# Flywheel — an AI co-founder
 
+A founder describes a business, and Flywheel plans it with them.
 
-A founder describes a business and Flywheel plans it with them.
+- **New idea (not launched):** researches the market, asks what it still needs to know, rules GO / PIVOT / NO-GO, lays out how to incorporate, checks the cash (reserve, break-even), and builds a launch plan — campaigns, lead sources, stock, and a funding roadmap.
+- **Existing business:** the founder enters their real numbers and uploads their order history. Flywheel analyses both, finds which customers are slipping away, and plans the next period from there.
 
-- **New idea (not launched):** it researches the market, asks the questions it still needs answered, rules GO / PIVOT / NO-GO, lays out how to incorporate, checks the cash (reserve, break-even), and builds a specific launch plan: which campaigns to run and where, where the first leads come from, what stock or tools to buy and from whom, and when to aim for funding.
-- **Existing business:** the founder enters their real numbers and uploads their order history (.csv or .xlsx). Flywheel analyses both, finds which customers are slipping away, and plans the next period from there.
-
-No revenue is invented. A business that hasn't launched has no results, so the launch plan never pretends it does, and every budget and cost is the founder's own figure.
+No revenue is invented. A business that hasn't launched has no results, so the launch plan never pretends it does — every budget and cost is the founder's own figure.
 
 ---
 
 ## Every agent has a real job
 
-An agent is only here if it does something a founder would otherwise do by hand. Where arithmetic is involved, **code does the maths and the model does the judgement and the writing** — so numbers are exact and the AI can't miscalculate them.
+Where arithmetic is involved, code does the maths and the model does the judgement and the writing — so numbers are exact and the model can't miscalculate them.
 
-| Agent | Runs for | What it actually does for the founder |
+| Agent | Runs for | What it does |
 |---|---|---|
-| **Intake** | both | Turns a free-text description into structured fields, and classifies what the business delivers (physical / service / software) |
-| **Market Research** | new idea | Sizes the market and names competitors from **live web search** (sources cited as [n]), flags risks, asks the questions still needed for a verdict |
-| **Founder Advisor** | new idea | GO / PIVOT / NO-GO — can stop a bad idea before money is spent |
-| **Company Formation** | new idea | Region-specific incorporation checklist: entity, registrations, licences, cost, timeline |
-| **Analytics** | existing | Ratios from the founder's numbers and their uploaded orders (average order, repeat rate, revenue trend) — computed in code; the model writes what they mean |
-| **Strategy** | both | Positioning, target customer, a real price, and budget priorities |
-| **Finance** | both | **Cash math in code:** launch reserve and break-even for a new idea; runway, debt load and budget-vs-cash for an existing business. Then splits the spendable budget with a hard per-area cap and explains it — all code, **no model call** |
-| **Marketing** | both | 2–4 specific campaigns (platform, localities/audience, format, timing, spend) plus ad copy and a matching ad image |
-| **Sales** | both | 2–4 lead sources with a weekly cadence and spend, and the steps from lead to paying customer |
-| **Product** | both | Physical goods: opening inventory and sourcing. Services/software: tools, equipment and hires needed to deliver. Totals computed in code and cut to fit the budget |
-| **CRM** | existing, with an upload | **Code** groups the uploaded customers (best, regular, new, slipping away, lost) and tracks change since last period; the **local model** writes an action per group and ready-to-send win-back messages. Runs locally because it sees real customer data |
-| **Funding** | both | Target raise date and stage, and the revenue/profit/traction milestones to hit first |
+| Intake | both | Turns a free-text description into structured fields |
+| Market Research | new idea | Market size and competitors from live web search (sources cited), flags risks, asks what's still unknown |
+| Founder Advisor | new idea | GO / PIVOT / NO-GO — can stop a bad idea before money is spent |
+| Company Formation | new idea | Region-specific incorporation checklist: entity, registrations, licences, cost, timeline |
+| Analytics | existing | Ratios from the founder's numbers and orders, computed in code; the model writes what they mean |
+| Strategy | both | Positioning, target customer, a real price, budget priorities |
+| Finance | both | Cash reserve, break-even, runway, debt load, budget split — all code, no model call |
+| Marketing | both | 2–4 campaigns with copy and a matching ad image |
+| Sales | both | 2–4 lead sources with a weekly cadence, and the steps from lead to customer |
+| Product | both | Opening inventory or delivery capacity, priced and cut to fit the budget |
+| CRM | existing, with an upload | Code groups customers (best/regular/new/slipping/lost); a local model writes actions and win-back messages so customer data never leaves the machine |
+| Funding | both | Target raise date, stage, and the milestones to hit first |
 
-There is deliberately **no CRM in a launch plan** — a business with no customers has nothing to retain — and no Analytics, because nothing has happened yet.
-
-The rule-based market simulator from earlier versions is **parked**: it produced synthetic revenue, so neither flow uses it. Its code and tests are kept.
+There's no CRM in a launch plan (no customers yet to retain) and no Analytics (nothing has happened yet).
 
 ---
 
@@ -75,44 +72,29 @@ The rule-based market simulator from earlier versions is **parked**: it produced
                        └─────────┘ and profit milestones
 ```
 
+Agent output is structured data (arrays of points, not paragraphs), so the UI renders real lists instead of guessing where to split prose.
+
 **Guardrails in code, not prompts:**
-- `agents/_guardrails.py` — every Strategy plan is checked before other agents use it: it must describe this business, use metric units in India, price near what customers pay, and contain no demeaning wording. A failing plan goes back once with the problems listed; a second failure stops the run
-- `agents/_cash.py` — reserve, break-even, runway, debt ratio
-- `agents/finance.py` `compute_capped_allocation` — no area gets more than 60% of the budget
-- `agents/_money.py` `fit_to_budget` — campaign and lead-source spends are cut to fit
-- `agents/product.py` `price_line_items` — line totals multiplied by the program, quantities cut to fit
-- `agents/_segments.py` — customer groups, with cut-offs scaled to how often *this* business's customers re-order
-- `tools/orders_file.py` — reads messy exports (loose column names, `₹1,599.00`, day-first dates)
-- Funding roadmaps are checked for a round too big for its stage and for traction and revenue milestones that contradict each other; a failing roadmap goes back once, and anything still wrong is shown as a warning
+- `agents/_guardrails.py` — every Strategy plan is checked (describes this business, metric units, price near what customers pay, no demeaning wording) before other agents use it. A failing plan is sent back once, then the run stops.
+- `agents/_cash.py` — reserve, break-even, runway, debt ratio.
+- `agents/finance.py` — no budget area gets more than 60% of the total.
+- `agents/_money.py` — campaign and lead-source spends are cut to fit the budget.
+- `agents/_segments.py` — customer groups, with cut-offs scaled to how often this business's customers actually re-order.
+- `tools/orders_file.py` — reads messy exports (loose column names, currency-formatted amounts, day-first dates).
+- Funding roadmaps are checked for a round too big for its stage, or milestones that contradict each other.
 
 ---
 
-## Keeping model usage low
+## Stack
 
-Model calls are treated as a cost to justify, without making the plans worse:
-
-- **Measured per agent:** every call logs tokens in/out, time and cache hits (`observability/usage.py`). See the dashboard's *Model usage* panel or the table at the end of each CLI run.
-- **No model where code is enough:** Finance's explanation is written from the numbers it computed — one fewer call per run.
-- **Identical inputs reuse the saved answer** (`agents/_cache.py`): same agent code, model and inputs cost zero calls on a repeat run. Editing an agent invalidates only its own entries. Set `FLYWHEEL_LLM_CACHE=0` to force fresh calls.
-- **Each planning agent gets only the context it uses** (`AGENT_CONTEXT` in `orchestration/cycle.py`) instead of the whole research, every answer and every number.
-- **Reply-length caps per agent** (`AGENT_MAX_TOKENS` in `agents/_models.py`) with headroom over measured replies.
-- **The local CRM model makes one direct call with thinking off** — 66s instead of two CrewAI calls taking over 14 minutes.
-
-**Measured:** a fresh launch plan made 9 model calls (18,630 tokens in, 3,417 out, 169s). Running it again with identical inputs made **0 calls** and finished in **24s**. Per-agent context trimming saves about 760–1,050 prompt tokens per run. Details in `docs/project_report.md`.
-
-Merging agents into one big call was rejected: it loses parallelism and focus, and one failure means redoing everything.
-
----
-
-## Tech stack
-
-- **Agent orchestration:** CrewAI (planning + advisory agents), Google ADK (Strategy/Analytics)
-- **Web search:** DuckDuckGo via `ddgs` — free, no API key — for Market Research
-- **Agent-to-tool:** MCP — a real FastMCP server exposing Decision Record history; the engine fetches last period's CRM record from it over stdio, as a separate process
-- **Agent-to-agent:** A2A — Marketing is exposed as an A2A server with a discoverable Agent Card; the engine calls it over the protocol and falls back to an in-process call if the server is down
-- **LLMs:** Groq free tier (`qwen/qwen3.8-27b`) for the hosted agents; Ollama (`qwen3:4b`, local, thinking turned off) for CRM. Gemini supported via a per-agent `model=` override — see `docs/setup.md`
-- **Data:** pandas + openpyxl for uploaded order files; SQLite for Decision Records
-- **Dashboard:** Streamlit
+- **Backend:** FastAPI, wrapping the same orchestration functions the CLIs call. Long-running plans run on a worker thread; progress is written as rows a client can resume from after a reload.
+- **Frontend:** Next.js, TypeScript, Tailwind. Types generated from the live API schema.
+- **Storage:** SQLAlchemy over SQLite or Postgres (`FLYWHEEL_DATABASE_URL`), Alembic migrations. Plans are scoped to runs, not overwritten.
+- **Agent orchestration:** CrewAI (planning + advisory agents), Google ADK (Strategy/Analytics).
+- **Agent-to-tool:** MCP — a FastMCP server exposing decision history over stdio.
+- **Agent-to-agent:** A2A — Marketing runs behind a discoverable Agent Card; falls back to a direct call if the server is down.
+- **LLMs:** Groq (hosted agents), Ollama (local, for CRM — so customer data never leaves the machine).
+- **Web search:** DuckDuckGo via `ddgs`, no API key.
 
 ---
 
@@ -120,125 +102,58 @@ Merging agents into one big call was rejected: it loses parallelism and focus, a
 
 ```
 flywheel/
-├── agents/
-│   ├── _brief.py           # PlanBrief: the shared context every planning agent gets
-│   ├── _cache.py           # reuse saved model answers for identical inputs
-│   ├── _guardrails.py      # checks on Strategy plans and Funding roadmaps
-│   ├── _cash.py            # reserve, break-even, runway (Finance's maths)
-│   ├── _money.py           # currency formatting + fit_to_budget guardrail
-│   ├── _segments.py        # customer groups from an order history (CRM's maths)
-│   ├── _models.py          # which provider each agent talks to
-│   ├── _retry.py           # shared rate-limit backoff
-│   ├── intake.py           # ─┐
-│   ├── market_research.py  #  │ validation & advisory
-│   ├── founder_advisor.py  #  │ (CrewAI + Groq)
-│   ├── company_formation.py# ─┘
-│   ├── analytics.py        # ADK + Groq (existing businesses)
-│   ├── strategy.py         # ADK + Groq
-│   ├── finance.py          # cash math, capped split and explanation -- all code
-│   ├── marketing.py        # CrewAI + Groq; campaigns + copy + image
-│   ├── sales.py            # CrewAI + Groq; lead sources
-│   ├── product.py          # CrewAI + Groq; inventory or delivery capacity
-│   ├── crm.py              # direct local Ollama call; retention on uploaded customers
-│   └── funding.py          # CrewAI + Groq; funding roadmap
-├── simulator/
-│   └── market_simulator.py # parked: not used by either flow
-├── orchestration/
-│   ├── validate_flow.py    # new idea: pitch -> verdict -> launch plan -> funding
-│   ├── review_flow.py      # existing business: numbers + orders -> plan -> funding
-│   ├── cycle.py            # the planning engine both flows share
-│   ├── report.py           # terminal printing for the two CLIs
-│   └── a2a_bridge.py       # A2A server + client for Marketing
-├── observability/
-│   ├── decision_record.py
-│   ├── usage.py            # tokens, calls, time and cache hits per agent
-│   └── dashboard/          # Streamlit
-├── tools/
-│   ├── orders_file.py      # read + clean uploaded .csv/.xlsx order histories
-│   ├── sample_data.py      # generate realistic sample order files for demos
-│   ├── web_search.py       # free DuckDuckGo search for Market Research
-│   ├── landing_page.py     # one-page launch site built from the plan
-│   ├── image_gen.py        # ad image generation (keyless, fails soft)
-│   ├── mcp_server.py       # FastMCP server: Decision Record query tools
-│   └── mcp_client_tool.py  # MCP client over stdio
-├── data/                   # SQLite store + generated ad images (gitignored)
+├── agents/            # intake, research, advisor, strategy, finance, marketing, sales, product, crm, funding
+├── orchestration/     # the two flows (new idea / existing business) and the shared planning engine
+├── api/               # FastAPI: endpoints, background jobs, request/response schemas
+├── web/               # Next.js frontend
+├── storage/           # SQLAlchemy models, runs, decision records, usage
+├── migrations/        # Alembic
+├── observability/     # usage tracking, decision records, Streamlit dashboard
+├── tools/              # order file parsing, web search, MCP server, landing page, image gen
 ├── tests/
-├── docs/
-├── requirements.txt
-└── README.md
+└── docs/
 ```
-
-**Status.** All agents are genuinely LLM-backed. MCP is real (a separate-process FastMCP server queried over stdio). A2A is real — the Decision Record logs `transport: a2a` vs `direct` (start `orchestration/a2a_bridge.py` first, or it falls back). Marketing generates a real ad image per plan into `data/ads/`. Every plan also produces a self-contained launch page (`data/site/index.html`, or *Download launch page* on the dashboard) ready for any static host. Still open: connecting that page's sign-up form to a real form service, and a place-lookup tool so agents can't name local spots that don't exist.
 
 ---
 
-## Getting started
+## Running it
 
 ```bash
-git clone <repo-url>
-cd flywheel
-
+git clone <repo-url> && cd flywheel
 python -m venv .venv && .venv/Scripts/activate   # Windows
 # source .venv/bin/activate                       # macOS/Linux
 ```
 
-Install in **stages** — one shot fails, see `docs/setup.md` for why:
+Install in stages (see `docs/setup.md`):
 
 ```bash
 pip install crewai && pip install google-adk && pip install mcp a2a-sdk
 pip install ollama groq google-genai && pip install fastapi uvicorn python-dotenv pydantic
-pip install chromadb && pip install pandas openpyxl ddgs && pip install streamlit && pip install pytest
+pip install sqlalchemy alembic "psycopg[binary]"
+pip install pandas openpyxl ddgs && pip install streamlit && pip install pytest
 ```
 
-Local model for CRM, plus your free Groq key:
-
 ```bash
-winget install --id Ollama.Ollama -e   # or see ollama.com
-ollama pull qwen3:4b
-
-cp .env.example .env                   # then add GROQ_API_KEY (console.groq.com/keys)
+cp .env.example .env   # add GROQ_API_KEY (console.groq.com/keys)
+ollama pull qwen3:4b    # local model for CRM
 ```
 
-Run it:
+**API + web app:**
 
 ```bash
-# new idea: pitch -> research -> verdict -> formation -> cash check -> launch plan -> funding
+.venv/Scripts/python -m uvicorn api.main:app --reload --port 8000
+cd web && npm install && npm run dev
+```
+
+**CLIs:**
+
+```bash
 python orchestration/validate_flow.py --capital 1500000 --fixed-costs 100000 --unit-cost 350
 
-# existing business: generate a sample order file, then plan from numbers + orders
 python tools/sample_data.py --out data/sample_orders.xlsx
 python orchestration/review_flow.py --description "..." --period "FY2025-26" \
     --revenue 2400000 --net-profit 180000 --debt 500000 --budget 400000 --cash 700000 \
     --orders data/sample_orders.xlsx
 
-# optional: serve Marketing over A2A (the engine falls back to a direct call without it)
-python orchestration/a2a_bridge.py
-
-# dashboard -- must be the venv python, a system streamlit shadows it
-.venv/Scripts/python -m streamlit run observability/dashboard/app.py
-
 pytest tests/ -q
 ```
-
----
-
-## Course context
-
-- **CO1** — foundational agent/LLM principles
-- **CO2** — agentic design patterns + local LLMs for secure, privacy-preserving solutions
-- **CO3** — multi-agent, multimodal, multi-step automation
-
----
-
-## Team
-
-| Name | Focus area (rotates across phases) |
-|---|---|
-| *Member A* | Strategy + Finance |
-| *Member B* | Product + Simulator |
-| *Member C* | Marketing + Analytics + Dashboard |
-
----
-
-## License
-

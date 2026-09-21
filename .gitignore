@@ -10,6 +10,8 @@ env/
 
 # data stores (generated at runtime)
 data/*.db
+data/*.db-wal
+data/*.db-shm
 data/chroma/
 data/*.sqlite3
 data/ads/
@@ -22,3 +24,9 @@ data/site/
 # OS
 .DS_Store
 Thumbs.db
+
+# generated sample order files (tools/sample_data.py)
+data/sample_orders.*
+data/uploads/
+Course_Handout__Agentic AI.pdf
+docs/project_report.md

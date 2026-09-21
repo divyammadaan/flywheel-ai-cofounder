@@ -42,9 +42,9 @@ Model choice notes:
     response_format to CrewAI's LLM() does not route around it; CrewAI still
     uses tool-calling for output_pydantic. Don't re-try this without also
     replacing output_pydantic.
-  - Strategy is the only agent on ADK's output_schema, which has no
-    response_format equivalent and parses whatever text comes back, so it
-    needs a model that emits bare JSON with no preamble. qwen is verified.
+  - Strategy and Analytics are the two agents on ADK's output_schema, which
+    has no response_format equivalent and parses whatever text comes back, so
+    both need a model that emits bare JSON with no preamble. qwen is verified.
 
 Every agent takes a `model=` argument, so all of this is overridable.
 """
@@ -57,7 +57,7 @@ NVIDIA_MODEL = "nvidia_nim/z-ai/glm-5.3-flash"
 # --- Groq: fast per call, low output-token ceiling. Carries every hosted agent.
 GROQ_MODEL = "groq/qwen/qwen3.8-27b"
 
-# Strategy specifically (ADK output_schema -- needs bare JSON, no preamble).
+# Strategy and Analytics (ADK output_schema -- needs bare JSON, no preamble).
 GROQ_MODEL_ADK_JSON = "groq/qwen/qwen3.8-27b"
 
 # --- Gemini: 20 req/DAY, so only agents that fire once per run.
@@ -83,7 +83,7 @@ AGENT_MODELS = {
     # engine -- once per cycle
     "strategy": GROQ_MODEL_ADK_JSON,
     "finance": GROQ_MODEL,
-    "analytics": GROQ_MODEL,
+    "analytics": GROQ_MODEL_ADK_JSON,
     # engine fan-out -- run concurrently (see orchestration/cycle.py)
     "marketing": GROQ_MODEL,
     "product": GROQ_MODEL,

@@ -36,6 +36,7 @@ from agents._brief import EXISTING, LAUNCH, OFFERING_LABELS, PlanBrief
 from agents._guardrails import clean_text_fields, funding_problems, strategy_problems
 from agents._money import fmt_money
 from agents._segments import customer_table, describe_segments, segment_summary
+from agents._text import as_text
 from agents.analytics import AnalyticsAgent, AnalyticsReport, PeriodMetrics, describe_file_metrics, describe_period
 from agents.crm import CRMAgent, CRMOutput
 from agents.finance import BudgetAllocation, FinanceAgent
@@ -257,13 +258,16 @@ def launch_sections(
             f"Monthly fixed costs: {fmt_money(business.monthly_fixed_costs, currency)}; cost to deliver one unit: "
             f"{fmt_money(business.unit_cost, currency)} ('—' means not given)."
         ),
+        # as_text, not the raw field: these are lists of points now, and an
+        # f-string would hand the model a Python repr full of brackets and quotes.
         "research": (
-            f"Market research: size {research.market_size_estimate} Competitors: {research.key_competitors} "
-            f"Opportunities: {research.opportunities} Risks: {research.risks}"
+            f"Market research: size {research.market_size_estimate} "
+            f"Competitors: {as_text(research.key_competitors)} "
+            f"Opportunities: {as_text(research.opportunities)} Risks: {as_text(research.risks)}"
         ),
         "founder_answers": f"Founder's answers:\n{answers}" if answers else "",
         "advisor": (
-            f"Founder Advisor verdict: {decision.verdict} -- {decision.rationale} Seed plan: positioning "
+            f"Founder Advisor verdict: {decision.verdict} -- {as_text(decision.rationale)} Seed plan: positioning "
             f"'{decision.seed_positioning}', price {fmt_money(decision.seed_price, currency)} "
             f"{decision.seed_price_unit}, budget priorities {decision.seed_priorities}."
         ),

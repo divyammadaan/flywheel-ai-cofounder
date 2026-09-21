@@ -54,7 +54,7 @@ try:
         run_funding,
         run_launch_plan,
     )
-    from observability.dashboard.format import as_bullets, headline, numbered_items
+    from observability.dashboard.format import as_list, headline
     from observability.usage import usage_summary
     from tools.landing_page import build_landing_page
     from tools.orders_file import OrdersFileError, load_orders
@@ -403,23 +403,39 @@ analytics = {r["cycle"]: r["decision"] for r in records if r["agent"] == "analyt
 # The agents write paragraphs, and a plan read as a wall of text is unusable.
 # So every section leads with its numbers, then a one-line takeaway, then
 # bullets, and keeps the long reasoning behind an expander.
-def prose(text, lead: bool = True) -> None:
-    """First sentence as the lead, the rest as bullets."""
-    first, rest = headline(text)
-    if not first:
+def points_of(value) -> list[str]:
+    """A field as a list of points.
+
+    Agents return arrays now. A Decision Record written before that change
+    holds the same field as one paragraph, and the dashboard reads records
+    straight out of SQLite -- so old runs still have to render. as_list covers
+    both: a list passes through, a paragraph is split only where it has real
+    structure.
+    """
+    return as_list(value)
+
+
+def prose(value, lead: bool = True) -> None:
+    """The lead point in bold, the rest as bullets."""
+    items = points_of(value)
+    if not items:
         return
+    first, rest = items[0], items[1:]
+    # A legacy paragraph that didn't split still wants its first sentence as
+    # the lead, which is what headline() did before the schema change.
+    if not rest and not isinstance(value, (list, tuple)):
+        first, rest = headline(value)
+        if not first:
+            return
     st.markdown(f"**{md_escape(first)}**" if lead else md_escape(first))
     for item in rest:
         st.markdown(f"- {md_escape(item)}")
 
 
-def bullets(text) -> None:
-    """Bullets when the text has structure, an untouched paragraph when not."""
-    items = as_bullets(text)
-    for item in items:
+def bullets(value) -> None:
+    """Every point as its own bullet."""
+    for item in points_of(value):
         st.markdown(f"- {md_escape(item)}")
-    if not items and str(text or "").strip():
-        st.markdown(md_escape(text))
 
 
 def labelled(label: str, text) -> None:
@@ -569,7 +585,7 @@ if "analytics" in trail:
     m2.metric("Debt / annual revenue", pct(k.get("debt_to_revenue")))
     m3.metric("CAC", fmt_money(k.get("cac"), cur) if k.get("cac") is not None else "not reported")
     m4.metric("Churn", pct(k.get("churn_rate")))
-    prose(a.get("summary", ""))
+    prose([a["headline"], *a.get("points", [])] if a.get("headline") else a.get("summary", ""))
 
     fm = a.get("file_metrics")
     if fm:
@@ -833,12 +849,8 @@ if "funding" in trail:
     with right:
         labelled("Non-equity alternatives", d.get("alternative_funding", ""))
     with st.expander("📑 Pitch deck outline"):
-        slides = numbered_items(d.get("pitch_deck_outline", ""))
-        if slides:
-            for i, slide in enumerate(slides, 1):
-                st.markdown(f"{i}. {md_escape(slide)}")
-        else:
-            bullets(d.get("pitch_deck_outline", ""))
+        for i, slide in enumerate(points_of(d.get("pitch_deck_outline", "")), 1):
+            st.markdown(f"{i}. {md_escape(slide)}")
     with st.expander("Why this readiness call"):
         prose(d.get("readiness_rationale", ""), lead=False)
 

@@ -129,3 +129,36 @@ def test_an_oversized_pre_seed_round_is_caught():
 def test_traction_that_cannot_produce_the_revenue_milestone_is_caught():
     problems = funding_problems(_roadmap(traction_milestones="80–100 paying subscribers before the round"), "INR", price=999)
     assert any("doesn't match the revenue milestone" in p for p in problems)
+
+
+# ------------------------------------- list-valued fields (schema change) --
+# rationale and traction_milestones became arrays so the UI can render them as
+# real lists. The checkers read them as text, so both shapes must still work:
+# a live agent now sends a list, while a Decision Record written before the
+# change replays a paragraph.
+
+
+def test_demeaning_wording_is_caught_inside_a_list_rationale():
+    plan = _plan(
+        rationale=[
+            "Priced under the Rs 900 customers said they would pay.",
+            "Targets families in Koramangala, excluding slum communities.",
+        ]
+    )
+    problems = strategy_problems(plan, COFFEE, reference_price=960)
+    assert any("demeaning" in p for p in problems)
+
+
+def test_a_list_rationale_is_not_read_as_its_python_repr():
+    # str() on a list would hand the word checks "['Farm-direct...']" --
+    # brackets and quotes glued to the first and last words.
+    plan = _plan(positioning="Monthly box", rationale=["Farm-direct coffee roasted to order."])
+    assert strategy_problems(plan, COFFEE, reference_price=899) == []
+
+
+def test_traction_milestones_are_scanned_for_customer_counts_as_a_list():
+    # The real check: 80-100 subscribers can't fund a ₹15 lakh monthly target
+    # at ₹999 each. It must still fire when the milestones arrive as an array.
+    roadmap = _roadmap(traction_milestones=["80–100 paying subscribers before the round", "Churn under 6%"])
+    problems = funding_problems(roadmap, "INR", price=999)
+    assert problems, "a traction milestone far too small for the revenue milestone should be flagged"

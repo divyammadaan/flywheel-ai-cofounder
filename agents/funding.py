@@ -31,6 +31,7 @@ from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from agents.analytics import describe_period
 from agents.intake import BusinessInput
 from observability.usage import register_role
@@ -65,7 +66,10 @@ directly costs the founder waiting time.)"""
 
 class FundingSchema(BaseModel):
     readiness: str = Field(description="One of: NOT_READY, READY_PRE_SEED, READY_SEED, READY_SERIES_A")
-    readiness_rationale: str = Field(description="2-3 sentences citing the plan or the reported numbers")
+    readiness_rationale: list[str] = Field(
+        default_factory=list,
+        description="2-3 reasons, one per entry, each a complete sentence citing the plan or the numbers",
+    )
     target_raise_date: str = Field(description="When to target the first or next raise, as a quarter and year, e.g. 'Q2 2028'")
     target_stage: str = Field(description="Stage and rough size of the raise, in the plan currency")
     revenue_milestone: str = Field(
@@ -74,14 +78,18 @@ class FundingSchema(BaseModel):
     profit_milestone: str = Field(
         description="Profitability to reach first, e.g. 'contribution-margin positive for 6 straight months'"
     )
-    traction_milestones: str = Field(description="Customer or traction numbers to reach first")
+    traction_milestones: list[str] = Field(
+        default_factory=list, description="Customer or traction numbers to reach first, one milestone per entry"
+    )
     investor_profile: str = Field(
         description="Type/profile of investor to target -- stage, ticket size, sector, geography. No named firms."
     )
     alternative_funding: str = Field(
         description="Non-equity options that may fit better right now (revenue-based, grants, bank/MSME loans, bootstrapping)"
     )
-    pitch_deck_outline: str = Field(description="Slide-by-slide outline specific to this business")
+    pitch_deck_outline: list[str] = Field(
+        default_factory=list, description="Slide-by-slide outline specific to this business, one slide per entry"
+    )
 
 
 @dataclass
@@ -89,15 +97,15 @@ class FundingPlan:
     mode: str
     currency: str
     readiness: str
-    readiness_rationale: str
+    readiness_rationale: list
     target_raise_date: str
     target_stage: str
     revenue_milestone: str
     profit_milestone: str
-    traction_milestones: str
+    traction_milestones: list
     investor_profile: str
     alternative_funding: str
-    pitch_deck_outline: str
+    pitch_deck_outline: list
     # Problems the checker still found after the one retry -- shown to the founder.
     warnings: list = field(default_factory=list)
 
@@ -165,13 +173,13 @@ class FundingAgent:
             mode=mode,
             currency=currency,
             readiness=p.readiness,
-            readiness_rationale=p.readiness_rationale,
+            readiness_rationale=as_list(p.readiness_rationale),
             target_raise_date=p.target_raise_date,
             target_stage=p.target_stage,
             revenue_milestone=p.revenue_milestone,
             profit_milestone=p.profit_milestone,
-            traction_milestones=p.traction_milestones,
+            traction_milestones=as_list(p.traction_milestones),
             investor_profile=p.investor_profile,
             alternative_funding=p.alternative_funding,
-            pitch_deck_outline=p.pitch_deck_outline,
+            pitch_deck_outline=as_list(p.pitch_deck_outline),
         )

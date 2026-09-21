@@ -17,6 +17,8 @@ call: they are fast, testable, and can't be talked out of their answer.
 
 import re
 
+from agents._text import as_text
+
 _DEMEANING = re.compile(
     r"\b(slums?|ghettos?|shanty ?towns?|low[- ]?class|lower[- ]class|uncivili[sz]ed|"
     r"backward (?:areas?|people|communit(?:y|ies)))\b",
@@ -98,8 +100,11 @@ def strategy_problems(plan, business, reference_price: float | None = None) -> l
     price), if known.
     """
     problems = []
+    # as_text, not str(): rationale is a list of points now, and str() on a
+    # list would wrap every reason in quotes and brackets before the word
+    # checks below ever see it.
     text = " ".join(
-        str(getattr(plan, field, "") or "") for field in ("positioning", "target_customer", "price_unit", "rationale")
+        as_text(getattr(plan, field, "")) for field in ("positioning", "target_customer", "price_unit", "rationale")
     )
 
     bad = demeaning_terms(text)
@@ -216,7 +221,7 @@ def funding_problems(plan, currency: str, price: float | None = None) -> list[st
 
     monthly = _monthly_revenue(plan.revenue_milestone)
     counts = [
-        _number(high or low) for low, high in _CUSTOMER_COUNT.findall(plan.traction_milestones or "")
+        _number(high or low) for low, high in _CUSTOMER_COUNT.findall(as_text(plan.traction_milestones))
     ]
     if price and monthly and counts:
         implied = monthly / price

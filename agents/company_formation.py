@@ -22,6 +22,7 @@ from pydantic import BaseModel, Field
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._retry import retry_on_rate_limit
+from agents._text import as_list
 from agents.intake import BusinessInput
 from observability.usage import register_role
 
@@ -68,9 +69,16 @@ waiting time.)"""
 class FormationSchema(BaseModel):
     recommended_entity: str = Field(description="Single recommended entity type, e.g. 'Private Limited Company'")
     entity_rationale: str = Field(description="1-2 sentences on why this entity fits this business")
-    registration_steps: str = Field(description="Numbered, ordered steps to register the entity")
-    licenses_and_permits: str = Field(description="Licences/permits this specific business likely needs")
-    tax_registrations: str = Field(description="Tax registrations required (e.g. GST, EIN, sales tax permit)")
+    # Arrays, not paragraphs: a founder works through these as a checklist.
+    registration_steps: list[str] = Field(
+        default_factory=list, description="Ordered steps to register the entity, one step per entry"
+    )
+    licenses_and_permits: list[str] = Field(
+        default_factory=list, description="Licences/permits this business needs, one per entry"
+    )
+    tax_registrations: list[str] = Field(
+        default_factory=list, description="Tax registrations required (e.g. GST, EIN), one per entry"
+    )
     estimated_cost: str = Field(description="Rough cost range, clearly flagged as an estimate")
     estimated_timeline: str = Field(description="Rough timeline range, clearly flagged as an estimate")
 
@@ -79,9 +87,9 @@ class FormationSchema(BaseModel):
 class FormationPlan:
     recommended_entity: str
     entity_rationale: str
-    registration_steps: str
-    licenses_and_permits: str
-    tax_registrations: str
+    registration_steps: list
+    licenses_and_permits: list
+    tax_registrations: list
     estimated_cost: str
     estimated_timeline: str
     disclaimer: str = DISCLAIMER
@@ -125,9 +133,9 @@ class CompanyFormationAgent:
         return FormationPlan(
             recommended_entity=p.recommended_entity,
             entity_rationale=p.entity_rationale,
-            registration_steps=p.registration_steps,
-            licenses_and_permits=p.licenses_and_permits,
-            tax_registrations=p.tax_registrations,
+            registration_steps=as_list(p.registration_steps),
+            licenses_and_permits=as_list(p.licenses_and_permits),
+            tax_registrations=as_list(p.tax_registrations),
             estimated_cost=p.estimated_cost,
             estimated_timeline=p.estimated_timeline,
         )
