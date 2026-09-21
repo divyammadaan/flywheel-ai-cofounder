@@ -22,6 +22,9 @@ pydantic
 
 # Storage
 chromadb
+sqlalchemy          # decision records + usage, over SQLite or Postgres
+alembic             # schema migrations
+psycopg[binary]     # Postgres driver; unused on the default SQLite path
 
 # Uploaded order files (.csv / .xlsx)
 pandas

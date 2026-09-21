@@ -58,6 +58,7 @@ from observability.decision_record import DecisionRecord, log_decision, reset_re
 from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, run_funding, run_launch_plan
 from orchestration.report import bullets, print_funding, print_plan, print_sources, print_usage, rule
+from storage import update_run
 from tools.landing_page import write_landing_page
 
 
@@ -72,7 +73,7 @@ def validate(
     skip_formation: bool = False,
     skip_funding: bool = False,
 ) -> None:
-    reset_records()
+    run_id = reset_records()
 
     rule("INTAKE")
     business = IntakeAgent().process(raw_pitch)
@@ -84,6 +85,9 @@ def validate(
     business.unit_cost = unit_cost
     business.runway_months = runway_months
     log_decision(DecisionRecord(PRECYCLE, "intake", {"raw_input": raw_pitch}, business.__dict__))
+    # Name the run after the business, so run history reads as a list of
+    # businesses rather than a list of ids.
+    update_run(run_id, mode=business.mode, label=business.business_summary)
     print(f"Summary : {business.business_summary}")
     print(f"Industry: {business.industry} ({business.offering_type})")
     print(f"Region  : {business.target_region}")
@@ -148,6 +152,7 @@ def validate(
     except PlanBlocked as blocked:
         rule("PLAN BLOCKED")
         print(blocked)
+        update_run(run_id, status="blocked", error=str(blocked))
         print_usage(usage_summary())
         return
     print_plan(plan)
@@ -158,6 +163,7 @@ def validate(
     if not skip_funding:
         print_funding(run_funding(business, plan))
 
+    update_run(run_id, status="done")
     print_usage(usage_summary())
 
 

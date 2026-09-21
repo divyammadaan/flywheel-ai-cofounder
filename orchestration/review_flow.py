@@ -43,10 +43,11 @@ load_dotenv()
 from agents._money import SUPPORTED_CURRENCIES, fmt_money
 from agents.analytics import PeriodMetrics
 from agents.intake import BusinessInput, IntakeAgent
-from observability.decision_record import DecisionRecord, get_records, log_decision, reset_records
+from observability.decision_record import DecisionRecord, current_run, get_records, log_decision, reset_records
 from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, next_review_cycle, run_business_review, run_funding
 from orchestration.report import print_analytics, print_funding, print_plan, print_usage, rule
+from storage import update_run
 from tools.landing_page import write_landing_page
 from tools.orders_file import OrdersFileError, load_orders
 
@@ -85,7 +86,7 @@ def review(
     else:
         if not description:
             raise SystemExit("--description is required unless you use --append.")
-        reset_records()
+        run_id = reset_records()
         rule("INTAKE")
         business = IntakeAgent().process(description)
         business.mode = "existing_business"
@@ -96,10 +97,12 @@ def review(
     business.existing_metrics = asdict(metrics)
     if not append:
         log_decision(DecisionRecord(PRECYCLE, "intake", {"raw_input": description}, business.__dict__))
+        update_run(run_id, mode=business.mode, label=business.business_summary)
         print(f"Summary : {business.business_summary}")
         print(f"Industry: {business.industry} ({business.offering_type})")
         print(f"Region  : {business.target_region}")
 
+    run_id = current_run()
     cycle = next_review_cycle()
     print(f"\nPeriod {cycle}: {metrics.period_label}, budget to deploy {fmt_money(budget, business.currency)}")
     if orders is None:
@@ -110,6 +113,7 @@ def review(
     except PlanBlocked as blocked:
         rule("PLAN BLOCKED")
         print(blocked)
+        update_run(run_id, status="blocked", error=str(blocked))
         print_usage(usage_summary())
         return
     print_analytics(plan.analytics)
@@ -121,6 +125,7 @@ def review(
     if not skip_funding:
         print_funding(run_funding(business, plan))
 
+    update_run(run_id, status="done")
     print_usage(usage_summary())
 
 

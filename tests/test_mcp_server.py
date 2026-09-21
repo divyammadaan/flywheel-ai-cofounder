@@ -5,19 +5,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest
 
-import observability.decision_record as decision_record_module
 from mcp.shared.memory import create_connected_server_and_client_session
 from observability.decision_record import DecisionRecord, log_decision
 from tools.mcp_server import mcp
 
 
 @pytest.fixture(autouse=True)
-def seed_records(tmp_path, monkeypatch):
-    # Isolate each test on its own DB file -- decision_record.py otherwise
-    # writes to the real data/flywheel.db, so records would accumulate
-    # across test runs and leak between tests.
-    monkeypatch.setattr(decision_record_module, "DB_PATH", tmp_path / "test_flywheel.db")
-
+def seed_records():
+    # Isolation comes from the autouse fixture in conftest.py, which points
+    # FLYWHEEL_DATABASE_URL at a temp file for every test.
     log_decision(DecisionRecord(1, "strategy", {"previous_summary": None}, {"positioning": "launch", "pricing": 40.0}))
     log_decision(DecisionRecord(1, "analytics", {}, {"summary": "Cycle 1 went fine."}))
     log_decision(DecisionRecord(2, "analytics", {}, {"summary": "Cycle 2 improved on cycle 1."}))

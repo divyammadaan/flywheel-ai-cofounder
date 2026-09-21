@@ -1,0 +1,53 @@
+# Local infrastructure for the production stack.
+#
+# Nothing here is required for the course demo: with no FLYWHEEL_DATABASE_URL
+# set, Flywheel uses its own SQLite file and the CLIs, the MCP server and the
+# test suite run exactly as the README describes. This file exists so the
+# Postgres path can be exercised on a laptop, and so deployment later is a
+# change of host rather than a change of design.
+#
+# NOT YET VERIFIED: Docker is not installed on the machine this was written
+# on, so these services have not been started. Treat the versions and the
+# healthcheck as reviewed-but-untested until someone runs `docker compose up`.
+#
+#   docker compose up -d
+#   export FLYWHEEL_DATABASE_URL=postgresql+psycopg://flywheel:flywheel@localhost:5432/flywheel
+#   python -m alembic upgrade head
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flywheel-postgres
+    environment:
+      POSTGRES_USER: flywheel
+      POSTGRES_PASSWORD: flywheel
+      POSTGRES_DB: flywheel
+    ports:
+      # Bound to localhost only: this holds founders' financials and customer
+      # lists, and the default Postgres credentials above are not a secret.
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Migrations must not start against a server that is still initialising.
+      test: ["CMD-SHELL", "pg_isready -U flywheel -d flywheel"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: flywheel-redis
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -11,14 +11,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pytest
 
 import agents._cache as cache_mod
-import observability.decision_record as decision_record_module
 import observability.usage as usage_mod
 from observability.usage import record_usage, usage_summary
 
 
 @pytest.fixture(autouse=True)
 def isolated(tmp_path, monkeypatch):
-    monkeypatch.setattr(decision_record_module, "DB_PATH", tmp_path / "flywheel.db")
+    # The database is isolated by the autouse fixture in conftest.py.
     monkeypatch.setattr(cache_mod, "CACHE_DIR", tmp_path / "llm_cache")
     monkeypatch.setattr(usage_mod, "_install_litellm_hook", lambda: None)
     monkeypatch.setattr(usage_mod, "_ROLE_TO_AGENT", {})

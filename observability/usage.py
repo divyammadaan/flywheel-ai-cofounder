@@ -1,8 +1,9 @@
 """LLM usage per agent: calls, tokens, time and cache hits.
 
 Every model call is recorded here, so a run shows where its tokens went and
-what the response cache saved. Stored in the same SQLite file as the Decision
-Records, so it is cleared with them when a fresh run starts.
+what the response cache saved. Rows are scoped to a run, alongside the Decision
+Records, so a summary reports the run it belongs to rather than everything the
+database has ever seen.
 
 How each framework's calls get counted -- measured, because the obvious
 sources turned out to be empty:
@@ -19,27 +20,11 @@ sources turned out to be empty:
 """
 
 import re
-import sqlite3
 import threading
 import time
-from contextlib import contextmanager
-from datetime import datetime, timezone
 
-from observability import decision_record
+from storage.usage import add_usage, fetch_usage, usage_row_count
 
-_SCHEMA = """
-CREATE TABLE IF NOT EXISTS llm_usage (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    agent TEXT NOT NULL,
-    model TEXT,
-    calls INTEGER NOT NULL,
-    prompt_tokens INTEGER NOT NULL,
-    completion_tokens INTEGER NOT NULL,
-    seconds REAL NOT NULL,
-    cached INTEGER NOT NULL,
-    timestamp TEXT NOT NULL
-);
-"""
 # The planning agents run in parallel threads, and litellm reports from its
 # own logging thread; all of them write here.
 _lock = threading.Lock()
@@ -47,21 +32,6 @@ _lock = threading.Lock()
 _ROLE_TO_AGENT: dict[str, tuple[str, str | None]] = {}
 _CREW_PROMPT_ROLE = re.compile(r"^\s*SYSTEM:\s*You are (.+?)\.")
 _hook_installed = False
-
-
-@contextmanager
-def _connect():
-    """Committed and closed when the block ends -- an unclosed connection keeps
-    the file locked on Windows (see decision_record._connect)."""
-    path = decision_record.DB_PATH  # read at call time, so tests can point it elsewhere
-    path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path)
-    try:
-        conn.execute(_SCHEMA)
-        yield conn
-        conn.commit()
-    finally:
-        conn.close()
 
 
 def record_usage(
@@ -73,20 +43,21 @@ def record_usage(
     calls: int = 1,
     cached: bool = False,
 ) -> None:
-    with _lock, _connect() as conn:
-        conn.execute(
-            "INSERT INTO llm_usage (agent, model, calls, prompt_tokens, completion_tokens, seconds, cached, timestamp) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                agent,
-                model,
-                int(calls),
-                int(prompt_tokens or 0),
-                int(completion_tokens or 0),
-                round(float(seconds), 2),
-                int(bool(cached)),
-                datetime.now(timezone.utc).isoformat(),
-            ),
+    """Record one model call against the current run.
+
+    The lock is still held here: the planning agents fan out in parallel and
+    litellm reports from its own logging thread, so several callers reach this
+    at once.
+    """
+    with _lock:
+        add_usage(
+            agent=agent,
+            model=model,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            seconds=seconds,
+            calls=calls,
+            cached=cached,
         )
 
 
@@ -153,11 +124,6 @@ def record_adk_usage(agent: str, model: str | None, usage_metadata: list, starte
 # --------------------------------------------------------------- summary --
 
 
-def _row_count() -> int:
-    with _connect() as conn:
-        return conn.execute("SELECT COUNT(*) FROM llm_usage").fetchone()[0]
-
-
 def usage_summary(settle_seconds: float = 3.0) -> dict:
     """Per-agent totals for the current run, in the order agents first ran.
 
@@ -166,30 +132,14 @@ def usage_summary(settle_seconds: float = 3.0) -> dict:
     for the row count to stop changing before summarising.
     """
     deadline = time.monotonic() + settle_seconds
-    count, stable_since = _row_count(), time.monotonic()
+    count, stable_since = usage_row_count(), time.monotonic()
     while time.monotonic() < deadline and time.monotonic() - stable_since < 1.0:
         time.sleep(0.25)
-        current = _row_count()
+        current = usage_row_count()
         if current != count:
             count, stable_since = current, time.monotonic()
 
-    with _connect() as conn:
-        rows = conn.execute(
-            "SELECT agent, SUM(CASE WHEN cached = 0 THEN calls ELSE 0 END), SUM(cached), "
-            "SUM(prompt_tokens), SUM(completion_tokens), SUM(seconds) "
-            "FROM llm_usage GROUP BY agent ORDER BY MIN(id)"
-        ).fetchall()
-    agents = [
-        {
-            "agent": agent,
-            "calls": int(calls or 0),
-            "cache_hits": int(hits or 0),
-            "prompt_tokens": int(prompt or 0),
-            "completion_tokens": int(completion or 0),
-            "seconds": round(float(seconds or 0), 1),
-        }
-        for agent, calls, hits, prompt, completion, seconds in rows
-    ]
+    agents = fetch_usage()
     totals = {key: sum(a[key] for a in agents) for key in ("calls", "cache_hits", "prompt_tokens", "completion_tokens")}
     totals["seconds"] = round(sum(a["seconds"] for a in agents), 1)
     return {"agents": agents, "totals": totals}
