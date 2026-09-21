@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+/*
+  Flywheel's design tokens.
+
+  The palette is deliberately small and almost colourless. A founder reads this
+  to decide where to put their money, so colour is spent only where it carries
+  meaning -- a verdict, a warning, a figure that is exact -- and never on
+  decoration. Anything that is merely structure is a shade of grey.
+
+  The greys are warm (a touch of yellow/red) rather than blue. Blue-greys read
+  as "system monitoring"; this is closer to a document someone sits with.
+*/
+
+@theme {
+  --color-canvas: oklch(0.994 0.002 85);
+  --color-surface: oklch(1 0 0);
+  --color-surface-sunken: oklch(0.975 0.003 85);
+  --color-line: oklch(0.917 0.004 85);
+  --color-line-strong: oklch(0.85 0.005 85);
+
+  --color-ink: oklch(0.21 0.008 75);
+  --color-ink-muted: oklch(0.47 0.008 75);
+  --color-ink-faint: oklch(0.63 0.007 75);
+
+  /* One accent, used for interaction and for nothing else. */
+  --color-accent: oklch(0.52 0.13 245);
+  --color-accent-hover: oklch(0.46 0.14 245);
+  --color-accent-soft: oklch(0.96 0.02 245);
+
+  /* Verdicts. These are the only place three colours appear together. */
+  --color-go: oklch(0.52 0.13 152);
+  --color-go-soft: oklch(0.96 0.03 152);
+  --color-pivot: oklch(0.58 0.12 75);
+  --color-pivot-soft: oklch(0.96 0.04 75);
+  --color-nogo: oklch(0.54 0.16 25);
+  --color-nogo-soft: oklch(0.96 0.03 25);
+
+  --color-warning: oklch(0.55 0.12 60);
+  --color-warning-soft: oklch(0.97 0.035 75);
+
+  --radius-card: 0.75rem;
+  --radius-tile: 0.5rem;
+
+  /*
+    Type scale. Only six sizes: every extra size is another chance for two
+    things that mean the same to look different.
+  */
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.02em;
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.015em;
+  --text-heading: 1.0625rem;
+  --text-heading--line-height: 1.4;
+  --text-heading--letter-spacing: -0.005em;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.65;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.5;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.45;
+
+  --shadow-card: 0 1px 2px oklch(0.21 0.008 75 / 0.04), 0 1px 3px oklch(0.21 0.008 75 / 0.03);
+  --shadow-raised: 0 4px 12px oklch(0.21 0.008 75 / 0.07), 0 1px 3px oklch(0.21 0.008 75 / 0.05);
+}
+
+/*
+  Dark mode follows the system. The guard lets a future toggle force light by
+  setting data-theme="light" without fighting the media query.
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-canvas: oklch(0.165 0.006 75);
+    --color-surface: oklch(0.205 0.007 75);
+    --color-surface-sunken: oklch(0.185 0.006 75);
+    --color-line: oklch(0.28 0.008 75);
+    --color-line-strong: oklch(0.36 0.009 75);
+
+    --color-ink: oklch(0.95 0.004 85);
+    --color-ink-muted: oklch(0.72 0.006 85);
+    --color-ink-faint: oklch(0.56 0.007 85);
+
+    --color-accent: oklch(0.72 0.12 245);
+    --color-accent-hover: oklch(0.79 0.11 245);
+    --color-accent-soft: oklch(0.28 0.05 245);
+
+    --color-go: oklch(0.74 0.14 152);
+    --color-go-soft: oklch(0.26 0.05 152);
+    --color-pivot: oklch(0.79 0.12 75);
+    --color-pivot-soft: oklch(0.28 0.05 75);
+    --color-nogo: oklch(0.71 0.15 25);
+    --color-nogo-soft: oklch(0.28 0.06 25);
+
+    --color-warning: oklch(0.79 0.11 70);
+    --color-warning-soft: oklch(0.27 0.045 70);
+
+    --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 1px 3px oklch(0 0 0 / 0.2);
+    --shadow-raised: 0 4px 14px oklch(0 0 0 / 0.4), 0 1px 3px oklch(0 0 0 / 0.3);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-canvas: oklch(0.165 0.006 75);
+  --color-surface: oklch(0.205 0.007 75);
+  --color-surface-sunken: oklch(0.185 0.006 75);
+  --color-line: oklch(0.28 0.008 75);
+  --color-line-strong: oklch(0.36 0.009 75);
+
+  --color-ink: oklch(0.95 0.004 85);
+  --color-ink-muted: oklch(0.72 0.006 85);
+  --color-ink-faint: oklch(0.56 0.007 85);
+
+  --color-accent: oklch(0.72 0.12 245);
+  --color-accent-hover: oklch(0.79 0.11 245);
+  --color-accent-soft: oklch(0.28 0.05 245);
+
+  --color-go: oklch(0.74 0.14 152);
+  --color-go-soft: oklch(0.26 0.05 152);
+  --color-pivot: oklch(0.79 0.12 75);
+  --color-pivot-soft: oklch(0.28 0.05 75);
+  --color-nogo: oklch(0.71 0.15 25);
+  --color-nogo-soft: oklch(0.28 0.06 25);
+
+  --color-warning: oklch(0.79 0.11 70);
+  --color-warning-soft: oklch(0.27 0.045 70);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  /*
+    Figures line up in columns and never change width as they animate or
+    update -- a budget that jitters while you read it reads as unreliable.
+  */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "cv01" 1;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
