@@ -16,6 +16,7 @@ import { api } from "@/lib/api";
 import type { Run } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Your plans" };
 
 export default async function RunsPage() {
   let runs: Run[] = [];

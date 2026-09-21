@@ -15,6 +15,7 @@
  * which is also what the empty space on a wide screen is for.
  */
 
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AnalyticsSection } from "@/components/analytics-section";
@@ -31,11 +32,31 @@ import { RunProgress } from "@/components/run-progress";
 import { StrategySection } from "@/components/strategy-section";
 import { UsageSection } from "@/components/usage-section";
 import { VerdictBlock } from "@/components/verdict";
-import { ApiError, api, toPlan } from "@/lib/api";
-import type { Plan, RunEvent, SegmentMeta, Usage } from "@/lib/types";
+import { ApiError, api, toPlan, wasRevised } from "@/lib/api";
+import type { Plan, RefinableAgent, RunEvent, SegmentMeta, Usage } from "@/lib/types";
+import { REFINABLE_AGENTS } from "@/lib/types";
 
 // A run changes while it is working, so this page is never cached.
 export const dynamic = "force-dynamic";
+
+/** The tab shows which plan this is -- useful the moment a founder has more
+ * than one open. Falls back silently; a page that can't build a title still
+ * renders, and the 404/error path below handles a genuinely missing run. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const runId = Number(id);
+  if (!Number.isFinite(runId)) return {};
+  try {
+    const detail = await api.getRun(runId);
+    return { title: detail.run.label ?? `Plan ${runId}` };
+  } catch {
+    return {};
+  }
+}
 
 export default async function RunPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -70,6 +91,11 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   }
 
   const questions = questionsFrom(detail.events);
+  // Which of this cycle's agents are already a redone version -- drives the
+  // small "Revised on your feedback" note next to each "Suggest a change".
+  const revisedAgents = new Set<RefinableAgent>(
+    REFINABLE_AGENTS.filter((agent) => wasRevised(detail, agent, plan.cycle)),
+  );
 
   return (
     <AppShell aside={<RunIndex sections={sectionsOf(plan)} />}>
@@ -122,13 +148,29 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
             product={plan.product}
             currency={currency}
             runId={runId}
+            cycle={plan.cycle}
+            revisedAgents={revisedAgents}
           />
 
           {plan.crm ? (
-            <CrmSection crm={plan.crm} currency={currency} meta={segmentMeta} />
+            <CrmSection
+              crm={plan.crm}
+              currency={currency}
+              meta={segmentMeta}
+              runId={runId}
+              cycle={plan.cycle}
+              revised={revisedAgents.has("crm")}
+            />
           ) : null}
 
-          {plan.funding ? <FundingSection funding={plan.funding} /> : null}
+          {plan.funding ? (
+            <FundingSection
+              funding={plan.funding}
+              runId={runId}
+              cycle={plan.cycle}
+              revised={revisedAgents.has("funding")}
+            />
+          ) : null}
 
           <BackgroundSection research={plan.research} formation={plan.formation} />
 

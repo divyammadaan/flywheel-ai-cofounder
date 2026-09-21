@@ -17,6 +17,10 @@ import { relativeTime } from "@/lib/format";
 import type { Run } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+// A title.template on the root layout never applies to app/page.tsx: they
+// are the SAME route segment, not parent and child, so this is written out
+// in full rather than relying on the "— Flywheel" suffix.
+export const metadata = { title: "Flywheel — an AI co-founder" };
 
 export default async function HomePage() {
   let recent: Run[] = [];

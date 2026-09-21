@@ -19,6 +19,7 @@ import {
   Section,
   Warning,
 } from "@/components/primitives";
+import { RefineControl } from "@/components/refine-control";
 import { asList } from "@/lib/format";
 import type { Funding } from "@/lib/types";
 
@@ -29,7 +30,17 @@ const READINESS_COPY: Record<string, string> = {
   READY_SERIES_A: "Ready — Series A",
 };
 
-export function FundingSection({ funding }: { funding: Funding }) {
+export function FundingSection({
+  funding,
+  runId,
+  cycle,
+  revised,
+}: {
+  funding: Funding;
+  runId: number;
+  cycle: number;
+  revised: boolean;
+}) {
   const readiness = READINESS_COPY[funding.readiness] ?? funding.readiness;
   const ready = funding.readiness !== "NOT_READY";
 
@@ -123,6 +134,7 @@ export function FundingSection({ funding }: { funding: Funding }) {
           ) : null}
 
           <Attribution agent="funding" />
+          <RefineControl runId={runId} agent="funding" cycle={cycle} revised={revised} />
         </div>
       </Card>
     </Section>

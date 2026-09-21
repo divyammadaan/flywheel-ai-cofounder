@@ -147,3 +147,23 @@ class RunDetail(BaseModel):
     run: RunSummary
     records: list[RecordOut]
     events: list[EventOut]
+
+
+class RefineRequest(BaseModel):
+    """Redo one agent's output on the founder's own instruction.
+
+    `agent` is checked again in `orchestration.cycle.refine_execution_agent`
+    against the same allowed set -- validated here too so a bad request
+    fails fast with a field error instead of a 500 from inside the engine.
+    """
+
+    agent: str = Field(description="marketing, sales, product, crm or funding")
+    cycle: int = Field(ge=1, description="Which period's plan to refine")
+    feedback: str = Field(min_length=3, description="What the founder wants changed")
+
+    @field_validator("feedback")
+    @classmethod
+    def not_just_whitespace(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("say what you'd like changed")
+        return value.strip()

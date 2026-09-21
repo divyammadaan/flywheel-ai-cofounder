@@ -28,12 +28,15 @@ from api.schemas import (
     ExistingBusinessRequest,
     NewIdeaRequest,
     OrdersPreview,
+    RecordOut,
+    RefineRequest,
     RunCreated,
     RunDetail,
     RunSummary,
     UsageOut,
 )
 from observability.usage import usage_summary
+from orchestration.cycle import REFINABLE_AGENTS, RefineError, refine_execution_agent
 from storage import (
     FINAL_KINDS,
     fetch_events,
@@ -165,6 +168,45 @@ def create_business_review_run(payload: ExistingBusinessRequest) -> dict:
     if payload.orders_token:
         uploads.discard(payload.orders_token)
     return {"run_id": run_id, "status": "running"}
+
+
+@app.post("/runs/{run_id}/refine", response_model=RecordOut)
+def refine_run(run_id: int, payload: RefineRequest) -> dict:
+    """Redo one agent's output on the founder's own instruction.
+
+    Synchronous, not a background job: unlike a full plan this is a single
+    agent call (a few seconds on Groq, up to ~20s for CRM's local model), so
+    there is nothing here worth a progress stream for. Defined as a plain
+    `def`, which FastAPI runs in its threadpool -- the event loop stays free
+    while the call is out to Groq or Ollama.
+
+    Only a finished plan can be refined: refining mid-run would race the
+    plan that is still being built, and a blocked or failed run has nothing
+    yet to refine.
+    """
+    run = _require_run(run_id)
+    if run["status"] != "done":
+        raise HTTPException(
+            status_code=409,
+            detail=f"This run is {run['status']}, so there's no finished plan yet to refine.",
+        )
+    with using_run(run_id):
+        try:
+            refine_execution_agent(payload.cycle, payload.agent, payload.feedback)
+        except RefineError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+        records = fetch_records(cycle=payload.cycle, agent=payload.agent, run_id=run_id, as_json_text=False)
+    if not records:  # pragma: no cover -- refine_execution_agent always logs one on success
+        raise HTTPException(status_code=500, detail="The refined plan wasn't recorded.")
+    return _record_out(records[-1])
+
+
+@app.get("/meta/refinable-agents")
+def refinable_agents() -> list[str]:
+    """Which agents `/runs/{id}/refine` accepts -- the UI reads this rather
+    than hardcoding the list a second time."""
+    return list(REFINABLE_AGENTS)
 
 
 @app.get("/runs/{run_id}", response_model=RunDetail)

@@ -4,11 +4,17 @@
  * Framed as the founder's questions, not as the agents' names. Nobody opens a
  * plan looking for "the Sales agent's output"; they are looking for "where do
  * my first customers come from". The agent is still named, as attribution, at
- * the bottom of each block.
+ * the bottom of each block -- alongside "Suggest a change", so reacting to a
+ * card is never more than one click from reading it.
  *
  * Every block is laid out the same way -- budget, then the specific items,
  * then the supporting judgement -- so the page has one rhythm rather than four
- * bespoke layouts.
+ * bespoke layouts. Cards in the same row stretch to equal height (`h-full` on
+ * the card, `items-stretch` -- the grid default -- on the row) with the
+ * footer pinned to the bottom via `mt-auto`: content above still varies in
+ * length, but every card now ends the same way instead of just stopping
+ * short, which is what made mismatched cards read as broken rather than as
+ * two different amounts of content.
  */
 
 import { AdImage } from "@/components/ad-image";
@@ -21,8 +27,9 @@ import {
   Section,
   Warning,
 } from "@/components/primitives";
+import { RefineControl } from "@/components/refine-control";
 import { asList, count, money } from "@/lib/format";
-import type { Marketing, Product, Sales } from "@/lib/types";
+import type { Marketing, Product, RefinableAgent, Sales } from "@/lib/types";
 
 function AreaCard({
   question,
@@ -32,6 +39,9 @@ function AreaCard({
   adjusted,
   children,
   by,
+  runId,
+  cycle,
+  revised,
 }: {
   question: string;
   area: keyof typeof AREA_LABEL;
@@ -39,10 +49,13 @@ function AreaCard({
   currency: string;
   adjusted?: boolean;
   children: React.ReactNode;
-  by: string;
+  by: RefinableAgent;
+  runId: number;
+  cycle: number;
+  revised: boolean;
 }) {
   return (
-    <Card as="section" className="overflow-hidden">
+    <Card as="section" className="flex h-full flex-col overflow-hidden">
       <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line px-6 py-5">
         <div>
           <h3 className="text-heading font-semibold text-ink">{question}</h3>
@@ -53,14 +66,17 @@ function AreaCard({
         </p>
       </header>
 
-      <div className="space-y-6 px-6 py-6">
+      <div className="flex flex-1 flex-col space-y-6 px-6 py-6">
         {adjusted ? (
           <Warning>
             The spends here were scaled down to fit the {money(budget, currency)} budget.
           </Warning>
         ) : null}
         {children}
-        <Attribution agent={by} />
+        <div className="mt-auto space-y-3 border-t border-line pt-5">
+          <Attribution agent={by} />
+          <RefineControl runId={runId} agent={by} cycle={cycle} revised={revised} />
+        </div>
       </div>
     </Card>
   );
@@ -111,12 +127,17 @@ export function DoSection({
   product,
   currency,
   runId,
+  cycle,
+  revisedAgents,
 }: {
   marketing?: Marketing;
   sales?: Sales;
   product?: Product;
   currency: string;
   runId: number;
+  cycle: number;
+  /** Which of this cycle's agents have already been redone once. */
+  revisedAgents: ReadonlySet<string>;
 }) {
   if (!marketing && !sales && !product) return null;
 
@@ -128,29 +149,57 @@ export function DoSection({
     >
       {/* Two up from xl. Marketing spans both columns because it carries the
           ad image and copy, which need the width; sales and product are lists
-          and read better in a narrower measure beside each other. */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 xl:items-start">
+          and read better in a narrower measure beside each other. No
+          `items-start`: the default `items-stretch` is what lets the cards
+          equalise height. */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         {marketing ? (
           <div className="xl:col-span-2">
-            <MarketingCard marketing={marketing} currency={currency} runId={runId} />
+            <MarketingCard
+              marketing={marketing}
+              currency={currency}
+              runId={runId}
+              cycle={cycle}
+              revised={revisedAgents.has("marketing")}
+            />
           </div>
         ) : null}
-        {sales ? <SalesCard sales={sales} currency={currency} /> : null}
-        {product ? <ProductCard product={product} currency={currency} /> : null}
+        {sales ? (
+          <SalesCard
+            sales={sales}
+            currency={currency}
+            runId={runId}
+            cycle={cycle}
+            revised={revisedAgents.has("sales")}
+          />
+        ) : null}
+        {product ? (
+          <ProductCard
+            product={product}
+            currency={currency}
+            runId={runId}
+            cycle={cycle}
+            revised={revisedAgents.has("product")}
+          />
+        ) : null}
       </div>
     </Section>
   );
+}
+
+interface CardProps {
+  runId: number;
+  cycle: number;
+  revised: boolean;
 }
 
 function MarketingCard({
   marketing,
   currency,
   runId,
-}: {
-  marketing: Marketing;
-  currency: string;
-  runId: number;
-}) {
+  cycle,
+  revised,
+}: { marketing: Marketing; currency: string } & CardProps) {
   return (
     <AreaCard
       question="How people hear about you"
@@ -159,6 +208,9 @@ function MarketingCard({
       currency={currency}
       adjusted={marketing.budget_adjusted}
       by="marketing"
+      runId={runId}
+      cycle={cycle}
+      revised={revised}
     >
       {marketing.campaigns?.length ? (
         <ul className="grid grid-cols-1 gap-x-10 gap-y-4 lg:grid-cols-2">
@@ -194,7 +246,13 @@ function MarketingCard({
   );
 }
 
-function SalesCard({ sales, currency }: { sales: Sales; currency: string }) {
+function SalesCard({
+  sales,
+  currency,
+  runId,
+  cycle,
+  revised,
+}: { sales: Sales; currency: string } & CardProps) {
   return (
     <AreaCard
       question="Where your first customers come from"
@@ -203,6 +261,9 @@ function SalesCard({ sales, currency }: { sales: Sales; currency: string }) {
       currency={currency}
       adjusted={sales.budget_adjusted}
       by="sales"
+      runId={runId}
+      cycle={cycle}
+      revised={revised}
     >
       {sales.lead_sources?.length ? (
         <ul className="space-y-4">
@@ -244,7 +305,13 @@ function SalesCard({ sales, currency }: { sales: Sales; currency: string }) {
   );
 }
 
-function ProductCard({ product, currency }: { product: Product; currency: string }) {
+function ProductCard({
+  product,
+  currency,
+  runId,
+  cycle,
+  revised,
+}: { product: Product; currency: string } & CardProps) {
   const isInventory = product.plan_type === "inventory";
 
   return (
@@ -255,6 +322,9 @@ function ProductCard({ product, currency }: { product: Product; currency: string
       currency={currency}
       adjusted={product.budget_adjusted}
       by="product"
+      runId={runId}
+      cycle={cycle}
+      revised={revised}
     >
       {product.line_items?.length ? (
         <div className="overflow-x-auto">
@@ -320,4 +390,3 @@ function ProductCard({ product, currency }: { product: Product; currency: string
     </AreaCard>
   );
 }
-

@@ -348,6 +348,137 @@ def run_business_review(
     return result
 
 
+# --------------------------------------------------------------- refine --
+
+# The agents that can be redone on the founder's own instruction. Strategy
+# and Finance are excluded on purpose: they feed every one of these, so
+# redoing either would leave the rest of the plan stale until it was also
+# redone. Redoing Sales, for example, touches nothing but Sales.
+REFINABLE_AGENTS = ("marketing", "sales", "product", "crm", "funding")
+
+
+class RefineError(ValueError):
+    """The refine request can't be carried out, in words the founder sees."""
+
+
+def _latest_record(cycle: int, agent: str) -> dict:
+    records = get_records(cycle=cycle, agent=agent)
+    if not records:
+        raise RefineError(f"There is no {agent} plan yet for this period to refine.")
+    return records[-1]
+
+
+def _brief_from_snapshot(snapshot: dict, feedback: str) -> PlanBrief:
+    """The brief a past run logged, with the founder's note appended to its
+    context. Round-trips through `asdict`/`fields` rather than `**snapshot`
+    directly, so an old record missing a field added since (or carrying one
+    since removed) doesn't crash the refine -- it's dropped or defaulted."""
+    brief_fields = {f.name for f in fields(PlanBrief)}
+    brief = PlanBrief(**{k: v for k, v in snapshot["brief"].items() if k in brief_fields})
+    note = (
+        "\n\nThe founder reviewed the plan above and asked for this change -- "
+        f"apply it, keeping everything else about the plan the same unless the "
+        f"change requires otherwise: {feedback.strip()}"
+    )
+    return replace(brief, context=brief.context + note)
+
+
+def _business_from_intake() -> BusinessInput:
+    records = get_records(cycle=PRECYCLE, agent="intake")
+    if not records:
+        raise RefineError("This run has no intake record to rebuild the business from.")
+    decision = json.loads(records[-1]["decision"])
+    business_fields = {f.name for f in fields(BusinessInput)}
+    return BusinessInput(**{k: v for k, v in decision.items() if k in business_fields})
+
+
+def refine_execution_agent(cycle: int, agent: str, feedback: str):
+    """Redo one execution agent's output with the founder's own feedback.
+
+    Rebuilds exactly the inputs the original call used -- the same
+    `PlanBrief`, the same budget -- from that agent's own last Decision
+    Record, so nothing needs to be re-derived from scratch or held in memory
+    between the first run and a later refine. Logs a NEW record rather than
+    overwriting: the founder can still see what the plan said before, and
+    `toPlan()` on the front end already treats the newest record for an
+    agent as the current one, so nothing else has to change to make the new
+    version "the" plan.
+    """
+    if not feedback.strip():
+        raise RefineError("Say what you'd like changed.")
+    if agent not in REFINABLE_AGENTS:
+        raise RefineError(
+            f"{agent} can't be refined directly -- it feeds other parts of the plan. "
+            "Ask for the change on one of: " + ", ".join(REFINABLE_AGENTS) + "."
+        )
+
+    latest = _latest_record(cycle, agent)
+    snapshot = json.loads(latest["input_snapshot"])
+    budget = snapshot["budget"]
+
+    if agent == "funding":
+        business = _business_from_intake()
+        strategy_records = get_records(cycle=cycle, agent="strategy")
+        price_unit = json.loads(strategy_records[-1]["decision"])["price_unit"] if strategy_records else ""
+        monthly_price = None
+        if strategy_records and re.search(r"month", price_unit, re.IGNORECASE):
+            monthly_price = json.loads(strategy_records[-1]["decision"])["price"]
+        history = analytics_history() if business.mode == EXISTING else []
+        note = (
+            "The founder reviewed this roadmap and asked for this change -- apply it: "
+            f"{feedback.strip()}"
+        )
+        plan = FundingAgent().assess(business, business.mode, snapshot["plan_summary"], history, note)
+        problems = funding_problems(plan, business.currency, monthly_price)
+        plan.warnings = problems
+        log_decision(
+            DecisionRecord(
+                cycle,
+                "funding",
+                {**snapshot, "founder_feedback": feedback.strip()},
+                asdict(plan),
+            )
+        )
+        return plan
+
+    brief = _brief_from_snapshot(snapshot, feedback)
+
+    if agent == "marketing":
+        out, transport = request_marketing(brief, budget)
+        out = _clean_output(out)
+        log_decision(
+            DecisionRecord(
+                cycle,
+                "marketing",
+                {"budget": budget, "brief": asdict(brief), "transport": transport, "founder_feedback": feedback.strip()},
+                asdict(out),
+            )
+        )
+        return out
+
+    if agent == "product":
+        out = _clean_output(ProductAgent().execute(brief, budget))
+    elif agent == "sales":
+        out = _clean_output(SalesAgent().execute(brief, budget))
+    elif agent == "crm":
+        prior_decision = json.loads(latest["decision"])
+        out = _clean_output(
+            CRMAgent().execute(brief, budget, prior_decision["segments"], previous_segments(cycle))
+        )
+    else:  # pragma: no cover -- guarded by REFINABLE_AGENTS above
+        raise RefineError(f"Unhandled agent {agent!r}.")
+
+    log_decision(
+        DecisionRecord(
+            cycle,
+            agent,
+            {"budget": budget, "brief": asdict(brief), "founder_feedback": feedback.strip()},
+            asdict(out),
+        )
+    )
+    return out
+
+
 # ---------------------------------------------------------------- funding --
 
 

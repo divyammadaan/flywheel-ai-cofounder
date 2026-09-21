@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
+import { ThemeScript } from "@/components/theme-toggle";
+
 import "./globals.css";
 
 /**
@@ -33,7 +35,10 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Flywheel",
+  // "%s — Flywheel" lets every route set its own title (the business
+  // summary on a plan, "New idea" on the form) instead of every tab in
+  // history reading identically "Flywheel".
+  title: { default: "Flywheel", template: "%s — Flywheel" },
   description:
     "An AI co-founder: validate a new idea, or plan an operating business's next period.",
 };
@@ -42,8 +47,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <ThemeScript />
+      </head>
       <body className="flex min-h-full flex-col bg-canvas text-ink">{children}</body>
     </html>
   );

@@ -8,8 +8,10 @@
  */
 
 import type {
+  DecisionRecord,
   OrdersPreview,
   Plan,
+  RefinableAgent,
   Run,
   RunDetail,
   RunEvent,
@@ -141,6 +143,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  refine: (runId: number, agent: RefinableAgent, cycle: number, feedback: string) =>
+    request<DecisionRecord>(`/runs/${runId}/refine`, {
+      method: "POST",
+      body: JSON.stringify({ agent, cycle, feedback }),
+    }),
+
   previewOrders: (file: File) => {
     const form = new FormData();
     form.append("file", file);
@@ -189,6 +197,7 @@ export function toPlan(detail: RunDetail, cycle?: number): Plan {
 
   return {
     run: detail.run,
+    cycle: target,
     intake: get("intake"),
     research: get("market_research"),
     advisor: get("founder_advisor"),
@@ -204,6 +213,13 @@ export function toPlan(detail: RunDetail, cycle?: number): Plan {
     strategyRejections,
     fundingRejections,
   };
+}
+
+/** Whether an agent's current output in this run is a redone version --
+ * i.e. more than one record exists for it in this cycle. Drives the small
+ * "Revised on your feedback" note next to its "Suggest a change" control. */
+export function wasRevised(detail: RunDetail, agent: string, cycle: number): boolean {
+  return detail.records.filter((r) => r.agent === agent && r.cycle === cycle).length > 1;
 }
 
 /** Every planned period in a run, oldest first. */

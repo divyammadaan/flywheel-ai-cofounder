@@ -34,6 +34,7 @@ import {
   Section,
   Warning,
 } from "@/components/primitives";
+import { RefineControl } from "@/components/refine-control";
 import { cn } from "@/lib/cn";
 import { count, money, percent } from "@/lib/format";
 import type { Crm, SegmentMeta } from "@/lib/types";
@@ -53,10 +54,16 @@ export function CrmSection({
   crm,
   currency,
   meta,
+  runId,
+  cycle,
+  revised,
 }: {
   crm: Crm;
   currency: string;
   meta?: SegmentMeta;
+  runId: number;
+  cycle: number;
+  revised: boolean;
 }) {
   const segments = crm.segments;
   if (!segments?.segments) return null;
@@ -189,8 +196,9 @@ export function CrmSection({
           <CopyBlock title="To win back lost customers" message={crm.lost_message} />
         </div>
 
-        <div className="border-t border-line px-6 py-4 sm:px-8">
+        <div className="space-y-3 border-t border-line px-6 py-4 sm:px-8">
           <Attribution agent="crm" />
+          <RefineControl runId={runId} agent="crm" cycle={cycle} revised={revised} />
         </div>
       </Card>
     </Section>

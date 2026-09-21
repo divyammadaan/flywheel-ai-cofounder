@@ -303,6 +303,9 @@ export interface SegmentMeta {
   definitions: Record<string, string>;
 }
 
+export const REFINABLE_AGENTS = ["marketing", "sales", "product", "crm", "funding"] as const;
+export type RefinableAgent = (typeof REFINABLE_AGENTS)[number];
+
 export interface OrdersPreview {
   token: string;
   rows: number;
@@ -316,6 +319,8 @@ export interface OrdersPreview {
 /** The plan, with each agent's record pulled out by name. */
 export interface Plan {
   run: Run;
+  /** The period this plan is showing. What "suggest a change" targets. */
+  cycle: number;
   intake?: Intake;
   research?: MarketResearch;
   advisor?: AdvisorDecision;

@@ -465,3 +465,123 @@ def test_the_failure_names_the_agent_that_was_in_flight(client, monkeypatch):
     ).json()["run_id"]
 
     assert "market research" in wait_for(client, run_id)["error"]
+
+
+# ---------------------------------------------------------------- refine --
+
+
+def test_refining_a_finished_run_returns_the_new_record(client, monkeypatch):
+    from dataclasses import asdict, dataclass, field
+
+    from observability.decision_record import DecisionRecord, log_decision
+    from orchestration import cycle as cycle_module
+    from storage import start_run, update_run
+
+    run_id = start_run(mode="new_idea", label="Test business")
+    log_decision(
+        DecisionRecord(
+            cycle_module.PRECYCLE,
+            "intake",
+            {},
+            {
+                "mode": "new_idea",
+                "business_summary": "Test business",
+                "industry": "F&B",
+                "product_or_service": "coffee",
+                "target_region": "Bangalore",
+                "currency": "INR",
+                "starting_capital": 1500000.0,
+            },
+        )
+    )
+    log_decision(
+        DecisionRecord(
+            1,
+            "sales",
+            {
+                "budget": 50000.0,
+                "brief": {
+                    "cycle": 1,
+                    "mode": "new_idea",
+                    "business_summary": "Test business",
+                    "industry": "F&B",
+                    "product_or_service": "coffee",
+                    "region": "Bangalore",
+                    "currency": "INR",
+                    "positioning": "x",
+                    "target_customer": "y",
+                    "price": 899.0,
+                    "price_unit": "per month",
+                    "context": "original context",
+                },
+            },
+            {"lead_sources": [{"where": "old"}], "conversion_process": []},
+        )
+    )
+    update_run(run_id, status="done")
+
+    @dataclass
+    class FakeSalesOut:
+        lead_sources: list
+        conversion_process: list = field(default_factory=list)
+
+    monkeypatch.setattr(
+        cycle_module,
+        "SalesAgent",
+        type("S", (), {"execute": lambda self, brief, budget: FakeSalesOut(lead_sources=[{"where": "new"}])}),
+    )
+
+    response = client.post(
+        f"/runs/{run_id}/refine", json={"agent": "sales", "cycle": 1, "feedback": "Try something else."}
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["agent"] == "sales"
+    assert body["decision"]["lead_sources"] == [{"where": "new"}]
+    assert body["input_snapshot"]["founder_feedback"] == "Try something else."
+
+    # And it shows up as part of the run, for a client that reloads.
+    detail = client.get(f"/runs/{run_id}").json()
+    sales_records = [r for r in detail["records"] if r["agent"] == "sales"]
+    assert len(sales_records) == 2
+
+
+def test_refining_a_run_that_is_still_going_is_refused(client, monkeypatch):
+    from api import flows
+
+    monkeypatch.setattr(flows, "IntakeAgent", lambda: _Stub(process=lambda _: FakeBusiness()))
+    monkeypatch.setattr(flows, "MarketResearchAgent", lambda: _Stub(research=lambda _: FakeResearch()))
+    run_id = client.post(
+        "/runs/new-idea",
+        json={"pitch": "A filter coffee subscription for Bangalore", "starting_capital": 1500000},
+    ).json()["run_id"]
+
+    response = client.post(f"/runs/{run_id}/refine", json={"agent": "sales", "cycle": 1, "feedback": "Change it."})
+    assert response.status_code == 409
+
+    # Drain the background job before the test ends: leaving it in flight
+    # races the next test's database teardown (a real failure mode, seen
+    # while writing this test -- not hypothetical).
+    wait_for(client, run_id)
+
+
+def test_refining_with_a_disallowed_agent_is_a_clear_422(client):
+    from storage import start_run, update_run
+
+    run_id = start_run()
+    update_run(run_id, status="done")
+    response = client.post(
+        f"/runs/{run_id}/refine", json={"agent": "strategy", "cycle": 1, "feedback": "Reposition it."}
+    )
+    assert response.status_code == 422
+    assert "strategy can't be refined" in response.json()["detail"]
+
+
+def test_refine_lists_its_allowed_agents(client):
+    assert client.get("/meta/refinable-agents").json() == [
+        "marketing",
+        "sales",
+        "product",
+        "crm",
+        "funding",
+    ]
