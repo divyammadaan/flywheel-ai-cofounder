@@ -1,18 +1,25 @@
 /**
- * Every plan, newest first.
+ * Every plan, grouped by when it happened.
  *
  * This screen could not exist before: the engine kept one global table and
- * starting a plan wiped it, so a founder had exactly one plan at a time and no
- * way back to the previous one. Runs made history possible, and this is where
- * it shows.
+ * starting a plan wiped it, so a founder had exactly one plan at a time and
+ * no way back to the previous one. Runs made history possible.
+ *
+ * A grid of same-size cards is what "history" looked like at first, and it
+ * read as clutter the moment titles varied in length and a few old test runs
+ * sat beside a real one, with no way to tell which was which at a glance. A
+ * single list with date headers -- Today, Yesterday, This week -- gives the
+ * eye something to anchor on regardless of how many runs pile up, and reads
+ * as an actual history rather than a wall of boxes.
  */
 
 import Link from "next/link";
 
 import { AppShell, Page } from "@/components/app-shell";
-import { RunLink } from "@/app/page";
 import { Card } from "@/components/primitives";
+import { RunLink } from "@/components/run-link";
 import { api } from "@/lib/api";
+import { bucketByDay } from "@/lib/format";
 import type { Run } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -30,14 +37,15 @@ export default async function RunsPage() {
 
   const needsYou = runs.filter((r) => r.status === "awaiting_answers");
   const rest = runs.filter((r) => r.status !== "awaiting_answers");
+  const groups = bucketByDay(rest, (r) => r.updated_at);
 
   return (
     <AppShell>
-      <Page className="py-12 sm:py-16">
+      <Page width="reading" className="py-12 sm:py-16">
         <h1 className="text-display font-semibold tracking-tight text-ink">Your plans</h1>
 
         {error ? (
-          <Card className="mt-8 max-w-2xl p-6">
+          <Card className="mt-8 p-6">
             <p className="text-body text-ink">{error}</p>
             <p className="mt-3 text-small text-ink-faint">
               Start the API with{" "}
@@ -47,7 +55,7 @@ export default async function RunsPage() {
             </p>
           </Card>
         ) : runs.length === 0 ? (
-          <Card className="mt-8 max-w-2xl p-8">
+          <Card className="mt-8 p-8">
             <p className="text-body text-ink">No plans yet.</p>
             <p className="mt-2 text-small text-ink-muted">
               Start with{" "}
@@ -62,37 +70,33 @@ export default async function RunsPage() {
             </p>
           </Card>
         ) : (
-          <div className="mt-8 space-y-10">
-            {/* Runs paused on a question are surfaced first: they are stuck
-                until the founder does something, and nothing else tells them. */}
-            {needsYou.length ? (
-              <section>
-                <h2 className="mb-3 text-heading font-semibold text-ink">Waiting on you</h2>
-                <ul className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-                  {needsYou.map((run) => (
-                    <li key={run.id}>
-                      <RunLink run={run} />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
+          <div className="mt-8 space-y-8">
+            {/* Runs paused on a question are surfaced first, out of date
+                order: they are stuck until the founder does something, and
+                nothing else on the page tells them that. */}
+            {needsYou.length ? <RunGroup label="Waiting on you" runs={needsYou} /> : null}
 
-            <section>
-              {needsYou.length ? (
-                <h2 className="mb-3 text-heading font-semibold text-ink">Everything else</h2>
-              ) : null}
-              <ul className="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-                {rest.map((run) => (
-                  <li key={run.id}>
-                    <RunLink run={run} />
-                  </li>
-                ))}
-              </ul>
-            </section>
+            {groups.map((group) => (
+              <RunGroup key={group.label} label={group.label} runs={group.items} />
+            ))}
           </div>
         )}
       </Page>
     </AppShell>
+  );
+}
+
+function RunGroup({ label, runs }: { label: string; runs: Run[] }) {
+  return (
+    <section>
+      <h2 className="mb-3 text-caption font-medium uppercase tracking-wide text-ink-faint">
+        {label}
+      </h2>
+      <Card className="divide-y divide-line overflow-hidden">
+        {runs.map((run) => (
+          <RunLink key={run.id} run={run} />
+        ))}
+      </Card>
+    </section>
   );
 }

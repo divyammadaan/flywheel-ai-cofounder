@@ -110,6 +110,9 @@ export const api = {
 
   getRun: (id: number) => request<RunDetail>(`/runs/${id}`),
 
+  deleteRun: (id: number) =>
+    request<void>(`/runs/${id}`, { method: "DELETE" }),
+
   getEvents: (id: number, afterSeq = 0) =>
     request<RunEvent[]>(`/runs/${id}/events?after_seq=${afterSeq}`),
 
@@ -157,6 +160,37 @@ export const api = {
 
   landingPageUrl: (id: number) => `${API_BASE}/runs/${id}/landing-page`,
   sampleOrdersUrl: (extension: "csv" | "xlsx") => `${API_BASE}/orders/sample.${extension}`,
+
+  /**
+   * Voice to text. Takes whatever container the browser's MediaRecorder
+   * produced -- `request()` already leaves a FormData body's Content-Type
+   * alone so the browser sets its own multipart boundary.
+   */
+  transcribe: (audio: Blob, filename = "audio.webm") => {
+    const form = new FormData();
+    form.append("file", audio, filename);
+    return request<{ text: string }>("/speech/transcribe", { method: "POST", body: form });
+  },
+
+  /**
+   * Text to voice. Returns the audio directly rather than going through
+   * `request()`, which assumes a JSON body -- this one is a WAV blob, and a
+   * failure here is routine enough (a thin free-tier TTS quota) that the
+   * caller is expected to catch it and fall back to the browser's own
+   * voice, not just surface it as an error.
+   */
+  synthesize: async (text: string): Promise<Blob> => {
+    const response = await fetch(`${API_BASE}/speech/synthesize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => null);
+      throw new ApiError(detail?.detail ?? "Speech synthesis is unavailable.", response.status);
+    }
+    return response.blob();
+  },
 };
 
 /**

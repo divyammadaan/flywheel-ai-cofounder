@@ -62,7 +62,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       type="button"
       onClick={cycle}
-      className={`flex w-full items-center gap-2.5 rounded-tile px-3 py-2 text-small text-ink-muted transition-colors hover:bg-surface-sunken hover:text-ink ${className ?? ""}`}
+      className={`flex w-full items-center gap-2.5 rounded-full px-3 py-2 text-small text-ink transition-colors hover:bg-surface ${className ?? ""}`}
       aria-label={`Theme: ${LABEL[choice]}. Click to change.`}
     >
       <Icon aria-hidden className="h-4 w-4 shrink-0" strokeWidth={1.75} />

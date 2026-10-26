@@ -167,3 +167,11 @@ class RefineRequest(BaseModel):
         if not value.strip():
             raise ValueError("say what you'd like changed")
         return value.strip()
+
+
+class SpeakRequest(BaseModel):
+    """Text to read aloud -- a plan section's own rendered text, sent back
+    to us rather than re-derived, so what you hear always matches what you
+    see on screen."""
+
+    text: str = Field(min_length=1, max_length=20000, description="What to read aloud")

@@ -19,6 +19,14 @@
   --color-line: oklch(0.917 0.004 85);
   --color-line-strong: oklch(0.85 0.005 85);
 
+  /*
+    `ink-strong` is above `ink`, for the one or two things that should read as
+    the brightest thing on screen -- the wordmark. `ink` is deliberately a
+    warm near-black rather than pure black, because a page of body text set in
+    #000 is harsh; a two-word name set in it is not, and at rail size the
+    warmth read as slightly dimmed rather than as warm.
+  */
+  --color-ink-strong: oklch(0.15 0.004 75);
   --color-ink: oklch(0.21 0.008 75);
   --color-ink-muted: oklch(0.47 0.008 75);
   --color-ink-faint: oklch(0.63 0.007 75);
@@ -46,6 +54,16 @@
     Type scale. Only six sizes: every extra size is another chance for two
     things that mean the same to look different.
   */
+  /*
+    One size above `display`, for the marketing page only. A landing hero and
+    a plan's verdict are not the same job: the verdict sits inside a dense
+    screen and must not shout over the figures next to it, while the hero has
+    a whole viewport to itself and a 36px line in that space reads as a
+    heading someone forgot to style.
+  */
+  --text-hero: 2.5rem;
+  --text-hero--line-height: 1.1;
+  --text-hero--letter-spacing: -0.03em;
   --text-display: 2.25rem;
   --text-display--line-height: 1.15;
   --text-display--letter-spacing: -0.02em;
@@ -78,6 +96,7 @@
     --color-line: oklch(0.28 0.008 75);
     --color-line-strong: oklch(0.36 0.009 75);
 
+    --color-ink-strong: oklch(1 0 0);
     --color-ink: oklch(0.95 0.004 85);
     --color-ink-muted: oklch(0.72 0.006 85);
     --color-ink-faint: oklch(0.56 0.007 85);
@@ -108,6 +127,7 @@
   --color-line: oklch(0.28 0.008 75);
   --color-line-strong: oklch(0.36 0.009 75);
 
+  --color-ink-strong: oklch(1 0 0);
   --color-ink: oklch(0.95 0.004 85);
   --color-ink-muted: oklch(0.72 0.006 85);
   --color-ink-faint: oklch(0.56 0.007 85);
@@ -167,5 +187,100 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+
+    /*
+      Scroll-revealed content, forced visible.
+
+      Killing the transition is not enough on its own: these elements START
+      hidden and are revealed by entering the viewport, so with the animation
+      disabled they would simply stay hidden. Anything below the fold would
+      never appear, because the scrolling that would reveal it is exactly what
+      this reader has asked not to have to do. The progress line is drawn in
+      full for the same reason -- it marks a sequence, and an undrawn line
+      says the sequence has not started.
+    */
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    [data-progress-line] {
+      height: 100% !important;
+    }
+  }
+}
+
+/*
+  The collapsed rail.
+
+  Driven by an attribute on <html> that `RailScript` sets before the first
+  paint, not by a React class: state read from localStorage after mount would
+  paint the rail open and snap it shut a frame later, on every navigation.
+  Width and label visibility are the only things that change -- the markup is
+  identical either way, so nothing has to re-mount to collapse.
+*/
+:root[data-rail="collapsed"] [data-rail] {
+  width: 3.5rem;
+}
+
+:root[data-rail="collapsed"] [data-rail-hide] {
+  display: none;
+}
+
+:root[data-rail="collapsed"] [data-rail-center] {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-rail] {
+    transition: width 180ms ease;
+  }
+}
+
+/*
+  The ambient wash behind the composer, on the home page only.
+
+  Three offset radial gradients rather than one, because a single centred blob
+  reads as a spotlight someone left on; overlapping hues at different
+  positions read as light in a room. They are the one piece of pure decoration
+  in the product, so they stay well under the text: the palette note at the
+  top of this file holds everywhere else, and a founder still has to be able
+  to see which numbers are exact.
+
+  The element covers the viewport and is never clipped. An earlier version put
+  it in a fixed-height box with `overflow-hidden`, which cut the gradients
+  mid-falloff and left a visible rectangle with straight edges across the top
+  of the page -- the exact thing the blur was there to avoid. Each gradient
+  now reaches `transparent` well inside the element's own bounds, so there is
+  no edge anywhere to cut.
+
+  Blurred *and* low-alpha, so it survives the banding that large, gentle
+  gradients show on 8-bit displays. Light mode gets roughly half the alpha --
+  the same values that read as atmosphere on a dark canvas read as a stain on
+  a white one.
+*/
+.ambient {
+  background:
+    radial-gradient(38% 34% at 26% 18%, oklch(0.62 0.17 250 / 0.34), transparent 70%),
+    radial-gradient(34% 30% at 74% 12%, oklch(0.64 0.15 305 / 0.26), transparent 70%),
+    radial-gradient(32% 28% at 50% 40%, oklch(0.70 0.13 200 / 0.20), transparent 70%);
+  filter: blur(44px);
+}
+
+:root[data-theme="light"] .ambient {
+  background:
+    radial-gradient(38% 34% at 26% 18%, oklch(0.62 0.17 250 / 0.17), transparent 70%),
+    radial-gradient(34% 30% at 74% 12%, oklch(0.64 0.15 305 / 0.13), transparent 70%),
+    radial-gradient(32% 28% at 50% 40%, oklch(0.70 0.13 200 / 0.10), transparent 70%);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .ambient {
+    background:
+      radial-gradient(38% 34% at 26% 18%, oklch(0.62 0.17 250 / 0.17), transparent 70%),
+      radial-gradient(34% 30% at 74% 12%, oklch(0.64 0.15 305 / 0.13), transparent 70%),
+      radial-gradient(32% 28% at 50% 40%, oklch(0.70 0.13 200 / 0.10), transparent 70%);
   }
 }

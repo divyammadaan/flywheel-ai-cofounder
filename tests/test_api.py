@@ -585,3 +585,169 @@ def test_refine_lists_its_allowed_agents(client):
         "crm",
         "funding",
     ]
+
+
+# ------------------------------------------------------------- deleting --
+
+
+def test_deleting_a_finished_plan_removes_it_from_the_list(client):
+    from storage import start_run, update_run
+
+    keep = start_run(mode="new_idea", label="Keep this one")
+    drop = start_run(mode="new_idea", label="Delete this one")
+    update_run(drop, status="done")
+
+    assert client.delete(f"/runs/{drop}").status_code == 204
+
+    assert client.get(f"/runs/{drop}").status_code == 404
+    listed = [r["id"] for r in client.get("/runs").json()]
+    assert drop not in listed
+    assert keep in listed
+
+
+def test_deleting_a_plan_takes_its_records_usage_and_events_with_it(client):
+    """The cascade is the point: a deleted plan must not leave rows behind.
+
+    Records go through the ORM relationship; usage and events are removed by
+    ON DELETE CASCADE in the schema. This asserts all three, because a
+    half-deleted run is invisible in the UI but still counted in usage.
+    """
+    from sqlalchemy import func, select
+
+    from storage import start_run, update_run
+    from storage.db import session_scope
+    from storage.events import add_event
+    from storage.models import DecisionRecordRow, LlmUsageRow, RunEvent
+    from storage.records import add_record
+    from storage.usage import add_usage
+
+    run_id = start_run(mode="new_idea", label="Doomed")
+    add_record(cycle=1, agent="sales", input_snapshot={"a": 1}, decision={"b": 2}, run_id=run_id)
+    add_event(kind="agent_finished", agent="sales", run_id=run_id)
+    add_usage(
+        agent="sales",
+        model="stub",
+        prompt_tokens=10,
+        completion_tokens=5,
+        seconds=1.0,
+        run_id=run_id,
+    )
+    update_run(run_id, status="done")
+
+    def counts() -> tuple[int, int, int]:
+        with session_scope() as session:
+            return (
+                session.scalar(select(func.count()).select_from(DecisionRecordRow).where(DecisionRecordRow.run_id == run_id)),
+                session.scalar(select(func.count()).select_from(RunEvent).where(RunEvent.run_id == run_id)),
+                session.scalar(select(func.count()).select_from(LlmUsageRow).where(LlmUsageRow.run_id == run_id)),
+            )
+
+    assert counts() == (1, 1, 1), "fixture did not write what the test needs"
+
+    assert client.delete(f"/runs/{run_id}").status_code == 204
+    assert counts() == (0, 0, 0)
+
+
+def test_deleting_a_plan_that_is_still_building_is_refused(client, monkeypatch):
+    """A worker thread holds this run id; deleting the row under it would
+    surface to the founder as "your plan failed" rather than as a deletion."""
+    from api import flows
+
+    monkeypatch.setattr(flows, "IntakeAgent", lambda: _Stub(process=lambda _: FakeBusiness()))
+    monkeypatch.setattr(flows, "MarketResearchAgent", lambda: _Stub(research=lambda _: FakeResearch()))
+    run_id = client.post(
+        "/runs/new-idea",
+        json={"pitch": "A filter coffee subscription for Bangalore", "starting_capital": 1500000},
+    ).json()["run_id"]
+
+    response = client.delete(f"/runs/{run_id}")
+    assert response.status_code == 409
+    assert "still being built" in response.json()["detail"]
+    assert client.get(f"/runs/{run_id}").status_code == 200
+
+    # Drain the background job before teardown, as above.
+    wait_for(client, run_id)
+
+
+def test_deleting_a_plan_that_does_not_exist_is_a_404(client):
+    assert client.delete("/runs/999999").status_code == 404
+
+
+# --------------------------------------------------------------- speech --
+
+
+def test_transcribing_returns_the_stubbed_text(client, monkeypatch):
+    from tools import speech
+
+    monkeypatch.setattr(speech, "transcribe", lambda audio, filename: "a filter coffee subscription")
+    response = client.post(
+        "/speech/transcribe",
+        files={"file": ("clip.webm", b"not real audio", "audio/webm")},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"text": "a filter coffee subscription"}
+
+
+def test_transcribing_empty_audio_is_a_clean_422_not_a_crash(client, monkeypatch):
+    from tools import speech
+
+    def fails(audio, filename):
+        raise speech.SpeechError("No audio was recorded.")
+
+    monkeypatch.setattr(speech, "transcribe", fails)
+    response = client.post(
+        "/speech/transcribe",
+        files={"file": ("clip.webm", b"", "audio/webm")},
+    )
+    assert response.status_code == 422
+    assert "No audio was recorded" in response.json()["detail"]
+
+
+def test_a_provider_failure_transcribing_is_translated_not_raw(client, monkeypatch):
+    from tools import speech
+
+    def fails(audio, filename):
+        raise RuntimeError("litellm.RateLimitError: 429 rate_limit_exceeded")
+
+    monkeypatch.setattr(speech, "transcribe", fails)
+    response = client.post(
+        "/speech/transcribe",
+        files={"file": ("clip.webm", b"x", "audio/webm")},
+    )
+    assert response.status_code == 502
+    assert "rate-limiting" in response.json()["detail"]
+
+
+def test_synthesizing_returns_the_stubbed_audio(client, monkeypatch):
+    from tools import speech
+
+    monkeypatch.setattr(speech, "synthesize", lambda text: b"RIFF....WAVEfmt fake audio bytes")
+    response = client.post("/speech/synthesize", json={"text": "The verdict is GO."})
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "audio/wav"
+    assert response.content == b"RIFF....WAVEfmt fake audio bytes"
+
+
+def test_synthesizing_empty_text_is_rejected_before_any_call(client):
+    # SpeakRequest's own min_length=1 catches this -- a 422 from validation,
+    # never reaching tools.speech at all.
+    response = client.post("/speech/synthesize", json={"text": ""})
+    assert response.status_code == 422
+
+
+def test_an_unaccepted_model_s_terms_surface_as_a_clear_message(client, monkeypatch):
+    """The real failure hit while building this: Orpheus needs its terms
+    accepted once in the Groq console before the account can call it."""
+    from tools import speech
+
+    def fails(text):
+        raise RuntimeError(
+            "Groq speech synthesis failed: Client error '400 Bad Request' ... "
+            '{"error":{"message":"The model requires terms acceptance.","code":"model_terms_required"}}'
+        )
+
+    monkeypatch.setattr(speech, "synthesize", fails)
+    response = client.post("/speech/synthesize", json={"text": "Read this aloud."})
+    assert response.status_code == 502
+    assert "terms" in response.json()["detail"].lower()
+    assert "console.groq.com" in response.json()["detail"]

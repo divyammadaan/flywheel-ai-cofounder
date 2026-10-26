@@ -19,6 +19,7 @@
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
+import { SpeakableSection } from "@/components/section-speakable";
 import { NONE_GIVEN, agentLabel } from "@/lib/format";
 
 // --------------------------------------------------------------- layout --
@@ -57,16 +58,18 @@ export function Section({
   action?: ReactNode;
   id?: string;
 }) {
+  // The header-plus-body layout and its speak button live in
+  // `SpeakableSection` ("use client", since it needs a ref) rather than
+  // here: this file is pulled into a server component
+  // (app/runs/[id]/page.tsx), and a hook anywhere in its import graph
+  // would force the whole module client-side. Pushing just the part that
+  // needs one into its own client component keeps `Section` itself --
+  // and everything else in this file -- server-renderable.
   return (
     <section id={id} className="scroll-mt-24">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <h2 className="text-title font-semibold text-ink">{title}</h2>
-          {lead ? <p className="mt-1 text-small text-ink-muted">{lead}</p> : null}
-        </div>
-        {action}
-      </div>
-      {children}
+      <SpeakableSection title={title} lead={lead} action={action}>
+        {children}
+      </SpeakableSection>
     </section>
   );
 }

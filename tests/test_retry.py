@@ -5,7 +5,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest
 
-from agents._retry import FULL_WINDOW_SECONDS, _is_rate_limit, _wait_for, retry_on_rate_limit
+from agents._retry import (
+    FULL_WINDOW_SECONDS,
+    _is_rate_limit,
+    _is_retryable,
+    _wait_for,
+    retry_on_rate_limit,
+)
 
 
 def test_wait_uses_providers_own_hint():
@@ -137,3 +143,73 @@ def test_reraises_after_max_attempts():
     with pytest.raises(RuntimeError):
         always_limited()
     assert len(calls) == 2
+
+
+# ------------------------------------------------- bad samples, not bad requests --
+
+# The exact payload that killed a live run at the Analytics step: Groq's JSON
+# mode rejected the completion and handed back what the model actually emitted.
+_GROQ_JSON_FAILURE = (
+    'litellm.BadRequestError: GroqException - {"error":{"message":"Failed to generate '
+    "JSON. Please adjust your prompt. See 'failed_generation' for more details.\","
+    '"type":"invalid_request_error","code":"json_validate_failed",'
+    '"failed_generation":"{\u03a3"}}'
+)
+
+# The CrewAI/forced-tool-calling equivalent, from an earlier failed run.
+_GROQ_TOOL_FAILURE = (
+    "InstructorRetryException: litellm.BadRequestError: GroqException - "
+    '{"error":{"message":"tool call validation failed: parameters for tool '
+    'MarketingOutputSchema did not match schema"}}'
+)
+
+
+@pytest.mark.parametrize("message", [_GROQ_JSON_FAILURE, _GROQ_TOOL_FAILURE])
+def test_a_bad_sample_is_retryable(message):
+    """The request was fine; the model emitted junk. Re-sampling usually fixes it.
+
+    Both arrive as BadRequestError, which normally means "do not retry" -- but
+    these say the model failed to produce schema-valid output, not that we sent
+    a bad request.
+    """
+    assert _is_retryable(RuntimeError(message))
+
+
+def test_a_bad_sample_retries_promptly_rather_than_waiting_out_a_window():
+    """No quota is refilling, so a full-window wait would only waste a minute."""
+    wait = _wait_for(RuntimeError(_GROQ_JSON_FAILURE), default=15.0)
+    assert wait == pytest.approx(1.5)
+    assert wait < FULL_WINDOW_SECONDS
+
+
+def test_a_bad_sample_is_retried_until_it_decodes():
+    attempts = []
+
+    @retry_on_rate_limit(max_attempts=4, wait_seconds=0.01)
+    def flaky():
+        attempts.append(1)
+        if len(attempts) < 3:
+            raise RuntimeError(_GROQ_JSON_FAILURE)
+        return "valid json at last"
+
+    assert flaky() == "valid json at last"
+    assert len(attempts) == 3
+
+
+def test_a_genuinely_malformed_request_still_fails_fast():
+    """The narrowness is the point: retrying an unknown model eight times
+    helps nobody and delays the error the founder needs to see."""
+    calls = []
+
+    @retry_on_rate_limit(max_attempts=5, wait_seconds=0.01)
+    def broken():
+        calls.append(1)
+        raise RuntimeError(
+            "litellm.BadRequestError: GroqException - "
+            '{"error":{"message":"The model `qwen/nonexistent` does not exist",'
+            '"type":"invalid_request_error","code":"model_not_found"}}'
+        )
+
+    with pytest.raises(RuntimeError):
+        broken()
+    assert len(calls) == 1

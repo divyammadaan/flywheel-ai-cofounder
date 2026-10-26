@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
+import { RailScript } from "@/components/rail-toggle";
 import { ThemeScript } from "@/components/theme-toggle";
 
 import "./globals.css";
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <ThemeScript />
+        <RailScript />
       </head>
       <body className="flex min-h-full flex-col bg-canvas text-ink">{children}</body>
     </html>

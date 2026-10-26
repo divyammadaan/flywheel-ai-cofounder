@@ -36,25 +36,36 @@ export function Field({
 }) {
   return (
     <div className="min-w-0">
-      <label
-        htmlFor={htmlFor}
-        className="flex items-baseline gap-1.5 text-small font-medium text-ink"
-      >
+      {/* One asterisk on the fields that need it, nothing on the ones that
+          don't -- "required" next to two fields and "optional" next to the
+          other five, at the same weight as the label itself, was more label
+          than a founder skimming the form needed to read. Absence of a mark
+          already means optional; this is the standard reading.
+
+          Inline rather than a flex sibling: as a sibling it was pushed to the
+          far right of the column whenever the label wrapped, leaving the mark
+          stranded away from the words it qualifies. */}
+      <label htmlFor={htmlFor} className="block text-body font-medium text-ink">
         {label}
         {required ? (
-          <span aria-hidden className="text-ink-faint">
-            required
+          <span aria-hidden className="text-nogo">
+            &nbsp;*
           </span>
-        ) : (
-          <span aria-hidden className="text-caption text-ink-faint">
-            optional
-          </span>
-        )}
+        ) : null}
       </label>
-      {hint ? <p className="mt-1 text-caption text-ink-faint">{hint}</p> : null}
+      {/* The hint sits UNDER the input, not between the label and it.
+          Above, a one-line hint on one field and none on its neighbour pushed
+          their boxes to different heights, and a row of inputs that do not
+          share a baseline reads as broken. Below the box, hint length cannot
+          move anything that has to line up.
+
+          That leaves label wrapping as the only thing that can still stagger
+          a row, which is a content problem: the labels in a multi-column
+          group are kept short enough not to wrap. */}
       <div className="mt-2">{children}</div>
+      {hint ? <p className="mt-1.5 text-small text-ink-muted">{hint}</p> : null}
       {error ? (
-        <p role="alert" className="mt-1.5 text-caption text-nogo">
+        <p role="alert" className="mt-1.5 text-small text-nogo">
           {error}
         </p>
       ) : null}
@@ -193,10 +204,10 @@ export function Checkbox({
         className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--color-accent)]"
       />
       <div className="min-w-0">
-        <label htmlFor={id} className="cursor-pointer text-small text-ink">
+        <label htmlFor={id} className="cursor-pointer text-body font-medium text-ink">
           {label}
         </label>
-        {hint ? <p className="text-caption text-ink-faint">{hint}</p> : null}
+        {hint ? <p className="mt-0.5 text-small text-ink-muted">{hint}</p> : null}
       </div>
     </div>
   );

@@ -21,6 +21,8 @@
  */
 
 import { RefreshCw, Sparkles } from "lucide-react";
+
+import { MicButton } from "@/components/mic-button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -93,9 +95,16 @@ export function RefineControl({
 
   return (
     <form onSubmit={submit} className="rounded-tile border border-line bg-surface-sunken p-4">
-      <label htmlFor={`refine-${agent}`} className="text-small font-medium text-ink">
-        What would you change here?
-      </label>
+      <div className="flex items-baseline justify-between gap-3">
+        <label htmlFor={`refine-${agent}`} className="text-small font-medium text-ink">
+          What would you change here?
+        </label>
+        <MicButton
+          onTranscript={(spoken) =>
+            setFeedback((current) => (current.trim() ? `${current.trim()} ${spoken}` : spoken))
+          }
+        />
+      </div>
       <textarea
         id={`refine-${agent}`}
         value={feedback}

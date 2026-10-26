@@ -1,4 +1,4 @@
-"""Shared retry decorator for provider rate limits.
+"""Shared retry decorator for provider rate limits and bad samples.
 
 Groq's free tier throttles output tokens per minute, and running several
 agents back-to-back trips it routinely. Neither framework retries usefully
@@ -65,6 +65,30 @@ _TRANSIENT_MARKERS = (
 )
 _TRANSIENT_WAIT_SECONDS = 2.0
 
+# The model produced output that isn't valid against the schema it was given.
+# These arrive as BadRequestError, which normally means "don't retry" -- but
+# these particular ones are not a bad REQUEST, they are a bad SAMPLE. The
+# request was fine; the model emitted junk, and the provider rejected it
+# before it ever reached us. Groq returns the junk verbatim: one live run died
+# on `failed_generation: "{Σ"` -- a brace and a sigma -- which killed a
+# multi-minute plan at the Analytics step over a single unlucky decode.
+#
+# Retrying re-samples, so the next attempt is a different completion and
+# usually valid. Deliberately narrow: a genuinely malformed request (unknown
+# model, bad parameter) still fails immediately rather than retrying eight
+# times to no purpose.
+#
+# Both framework paths can produce one of these:
+#   - ADK + Groq JSON mode  -> "json_validate_failed"
+#   - CrewAI forced tool-calling -> "tool call validation failed"
+_GENERATION_MARKERS = (
+    "json_validate_failed",
+    "failed to generate json",
+    "tool call validation failed",
+)
+# Nothing is refilling and no window has to pass, so re-sample promptly.
+_GENERATION_WAIT_SECONDS = 1.5
+
 # "Please try again in 4.26s" / "in 21.06s"
 _RETRY_HINT = re.compile(r"try again in ([\d.]+)s", re.IGNORECASE)
 
@@ -103,8 +127,13 @@ def _is_transient(exc: BaseException) -> bool:
     return any(marker in text for marker in _TRANSIENT_MARKERS)
 
 
+def _is_bad_generation(exc: BaseException) -> bool:
+    text = _describe(exc)
+    return any(marker in text for marker in _GENERATION_MARKERS)
+
+
 def _is_retryable(exc: BaseException) -> bool:
-    return _is_rate_limit(exc) or _is_transient(exc)
+    return _is_rate_limit(exc) or _is_transient(exc) or _is_bad_generation(exc)
 
 
 def _wait_for(exc: BaseException, default: float) -> float:
@@ -117,8 +146,10 @@ def _wait_for(exc: BaseException, default: float) -> float:
         return min(float(match.group(1)) + 1.0, MAX_SLEEP_SECONDS)
     if _NEEDS_FULL_WINDOW in text:
         return FULL_WINDOW_SECONDS
-    # A dropped connection isn't a quota problem -- nothing is refilling, so
-    # waiting a full window just wastes time. Retry promptly.
+    # Neither a dropped connection nor a bad sample is a quota problem --
+    # nothing is refilling, so waiting a full window just wastes time.
+    if _is_bad_generation(exc) and not _is_rate_limit(exc):
+        return _GENERATION_WAIT_SECONDS
     if _is_transient(exc) and not _is_rate_limit(exc):
         return _TRANSIENT_WAIT_SECONDS
     return default

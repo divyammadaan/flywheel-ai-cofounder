@@ -32,7 +32,9 @@ function Collapsible({
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5">
           <div className="min-w-0">
             <h3 className="text-heading font-semibold text-ink">{summary}</h3>
-            {meta ? <p className="mt-0.5 text-caption text-ink-faint">{meta}</p> : null}
+            {meta ? (
+              <p className="mt-0.5 truncate text-caption text-ink-faint">{meta}</p>
+            ) : null}
           </div>
           <svg
             aria-hidden
@@ -140,16 +142,28 @@ function ResearchBlock({ research }: { research: MarketResearch }) {
 
 function FormationBlock({ formation }: { formation: FormationPlan }) {
   return (
-    <Collapsible
-      summary={`Setting up — ${formation.recommended_entity}`}
-      meta={`${formation.estimated_cost} · ${formation.estimated_timeline}`}
-    >
+    <Collapsible summary={`Setting up — ${formation.recommended_entity}`} meta="Cost, timeline and licences inside">
       <div className="space-y-6">
         <div>
           <h4 className="mb-2 text-caption font-medium uppercase tracking-wide text-ink-faint">
             Why this entity
           </h4>
           <p className="text-body text-ink-muted">{formation.entity_rationale}</p>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div>
+            <h4 className="mb-2 text-caption font-medium uppercase tracking-wide text-ink-faint">
+              Estimated cost
+            </h4>
+            <p className="text-small text-ink-muted">{formation.estimated_cost}</p>
+          </div>
+          <div>
+            <h4 className="mb-2 text-caption font-medium uppercase tracking-wide text-ink-faint">
+              Estimated timeline
+            </h4>
+            <p className="text-small text-ink-muted">{formation.estimated_timeline}</p>
+          </div>
         </div>
 
         <div>

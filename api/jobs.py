@@ -79,6 +79,11 @@ _FRIENDLY = (
         ("authentication", "api key", "401", "invalid_api_key"),
         "The model provider rejected the API key. Check GROQ_API_KEY in your .env.",
     ),
+    (
+        ("model_terms_required", "requires terms acceptance"),
+        "This model needs its terms accepted once in the Groq console before it will "
+        "run -- console.groq.com, under that model's page.",
+    ),
 )
 
 

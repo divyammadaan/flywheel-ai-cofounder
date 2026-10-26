@@ -133,6 +133,48 @@ export function relativeTime(value: string | null | undefined): string {
   return date(value);
 }
 
+/**
+ * Calendar-day buckets for a list of timestamped things, oldest bucket last.
+ *
+ * A flat list of runs gets harder to scan the moment titles vary in length
+ * and a handful are old test data sitting next to today's real plan -- date
+ * headers give the eye something to anchor on regardless of how many runs
+ * pile up, which a same-size grid of cards does not.
+ */
+export function bucketByDay<T>(
+  items: T[],
+  getDate: (item: T) => string | null | undefined,
+): { label: string; items: T[] }[] {
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const today = startOfDay(new Date());
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  const buckets = new Map<string, T[]>();
+  for (const item of items) {
+    const raw = getDate(item);
+    const parsed = raw ? new Date(raw) : null;
+    const label =
+      parsed && !Number.isNaN(parsed.getTime())
+        ? labelFor(Math.round((today - startOfDay(parsed)) / oneDay))
+        : "Earlier";
+    if (!buckets.has(label)) buckets.set(label, []);
+    buckets.get(label)!.push(item);
+  }
+
+  const order = ["Today", "Yesterday", "This week", "This month", "Earlier"];
+  return order
+    .filter((label) => buckets.has(label))
+    .map((label) => ({ label, items: buckets.get(label)! }));
+
+  function labelFor(daysAgo: number): string {
+    if (daysAgo <= 0) return "Today";
+    if (daysAgo === 1) return "Yesterday";
+    if (daysAgo <= 7) return "This week";
+    if (daysAgo <= 30) return "This month";
+    return "Earlier";
+  }
+}
+
 export function tokens(value: number | null | undefined): string {
   if (value === null || value === undefined) return NONE_GIVEN;
   if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}k`;
@@ -173,4 +215,68 @@ export function agentLabel(agent: string): string {
     company_formation: "Company formation",
   };
   return special[agent] ?? titleCase(agent);
+}
+
+/**
+ * A plan's name, short enough to sit in the rail.
+ *
+ * A run is labelled with the founder's own pitch, because that is what the
+ * research agents need. In a 256px rail that is six rows of near-identical
+ * truncated prose -- "A boutique filter-coffee subscription in B…" beside "A
+ * Bangalore-based filter-coffee subscri…" -- where the part that tells them
+ * apart is the part that got cut off.
+ *
+ * Trimming to a character count was not enough; what makes a pitch long is
+ * its grammar, so this cuts on that instead:
+ *
+ * 1. Drop the leading article. Every pitch starts "A ..." and four rows
+ *    beginning with the same word is four rows that look the same.
+ * 2. Cut at the first clause break, or at the verb that starts the
+ *    elaboration -- "selling", "offering", "delivering". What comes before
+ *    is the business; what comes after is the detail.
+ * 3. Only then trim to length, on a word boundary so no word is halved, and
+ *    drop a trailing preposition -- cutting mid-phrase leaves "Weekend
+ *    cycling-tour startup in", which reads as a sentence that was
+ *    interrupted rather than as a name.
+ *
+ * "A Bangalore-based filter-coffee subscription selling 500g single-origin
+ * beans monthly" becomes "Bangalore-based filter-coffee".
+ */
+const TITLE_MAX = 34;
+
+/** Verbs that begin the elaboration rather than the name of the business. */
+const ELABORATION =
+  /\s+(?:selling|offering|delivering|providing|serving|specialising|specializing|focused on|aimed at|targeting|that|which|where we|who)/i;
+
+export function planTitle(label: string | null | undefined, id: number): string {
+  const raw = (label ?? "").trim();
+  if (!raw) return `Plan ${id}`;
+
+  let text = raw.replace(/^(?:a|an|the)\s+/i, "");
+
+  // The first clause: a colon, dash or semicolon almost always separates the
+  // business from its description.
+  text = text.split(/\s*[:;–—]\s*|,\s+/)[0]?.trim() || text;
+
+  const verb = text.match(ELABORATION);
+  if (verb?.index !== undefined && verb.index >= 8) {
+    text = text.slice(0, verb.index).trim();
+  }
+
+  if (text.length > TITLE_MAX) {
+    const cut = text.slice(0, TITLE_MAX);
+    const lastSpace = cut.lastIndexOf(" ");
+    text = lastSpace > 12 ? cut.slice(0, lastSpace) : cut;
+  }
+
+  text = stripTrailing(text);
+  if (!text) return `Plan ${id}`;
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function stripTrailing(value: string): string {
+  return value
+    .replace(/[\s,.;:–—-]+$/, "")
+    .replace(/\s+(?:in|for|at|to|with|of|and|on|from|by|that|a|an|the)$/i, "")
+    .replace(/[\s,.;:–—-]+$/, "");
 }

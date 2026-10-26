@@ -1,0 +1,1428 @@
+order_id,order_date,customer,city,product,channel,amount
+ORD-10001,2025-09-01,Harsh Kulkarni,Indiranagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10002,2025-09-02,Arjun Singh,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10003,2025-09-02,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10004,2025-09-02,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10005,2025-09-09,Arjun Rao,Indiranagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10006,2025-09-09,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10007,2025-09-09,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10008,2025-09-09,Shreya Sharma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10009,2025-09-09,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10010,2025-09-10,Karthik Hegde,HSR Layout,Monthly filter coffee subscription,Referral,799.0
+ORD-10011,2025-09-10,Rahul Rao,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10012,2025-09-11,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10013,2025-09-11,Vikram Kapoor 39,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10014,2025-09-12,Aditi Singh,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10015,2025-09-12,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,719.1
+ORD-10016,2025-09-13,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10017,2025-09-14,Harsh Rao,Hebbal,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10018,2025-09-14,Zoya Joshi,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10019,2025-09-14,Zoya Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10020,2025-09-15,Ishaan Iyer 89,JP Nagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10021,2025-09-15,Vikram Hegde,Bellandur,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10022,2025-09-17,Zoya Rao,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10023,2025-09-18,Aarav Kulkarni,Whitefield,Monthly filter coffee subscription,Google Search,1438.2
+ORD-10024,2025-09-18,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10025,2025-09-18,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10026,2025-09-18,Siddharth Iyer,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10027,2025-09-19,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10028,2025-09-19,Kavya Pillai,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10029,2025-09-19,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10030,2025-09-19,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10031,2025-09-20,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10032,2025-09-20,Rahul Gupta,JP Nagar,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10033,2025-09-21,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10034,2025-09-21,Sanjana Patel,Electronic City,Monthly filter coffee subscription,Walk-in,1438.2
+ORD-10035,2025-09-21,Sneha Rao,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10036,2025-09-22,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10037,2025-09-23,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10038,2025-09-23,Kiran Das 24,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10039,2025-09-23,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10040,2025-09-24,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,719.1
+ORD-10041,2025-09-24,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10042,2025-09-24,Neha Rao,Bellandur,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10043,2025-09-25,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10044,2025-09-26,Arjun Singh,Electronic City,Monthly filter coffee subscription,Instagram,719.1
+ORD-10045,2025-09-27,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10046,2025-09-27,Sanjana Krishnan,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10047,2025-09-28,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10048,2025-09-28,Sanjana Nair,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10049,2025-09-28,Shreya Menon,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10050,2025-09-29,Sanjana Joshi,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10051,2025-09-30,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10052,2025-09-30,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10053,2025-10-02,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10054,2025-10-02,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10055,2025-10-03,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10056,2025-10-04,Shreya Sharma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10057,2025-10-04,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,1598.0
+ORD-10058,2025-10-04,Tanvi Sharma,Electronic City,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10059,2025-10-05,Akash Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10060,2025-10-05,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10061,2025-10-05,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,1598.0
+ORD-10062,2025-10-06,Nikhil Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10063,2025-10-06,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10064,2025-10-09,Karthik Hegde,HSR Layout,Monthly filter coffee subscription,Referral,799.0
+ORD-10065,2025-10-09,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10066,2025-10-09,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10067,2025-10-09,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10068,2025-10-10,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10069,2025-10-10,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10070,2025-10-11,Aditi Singh,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10071,2025-10-11,Harsh Rao,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10072,2025-10-11,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10073,2025-10-11,Pooja Mehta 59,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10074,2025-10-11,Rahul Rao,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10075,2025-10-12,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10076,2025-10-12,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10077,2025-10-12,Tanvi Joshi,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10078,2025-10-12,Zoya Rao,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10079,2025-10-13,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10080,2025-10-13,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10081,2025-10-13,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10082,2025-10-13,Vikram Kapoor 39,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10083,2025-10-14,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10084,2025-10-14,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10085,2025-10-14,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10086,2025-10-16,Vikram Hegde,Bellandur,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10087,2025-10-16,Vikram Kulkarni,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10088,2025-10-16,Zoya Shetty,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10089,2025-10-17,Aarav Kulkarni,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10090,2025-10-17,Ananya Kulkarni 63,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10091,2025-10-17,Kiran Das 24,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10092,2025-10-17,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10093,2025-10-19,Ishaan Krishnan 91,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10094,2025-10-19,Kavya Menon 11,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10095,2025-10-19,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10096,2025-10-19,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10097,2025-10-19,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10098,2025-10-20,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10099,2025-10-20,Ishaan Iyer 89,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10100,2025-10-20,Riya Kapoor 62,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10101,2025-10-20,Sanjana Mehta,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10102,2025-10-20,Sneha Pillai,HSR Layout,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10103,2025-10-21,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10104,2025-10-21,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10105,2025-10-21,Akash Patel,Malleshwaram,Monthly filter coffee subscription,Referral,719.1
+ORD-10106,2025-10-21,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10107,2025-10-21,Karthik Shetty,Electronic City,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10108,2025-10-21,Neha Patel,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10109,2025-10-21,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10110,2025-10-21,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10111,2025-10-21,Zoya Joshi,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10112,2025-10-22,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10113,2025-10-22,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10114,2025-10-22,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10115,2025-10-22,Vikram Mehta,JP Nagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10116,2025-10-23,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10117,2025-10-23,Karthik Patel,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10118,2025-10-25,Ananya Mehta,Indiranagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10119,2025-10-25,Neha Rao,Bellandur,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10120,2025-10-25,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10121,2025-10-25,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10122,2025-10-26,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10123,2025-10-26,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10124,2025-10-26,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10125,2025-10-26,Sanjana Joshi,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10126,2025-10-26,Sanjana Krishnan,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10127,2025-10-26,Shreya Menon,Hebbal,Monthly filter coffee subscription,Referral,1598.0
+ORD-10128,2025-10-27,Arjun Singh,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10129,2025-10-27,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10130,2025-10-27,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10131,2025-10-28,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10132,2025-10-28,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10133,2025-10-28,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10134,2025-10-28,Pooja Shetty,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10135,2025-10-29,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10136,2025-10-29,Nikhil Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10137,2025-10-30,Sanjana Shetty,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10138,2025-10-30,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,719.1
+ORD-10139,2025-10-30,Tanvi Sharma,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10140,2025-10-30,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,719.1
+ORD-10141,2025-10-31,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10142,2025-10-31,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,1598.0
+ORD-10143,2025-11-01,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10144,2025-11-01,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10145,2025-11-01,Ananya Verma 95,Bellandur,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10146,2025-11-02,Sneha Bhat,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10147,2025-11-03,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10148,2025-11-03,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10149,2025-11-03,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10150,2025-11-03,Sanjana Nair,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10151,2025-11-03,Sneha Mehta,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10152,2025-11-03,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10153,2025-11-04,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10154,2025-11-04,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10155,2025-11-04,Pooja Mehta 59,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10156,2025-11-04,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10157,2025-11-04,Tanvi Joshi,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10158,2025-11-05,Sneha Gupta,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10159,2025-11-05,Vikram Kulkarni,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10160,2025-11-05,Zoya Rao,Hebbal,Monthly filter coffee subscription,Instagram,719.1
+ORD-10161,2025-11-06,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10162,2025-11-06,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10163,2025-11-06,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10164,2025-11-07,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10165,2025-11-07,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10166,2025-11-07,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10167,2025-11-07,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10168,2025-11-07,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10169,2025-11-07,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10170,2025-11-09,Aditi Shetty 69,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10171,2025-11-09,Aditi Singh,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10172,2025-11-09,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10173,2025-11-09,Karthik Gupta,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-10174,2025-11-10,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10175,2025-11-10,Pooja Nair,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10176,2025-11-10,Tanvi Gupta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10177,2025-11-11,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10178,2025-11-11,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10179,2025-11-11,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10180,2025-11-11,Vikram Hegde,Bellandur,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10181,2025-11-11,Zoya Shetty,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10182,2025-11-12,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10183,2025-11-12,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,1598.0
+ORD-10184,2025-11-12,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10185,2025-11-12,Ishaan Rao,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10186,2025-11-12,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,1598.0
+ORD-10187,2025-11-12,Sneha Iyer,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10188,2025-11-12,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10189,2025-11-13,Aditi Hegde,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10190,2025-11-13,Kavya Singh,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10191,2025-11-13,Rahul Rao,Koramangala,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10192,2025-11-13,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,719.1
+ORD-10193,2025-11-13,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10194,2025-11-14,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10195,2025-11-14,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10196,2025-11-14,Sanjana Shetty 57,JP Nagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10197,2025-11-15,Aarav Reddy,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10198,2025-11-15,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10199,2025-11-16,Aarav Kulkarni,Whitefield,Monthly filter coffee subscription,Google Search,1438.2
+ORD-10200,2025-11-16,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10201,2025-11-16,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10202,2025-11-16,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10203,2025-11-17,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-10204,2025-11-17,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10205,2025-11-17,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10206,2025-11-17,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10207,2025-11-18,Akash Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10208,2025-11-18,Harsh Krishnan 53,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10209,2025-11-18,Kiran Das 24,Koramangala,Monthly filter coffee subscription,Google Search,719.1
+ORD-10210,2025-11-18,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10211,2025-11-18,Sanjana Mehta,Bellandur,Monthly filter coffee subscription,Referral,719.1
+ORD-10212,2025-11-18,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10213,2025-11-18,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10214,2025-11-19,Ananya Mehta,Indiranagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10215,2025-11-19,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10216,2025-11-19,Kavya Menon 11,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10217,2025-11-19,Riya Kapoor 62,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10218,2025-11-19,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10219,2025-11-19,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,719.1
+ORD-10220,2025-11-19,Vikram Mehta,JP Nagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10221,2025-11-20,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10222,2025-11-20,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10223,2025-11-20,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10224,2025-11-21,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10225,2025-11-21,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10226,2025-11-21,Karthik Kapoor,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10227,2025-11-21,Pooja Shetty,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10228,2025-11-21,Sanjana Krishnan,JP Nagar,Monthly filter coffee subscription,Referral,719.1
+ORD-10229,2025-11-21,Shreya Mehta,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10230,2025-11-21,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10231,2025-11-21,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10232,2025-11-22,Ananya Kulkarni 63,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10233,2025-11-22,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10234,2025-11-22,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10235,2025-11-23,Karthik Patel,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10236,2025-11-23,Karthik Shetty,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10237,2025-11-23,Neha Rao,Bellandur,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10238,2025-11-23,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10239,2025-11-23,Yash Iyer,Hebbal,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10240,2025-11-24,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10241,2025-11-24,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10242,2025-11-24,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-10243,2025-11-24,Sanjana Joshi,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10244,2025-11-24,Sneha Reddy,Jayanagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10245,2025-11-25,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10246,2025-11-25,Ishaan Krishnan 91,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10247,2025-11-25,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10248,2025-11-25,Varun Patel 89,Bellandur,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10249,2025-11-26,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10250,2025-11-26,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,719.1
+ORD-10251,2025-11-26,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10252,2025-11-26,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10253,2025-11-26,Sanjana Nair,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10254,2025-11-26,Shreya Menon,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10255,2025-11-26,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10256,2025-11-27,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10257,2025-11-28,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10258,2025-11-28,Aarav Sharma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10259,2025-11-28,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10260,2025-11-28,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10261,2025-11-29,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10262,2025-11-29,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10263,2025-11-30,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10264,2025-11-30,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10265,2025-11-30,Ishaan Gupta,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10266,2025-11-30,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10267,2025-11-30,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,1598.0
+ORD-10268,2025-11-30,Sneha Mehta,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10269,2025-11-30,Varun Menon,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10270,2025-12-01,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10271,2025-12-02,Ananya Verma 95,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10272,2025-12-02,Karthik Gupta,Malleshwaram,Monthly filter coffee subscription,Instagram,719.1
+ORD-10273,2025-12-02,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10274,2025-12-02,Sanjana Shetty,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10275,2025-12-02,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10276,2025-12-02,Tanvi Sharma,Electronic City,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10277,2025-12-02,Vikram Kulkarni,Bellandur,Monthly filter coffee subscription,Google Search,719.1
+ORD-10278,2025-12-03,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10279,2025-12-03,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,1598.0
+ORD-10280,2025-12-04,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10281,2025-12-04,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10282,2025-12-04,Pooja Nair,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10283,2025-12-05,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10284,2025-12-05,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10285,2025-12-05,Neha Singh,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10286,2025-12-05,Tanvi Gupta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10287,2025-12-05,Tanvi Joshi,Hebbal,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10288,2025-12-06,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10289,2025-12-06,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10290,2025-12-06,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10291,2025-12-06,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10292,2025-12-06,Sneha Gupta,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10293,2025-12-07,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10294,2025-12-07,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10295,2025-12-07,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10296,2025-12-07,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10297,2025-12-07,Rohan Hegde,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10298,2025-12-08,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10299,2025-12-08,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10300,2025-12-09,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10301,2025-12-10,Aditi Hegde,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10302,2025-12-10,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10303,2025-12-10,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10304,2025-12-10,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10305,2025-12-11,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10306,2025-12-11,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10307,2025-12-11,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10308,2025-12-11,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10309,2025-12-11,Vikram Bhat,Electronic City,Monthly filter coffee subscription,Instagram,719.1
+ORD-10310,2025-12-12,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10311,2025-12-12,Ishaan Rao,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10312,2025-12-13,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10313,2025-12-13,Ananya Mehta,Indiranagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10314,2025-12-13,Ishaan Das,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10315,2025-12-13,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10316,2025-12-13,Sneha Reddy,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10317,2025-12-13,Varun Singh,Jayanagar,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10318,2025-12-13,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10319,2025-12-14,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10320,2025-12-14,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10321,2025-12-14,Priya Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10322,2025-12-14,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10323,2025-12-14,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-10324,2025-12-14,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10325,2025-12-15,Aarav Reddy,Whitefield,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10326,2025-12-15,Aditi Shetty 69,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10327,2025-12-15,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10328,2025-12-15,Riya Bhat,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10329,2025-12-15,Rohan Iyer,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10330,2025-12-16,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10331,2025-12-16,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,719.1
+ORD-10332,2025-12-16,Sanjana Mehta,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10333,2025-12-16,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,719.1
+ORD-10334,2025-12-16,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10335,2025-12-16,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10336,2025-12-17,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10337,2025-12-17,Kavya Singh,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10338,2025-12-17,Pooja Shetty,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10339,2025-12-17,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10340,2025-12-17,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10341,2025-12-17,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10342,2025-12-17,Sneha Iyer,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10343,2025-12-17,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10344,2025-12-18,Harsh Krishnan 53,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10345,2025-12-18,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10346,2025-12-18,Varun Patel 89,Bellandur,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10347,2025-12-18,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10348,2025-12-19,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10349,2025-12-19,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10350,2025-12-19,Meera Singh 75,HSR Layout,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10351,2025-12-19,Pooja Bhat,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10352,2025-12-19,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,719.1
+ORD-10353,2025-12-19,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10354,2025-12-20,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10355,2025-12-20,Ananya Kulkarni 63,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10356,2025-12-20,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10357,2025-12-20,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10358,2025-12-20,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10359,2025-12-20,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10360,2025-12-21,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10361,2025-12-21,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10362,2025-12-21,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10363,2025-12-22,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10364,2025-12-22,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,719.1
+ORD-10365,2025-12-22,Karthik Kapoor,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10366,2025-12-22,Meera Nair,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10367,2025-12-22,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10368,2025-12-22,Varun Krishnan,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10369,2025-12-23,Aarav Sharma,Whitefield,Monthly filter coffee subscription,Google Search,719.1
+ORD-10370,2025-12-23,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10371,2025-12-23,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10372,2025-12-23,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10373,2025-12-23,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10374,2025-12-23,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10375,2025-12-23,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10376,2025-12-23,Shreya Mehta,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10377,2025-12-23,Yash Iyer,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10378,2025-12-24,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10379,2025-12-24,Akash Rao 84,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10380,2025-12-24,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10381,2025-12-24,Karthik Shetty,Electronic City,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10382,2025-12-24,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10383,2025-12-24,Nikhil Patel,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10384,2025-12-24,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10385,2025-12-24,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10386,2025-12-25,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10387,2025-12-26,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10388,2025-12-26,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10389,2025-12-26,Sanjana Shetty,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10390,2025-12-27,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10391,2025-12-27,Varun Menon,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10392,2025-12-27,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10393,2025-12-28,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10394,2025-12-28,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10395,2025-12-28,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10396,2025-12-28,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10397,2025-12-28,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10398,2025-12-29,Yash Patel,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10399,2025-12-30,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10400,2025-12-30,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10401,2025-12-30,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10402,2025-12-30,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10403,2025-12-31,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10404,2025-12-31,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10405,2025-12-31,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10406,2025-12-31,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10407,2025-12-31,Zoya Patel,Indiranagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10408,2026-01-01,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10409,2026-01-01,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10410,2026-01-01,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10411,2026-01-01,Pooja Nair,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10412,2026-01-01,Sneha Mehta,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10413,2026-01-02,Divya Shetty,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10414,2026-01-02,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10415,2026-01-02,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10416,2026-01-03,Ananya Verma 95,Bellandur,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10417,2026-01-03,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,719.1
+ORD-10418,2026-01-04,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10419,2026-01-04,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10420,2026-01-04,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10421,2026-01-05,Ishaan Reddy,Indiranagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10422,2026-01-05,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10423,2026-01-05,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10424,2026-01-05,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10425,2026-01-05,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10426,2026-01-06,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10427,2026-01-06,Aditi Shetty 69,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10428,2026-01-06,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10429,2026-01-06,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10430,2026-01-07,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10431,2026-01-07,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10432,2026-01-07,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-10433,2026-01-07,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10434,2026-01-08,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,1598.0
+ORD-10435,2026-01-08,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10436,2026-01-08,Ishaan Rao,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10437,2026-01-08,Kavya Singh,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10438,2026-01-08,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10439,2026-01-09,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10440,2026-01-09,Neha Singh,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10441,2026-01-09,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10442,2026-01-09,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10443,2026-01-09,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10444,2026-01-09,Varun Singh,Jayanagar,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10445,2026-01-10,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10446,2026-01-10,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10447,2026-01-10,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-10448,2026-01-10,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10449,2026-01-10,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10450,2026-01-11,Aarav Reddy,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10451,2026-01-11,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10452,2026-01-11,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10453,2026-01-11,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10454,2026-01-11,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10455,2026-01-12,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10456,2026-01-12,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10457,2026-01-12,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10458,2026-01-12,Sneha Reddy,Jayanagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10459,2026-01-13,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10460,2026-01-13,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10461,2026-01-13,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10462,2026-01-13,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10463,2026-01-14,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10464,2026-01-14,Karthik Shetty,Electronic City,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10465,2026-01-14,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10466,2026-01-14,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10467,2026-01-15,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10468,2026-01-15,Pooja Bhat,JP Nagar,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10469,2026-01-15,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10470,2026-01-15,Vikram Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10471,2026-01-15,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10472,2026-01-16,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10473,2026-01-16,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10474,2026-01-16,Harsh Krishnan 53,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10475,2026-01-16,Meera Nair,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10476,2026-01-16,Meera Singh 75,HSR Layout,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10477,2026-01-16,Rohan Iyer,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10478,2026-01-17,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10479,2026-01-17,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10480,2026-01-17,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10481,2026-01-17,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10482,2026-01-17,Riya Bhat,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10483,2026-01-17,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10484,2026-01-17,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10485,2026-01-18,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10486,2026-01-18,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10487,2026-01-18,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10488,2026-01-18,Ishaan Das,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10489,2026-01-18,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10490,2026-01-19,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10491,2026-01-19,Akash Rao 84,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10492,2026-01-19,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10493,2026-01-19,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10494,2026-01-19,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10495,2026-01-20,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10496,2026-01-20,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10497,2026-01-20,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10498,2026-01-21,Karthik Kapoor,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10499,2026-01-21,Sneha Iyer,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10500,2026-01-22,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10501,2026-01-22,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10502,2026-01-22,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10503,2026-01-23,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10504,2026-01-23,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10505,2026-01-23,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10506,2026-01-23,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10507,2026-01-23,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-10508,2026-01-23,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10509,2026-01-23,Yash Patel,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10510,2026-01-24,Arjun Gupta,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10511,2026-01-24,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10512,2026-01-24,Nikhil Patel,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10513,2026-01-24,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10514,2026-01-24,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10515,2026-01-24,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10516,2026-01-25,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10517,2026-01-25,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10518,2026-01-25,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10519,2026-01-25,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-10520,2026-01-25,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10521,2026-01-25,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10522,2026-01-25,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10523,2026-01-25,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10524,2026-01-26,Aarav Sharma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10525,2026-01-26,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,719.1
+ORD-10526,2026-01-26,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-10527,2026-01-26,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10528,2026-01-26,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10529,2026-01-26,Varun Krishnan,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10530,2026-01-27,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10531,2026-01-27,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10532,2026-01-27,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10533,2026-01-28,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10534,2026-01-28,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10535,2026-01-28,Zoya Patel,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10536,2026-01-29,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10537,2026-01-29,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10538,2026-01-29,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10539,2026-01-30,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10540,2026-01-30,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10541,2026-01-30,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10542,2026-01-31,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10543,2026-01-31,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10544,2026-01-31,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10545,2026-01-31,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10546,2026-02-01,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10547,2026-02-01,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10548,2026-02-01,Siddharth Krishnan,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10549,2026-02-02,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10550,2026-02-02,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-10551,2026-02-03,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10552,2026-02-03,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10553,2026-02-03,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10554,2026-02-03,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10555,2026-02-04,Aarav Reddy,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10556,2026-02-04,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10557,2026-02-04,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10558,2026-02-04,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10559,2026-02-05,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10560,2026-02-05,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10561,2026-02-05,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10562,2026-02-05,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10563,2026-02-05,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10564,2026-02-05,Yash Kulkarni,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10565,2026-02-06,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10566,2026-02-06,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10567,2026-02-06,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10568,2026-02-07,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10569,2026-02-08,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10570,2026-02-08,Karthik Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10571,2026-02-08,Meera Singh 75,HSR Layout,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10572,2026-02-08,Siddharth Kulkarni,Bellandur,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10573,2026-02-08,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10574,2026-02-09,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10575,2026-02-09,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10576,2026-02-09,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10577,2026-02-09,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10578,2026-02-09,Riya Bhat,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10579,2026-02-09,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-10580,2026-02-09,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10581,2026-02-09,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10582,2026-02-09,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10583,2026-02-09,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10584,2026-02-10,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10585,2026-02-10,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10586,2026-02-11,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10587,2026-02-11,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10588,2026-02-11,Neha Singh,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10589,2026-02-11,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10590,2026-02-11,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10591,2026-02-11,Varun Singh,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10592,2026-02-12,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10593,2026-02-13,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10594,2026-02-13,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10595,2026-02-13,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,719.1
+ORD-10596,2026-02-13,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10597,2026-02-13,Rohan Iyer,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10598,2026-02-14,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10599,2026-02-14,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10600,2026-02-14,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10601,2026-02-14,Akash Rao 84,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10602,2026-02-14,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10603,2026-02-14,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10604,2026-02-15,Harsh Menon,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10605,2026-02-15,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10606,2026-02-16,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10607,2026-02-16,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10608,2026-02-16,Meera Nair,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10609,2026-02-16,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10610,2026-02-16,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10611,2026-02-16,Yash Patel,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10612,2026-02-17,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10613,2026-02-17,Vikram Bhat,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10614,2026-02-18,Ishaan Das,Electronic City,Monthly filter coffee subscription,Referral,719.1
+ORD-10615,2026-02-18,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10616,2026-02-18,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10617,2026-02-19,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10618,2026-02-19,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10619,2026-02-19,Kavya Joshi,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10620,2026-02-19,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,719.1
+ORD-10621,2026-02-19,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10622,2026-02-19,Siddharth Joshi 57,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10623,2026-02-20,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10624,2026-02-20,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10625,2026-02-20,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10626,2026-02-20,Siddharth Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10627,2026-02-20,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10628,2026-02-20,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10629,2026-02-20,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10630,2026-02-21,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10631,2026-02-21,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10632,2026-02-21,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10633,2026-02-21,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10634,2026-02-22,Arjun Gupta,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10635,2026-02-22,Diya Bhat 68,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10636,2026-02-22,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10637,2026-02-22,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10638,2026-02-23,Aarav Sharma,Whitefield,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10639,2026-02-23,Nikhil Joshi,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10640,2026-02-23,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-10641,2026-02-24,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10642,2026-02-24,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-10643,2026-02-24,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10644,2026-02-24,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10645,2026-02-24,Pooja Bhat,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10646,2026-02-24,Pooja Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10647,2026-02-24,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10648,2026-02-24,Rahul Verma,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10649,2026-02-24,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10650,2026-02-24,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10651,2026-02-24,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10652,2026-02-24,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10653,2026-02-25,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10654,2026-02-25,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10655,2026-02-25,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10656,2026-02-25,Rahul Singh 98,Indiranagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10657,2026-02-26,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10658,2026-02-26,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10659,2026-02-26,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10660,2026-02-26,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10661,2026-02-26,Rohan Rao,Jayanagar,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10662,2026-02-27,Divya Pillai,Hebbal,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10663,2026-02-28,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10664,2026-02-28,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10665,2026-02-28,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-10666,2026-02-28,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,1598.0
+ORD-10667,2026-02-28,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10668,2026-02-28,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10669,2026-02-28,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10670,2026-02-28,Varun Krishnan,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10671,2026-03-01,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10672,2026-03-01,Priya Singh,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10673,2026-03-01,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10674,2026-03-01,Shreya Gupta,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10675,2026-03-01,Zoya Patel,Indiranagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10676,2026-03-02,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10677,2026-03-02,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10678,2026-03-02,Arjun Nair,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10679,2026-03-02,Nikhil Patel,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10680,2026-03-02,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10681,2026-03-03,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10682,2026-03-03,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10683,2026-03-03,Meera Singh 75,HSR Layout,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10684,2026-03-03,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10685,2026-03-03,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10686,2026-03-03,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10687,2026-03-04,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10688,2026-03-04,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10689,2026-03-05,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10690,2026-03-06,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10691,2026-03-06,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10692,2026-03-06,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10693,2026-03-06,Riya Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10694,2026-03-06,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10695,2026-03-07,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10696,2026-03-07,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10697,2026-03-07,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10698,2026-03-08,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10699,2026-03-08,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10700,2026-03-09,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-10701,2026-03-09,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10702,2026-03-09,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10703,2026-03-09,Siddharth Kulkarni,Bellandur,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10704,2026-03-09,Yash Kulkarni,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10705,2026-03-10,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10706,2026-03-10,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10707,2026-03-10,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10708,2026-03-10,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10709,2026-03-10,Rohan Iyer,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10710,2026-03-10,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-10711,2026-03-10,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10712,2026-03-10,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10713,2026-03-11,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10714,2026-03-11,Neha Singh,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10715,2026-03-11,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10716,2026-03-12,Karthik Bhat,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10717,2026-03-12,Yash Patel,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10718,2026-03-13,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10719,2026-03-13,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10720,2026-03-13,Meera Nair,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10721,2026-03-13,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10722,2026-03-13,Riya Bhat,Indiranagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10723,2026-03-13,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10724,2026-03-13,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10725,2026-03-13,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10726,2026-03-13,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10727,2026-03-13,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10728,2026-03-14,Aarav Shetty 85,Malleshwaram,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10729,2026-03-14,Akash Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10730,2026-03-14,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10731,2026-03-14,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10732,2026-03-14,Varun Singh,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10733,2026-03-15,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,1598.0
+ORD-10734,2026-03-15,Diya Bhat 68,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10735,2026-03-15,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10736,2026-03-15,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-10737,2026-03-16,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10738,2026-03-16,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10739,2026-03-16,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10740,2026-03-16,Akash Rao 84,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10741,2026-03-16,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10742,2026-03-16,Vikram Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10743,2026-03-17,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-10744,2026-03-17,Kavya Joshi,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10745,2026-03-17,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10746,2026-03-17,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10747,2026-03-18,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10748,2026-03-18,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-10749,2026-03-18,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10750,2026-03-19,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10751,2026-03-19,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10752,2026-03-19,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10753,2026-03-20,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10754,2026-03-20,Harsh Menon,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10755,2026-03-20,Pooja Bhat,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10756,2026-03-20,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10757,2026-03-20,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10758,2026-03-21,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10759,2026-03-21,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10760,2026-03-21,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10761,2026-03-21,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10762,2026-03-22,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10763,2026-03-22,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10764,2026-03-22,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10765,2026-03-22,Rohan Rao,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10766,2026-03-22,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10767,2026-03-22,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10768,2026-03-23,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10769,2026-03-23,Nikhil Joshi,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10770,2026-03-23,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10771,2026-03-23,Rahul Menon 99,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10772,2026-03-23,Varun Krishnan,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10773,2026-03-24,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10774,2026-03-24,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10775,2026-03-24,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10776,2026-03-24,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10777,2026-03-24,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10778,2026-03-24,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,719.1
+ORD-10779,2026-03-25,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10780,2026-03-25,Pooja Hegde,Bellandur,Monthly filter coffee subscription,Google Search,719.1
+ORD-10781,2026-03-25,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10782,2026-03-25,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,719.1
+ORD-10783,2026-03-25,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10784,2026-03-26,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10785,2026-03-26,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10786,2026-03-26,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10787,2026-03-26,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10788,2026-03-27,Arjun Gupta,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10789,2026-03-27,Ishaan Das,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10790,2026-03-27,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10791,2026-03-27,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10792,2026-03-27,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10793,2026-03-27,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10794,2026-03-27,Siddharth Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10795,2026-03-28,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10796,2026-03-28,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10797,2026-03-28,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10798,2026-03-29,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10799,2026-03-29,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10800,2026-03-29,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10801,2026-03-29,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10802,2026-03-29,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10803,2026-03-30,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10804,2026-03-30,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-10805,2026-03-30,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10806,2026-03-30,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10807,2026-03-30,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10808,2026-03-30,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10809,2026-03-31,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10810,2026-03-31,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10811,2026-03-31,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10812,2026-03-31,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10813,2026-04-01,Aarav Sharma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10814,2026-04-01,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10815,2026-04-01,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10816,2026-04-01,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10817,2026-04-02,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10818,2026-04-02,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10819,2026-04-02,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10820,2026-04-02,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10821,2026-04-02,Rohan Iyer,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10822,2026-04-03,Nikhil Patel,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10823,2026-04-03,Riya Bhat,Indiranagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10824,2026-04-04,Shreya Gupta,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10825,2026-04-04,Siddharth Kulkarni,Bellandur,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10826,2026-04-04,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10827,2026-04-05,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,719.1
+ORD-10828,2026-04-05,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10829,2026-04-05,Zoya Patel,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10830,2026-04-06,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10831,2026-04-06,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10832,2026-04-06,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10833,2026-04-06,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10834,2026-04-07,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10835,2026-04-07,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10836,2026-04-08,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10837,2026-04-08,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10838,2026-04-08,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10839,2026-04-08,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-10840,2026-04-08,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10841,2026-04-08,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,1598.0
+ORD-10842,2026-04-08,Yash Kulkarni,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10843,2026-04-09,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10844,2026-04-09,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10845,2026-04-09,Diya Hegde 15,HSR Layout,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10846,2026-04-09,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10847,2026-04-10,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10848,2026-04-10,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10849,2026-04-10,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10850,2026-04-11,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10851,2026-04-11,Karthik Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10852,2026-04-11,Neha Singh,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10853,2026-04-11,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10854,2026-04-11,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,719.1
+ORD-10855,2026-04-11,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10856,2026-04-12,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10857,2026-04-13,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10858,2026-04-13,Harsh Menon,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10859,2026-04-13,Meera Nair,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10860,2026-04-13,Meera Singh 75,HSR Layout,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10861,2026-04-13,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10862,2026-04-14,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10863,2026-04-14,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10864,2026-04-14,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10865,2026-04-15,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10866,2026-04-15,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10867,2026-04-15,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10868,2026-04-15,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10869,2026-04-16,Diya Bhat 68,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10870,2026-04-16,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10871,2026-04-16,Yash Patel,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10872,2026-04-16,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10873,2026-04-17,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10874,2026-04-17,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10875,2026-04-17,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10876,2026-04-17,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10877,2026-04-17,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10878,2026-04-18,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10879,2026-04-18,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10880,2026-04-18,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,1598.0
+ORD-10881,2026-04-19,Akash Rao 84,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10882,2026-04-19,Kavya Joshi,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10883,2026-04-19,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10884,2026-04-19,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-10885,2026-04-20,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-10886,2026-04-20,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10887,2026-04-20,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10888,2026-04-20,Nikhil Joshi,Electronic City,Monthly filter coffee subscription,Instagram,719.1
+ORD-10889,2026-04-20,Rohan Rao,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10890,2026-04-20,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10891,2026-04-20,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10892,2026-04-20,Varun Krishnan,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10893,2026-04-20,Varun Singh,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10894,2026-04-20,Vikram Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10895,2026-04-21,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-10896,2026-04-22,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10897,2026-04-22,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10898,2026-04-22,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10899,2026-04-22,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10900,2026-04-22,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10901,2026-04-22,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-10902,2026-04-23,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10903,2026-04-23,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-10904,2026-04-23,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10905,2026-04-23,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10906,2026-04-23,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10907,2026-04-24,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10908,2026-04-24,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10909,2026-04-24,Ishaan Das,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10910,2026-04-24,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10911,2026-04-24,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10912,2026-04-24,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10913,2026-04-24,Siddharth Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-10914,2026-04-24,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10915,2026-04-25,Arjun Gupta,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10916,2026-04-25,Pooja Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10917,2026-04-25,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10918,2026-04-25,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10919,2026-04-25,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10920,2026-04-26,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10921,2026-04-26,Neha Kulkarni,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-10922,2026-04-27,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10923,2026-04-27,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10924,2026-04-27,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10925,2026-04-27,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-10926,2026-04-28,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10927,2026-04-28,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-10928,2026-04-28,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-10929,2026-04-28,Nikhil Patel,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10930,2026-04-29,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10931,2026-04-29,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10932,2026-04-29,Pooja Bhat,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-10933,2026-04-29,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-10934,2026-04-29,Zoya Patel,Indiranagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10935,2026-04-30,Rohan Iyer,Indiranagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10936,2026-04-30,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10937,2026-05-01,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10938,2026-05-01,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10939,2026-05-01,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10940,2026-05-01,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-10941,2026-05-01,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10942,2026-05-02,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10943,2026-05-02,Pooja Singh,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10944,2026-05-03,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,1598.0
+ORD-10945,2026-05-03,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10946,2026-05-03,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-10947,2026-05-03,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10948,2026-05-04,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10949,2026-05-04,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-10950,2026-05-04,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10951,2026-05-04,Riya Bhat,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10952,2026-05-04,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10953,2026-05-05,Aarav Sharma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-10954,2026-05-05,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10955,2026-05-05,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-10956,2026-05-05,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-10957,2026-05-05,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10958,2026-05-05,Yash Patel,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-10959,2026-05-06,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10960,2026-05-06,Diya Nair,Malleshwaram,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10961,2026-05-06,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-10962,2026-05-06,Siddharth Kulkarni,Bellandur,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10963,2026-05-06,Yash Kulkarni,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-10964,2026-05-07,Karthik Bhat,Electronic City,Monthly filter coffee subscription,Instagram,1438.2
+ORD-10965,2026-05-07,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10966,2026-05-08,Aditya Krishnan,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10967,2026-05-08,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-10968,2026-05-08,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-10969,2026-05-08,Shreya Gupta,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-10970,2026-05-09,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10971,2026-05-09,Neha Singh,Malleshwaram,Monthly filter coffee subscription,Walk-in,719.1
+ORD-10972,2026-05-09,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10973,2026-05-09,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-10974,2026-05-09,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-10975,2026-05-09,Sneha Sharma,Whitefield,Monthly filter coffee subscription,Referral,1598.0
+ORD-10976,2026-05-10,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10977,2026-05-10,Harsh Menon,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10978,2026-05-10,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10979,2026-05-10,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-10980,2026-05-10,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-10981,2026-05-11,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-10982,2026-05-11,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10983,2026-05-11,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10984,2026-05-12,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10985,2026-05-12,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,719.1
+ORD-10986,2026-05-12,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-10987,2026-05-12,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10988,2026-05-12,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10989,2026-05-12,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-10990,2026-05-13,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10991,2026-05-13,Meera Singh 75,HSR Layout,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10992,2026-05-13,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-10993,2026-05-14,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-10994,2026-05-14,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-10995,2026-05-14,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10996,2026-05-15,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-10997,2026-05-15,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,719.1
+ORD-10998,2026-05-15,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-10999,2026-05-15,Kavya Joshi,Whitefield,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11000,2026-05-15,Kiran Sharma 57,Jayanagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11001,2026-05-15,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,719.1
+ORD-11002,2026-05-15,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,1598.0
+ORD-11003,2026-05-15,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11004,2026-05-16,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11005,2026-05-16,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-11006,2026-05-16,Diya Bhat 68,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11007,2026-05-16,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11008,2026-05-16,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11009,2026-05-16,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11010,2026-05-16,Rohan Rao,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11011,2026-05-16,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-11012,2026-05-16,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11013,2026-05-17,Akash Rao 84,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11014,2026-05-17,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11015,2026-05-17,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11016,2026-05-17,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11017,2026-05-17,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11018,2026-05-17,Varun Krishnan,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11019,2026-05-17,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11020,2026-05-18,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,719.1
+ORD-11021,2026-05-18,Meera Nair,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-11022,2026-05-18,Vikram Bhat,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11023,2026-05-19,Aditi Patel 91,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11024,2026-05-19,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11025,2026-05-19,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11026,2026-05-19,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-11027,2026-05-20,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11028,2026-05-20,Nikhil Joshi,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11029,2026-05-20,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-11030,2026-05-21,Aditi Reddy,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-11031,2026-05-21,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11032,2026-05-21,Siddharth Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11033,2026-05-21,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11034,2026-05-22,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11035,2026-05-22,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,719.1
+ORD-11036,2026-05-22,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-11037,2026-05-22,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11038,2026-05-22,Shreya Iyer,Indiranagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-11039,2026-05-22,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11040,2026-05-22,Varun Singh,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11041,2026-05-23,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11042,2026-05-23,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-11043,2026-05-23,Arjun Shetty,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11044,2026-05-23,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11045,2026-05-23,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11046,2026-05-23,Meera Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-11047,2026-05-23,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11048,2026-05-23,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11049,2026-05-24,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11050,2026-05-24,Arjun Gupta,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11051,2026-05-24,Pooja Bhat,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11052,2026-05-24,Priya Mehta,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11053,2026-05-24,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11054,2026-05-25,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11055,2026-05-25,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,719.1
+ORD-11056,2026-05-25,Rahul Iyer,Jayanagar,Monthly filter coffee subscription,Google Search,719.1
+ORD-11057,2026-05-25,Zoya Patel,Indiranagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11058,2026-05-26,Ishaan Das,Electronic City,Monthly filter coffee subscription,Referral,1598.0
+ORD-11059,2026-05-26,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11060,2026-05-27,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,719.1
+ORD-11061,2026-05-27,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11062,2026-05-27,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11063,2026-05-28,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11064,2026-05-28,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-11065,2026-05-29,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11066,2026-05-29,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,1438.2
+ORD-11067,2026-05-29,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,719.1
+ORD-11068,2026-05-30,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11069,2026-05-31,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11070,2026-05-31,Akash Rao 3,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11071,2026-05-31,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11072,2026-05-31,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11073,2026-05-31,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11074,2026-05-31,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11075,2026-05-31,Pooja Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11076,2026-05-31,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11077,2026-05-31,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11078,2026-06-01,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-11079,2026-06-01,Karthik Bhat,Electronic City,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11080,2026-06-01,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11081,2026-06-03,Aarav Sharma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11082,2026-06-03,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11083,2026-06-03,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11084,2026-06-03,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11085,2026-06-03,Shreya Sharma 33,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-11086,2026-06-04,Arjun Kapoor,Electronic City,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11087,2026-06-04,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,719.1
+ORD-11088,2026-06-04,Shreya Patel,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11089,2026-06-04,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11090,2026-06-05,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11091,2026-06-05,Meera Joshi,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11092,2026-06-05,Shreya Gupta,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11093,2026-06-05,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11094,2026-06-06,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11095,2026-06-06,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11096,2026-06-06,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11097,2026-06-06,Neha Singh,Malleshwaram,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11098,2026-06-06,Nikhil Patel,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11099,2026-06-06,Pooja Rao,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11100,2026-06-06,Rohan Iyer,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11101,2026-06-07,Aditya Verma,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-11102,2026-06-07,Ishaan Kulkarni 40,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11103,2026-06-07,Ishaan Singh,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11104,2026-06-07,Sanjana Nair 2,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-11105,2026-06-07,Yash Kulkarni,Jayanagar,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11106,2026-06-08,Siddharth Kulkarni,Bellandur,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11107,2026-06-08,Tanvi Kulkarni,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-11108,2026-06-09,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,719.1
+ORD-11109,2026-06-09,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11110,2026-06-09,Meera Singh 75,HSR Layout,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11111,2026-06-09,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11112,2026-06-09,Varun Gupta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11113,2026-06-09,Yash Patel,HSR Layout,Monthly filter coffee subscription,Instagram,719.1
+ORD-11114,2026-06-10,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11115,2026-06-10,Meera Das,Whitefield,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11116,2026-06-10,Riya Bhat,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11117,2026-06-10,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-11118,2026-06-11,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11119,2026-06-11,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11120,2026-06-12,Aditya Menon,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11121,2026-06-12,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11122,2026-06-12,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11123,2026-06-12,Harsh Menon,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-11124,2026-06-12,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11125,2026-06-12,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11126,2026-06-12,Shreya Iyer 90,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11127,2026-06-12,Vikram Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11128,2026-06-13,Diya Bhat 68,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11129,2026-06-13,Karthik Rao,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11130,2026-06-13,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11131,2026-06-13,Nikhil Joshi,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11132,2026-06-13,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11133,2026-06-14,Karthik Hegde 6,Jayanagar,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-11134,2026-06-14,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,1598.0
+ORD-11135,2026-06-14,Sneha Kapoor 17,HSR Layout,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11136,2026-06-15,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11137,2026-06-15,Divya Joshi,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11138,2026-06-15,Sneha Das,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11139,2026-06-15,Varun Singh,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11140,2026-06-15,Yash Krishnan,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11141,2026-06-15,Zoya Pillai,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11142,2026-06-16,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11143,2026-06-16,Rohan Rao,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11144,2026-06-16,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11145,2026-06-16,Varun Krishnan,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11146,2026-06-17,Akash Joshi,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-11147,2026-06-17,Kavya Das,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11148,2026-06-18,Riya Mehta 47,JP Nagar,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-11149,2026-06-18,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-11150,2026-06-19,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11151,2026-06-19,Meera Nair,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-11152,2026-06-19,Rohan Mehta,Malleshwaram,Monthly filter coffee subscription,Google Search,799.0
+ORD-11153,2026-06-19,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11154,2026-06-19,Vikram Gupta,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-11155,2026-06-20,Aditi Verma 90,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11156,2026-06-20,Diya Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11157,2026-06-20,Kavya Joshi,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11158,2026-06-20,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11159,2026-06-21,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11160,2026-06-21,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-11161,2026-06-21,Aditya Patel,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11162,2026-06-21,Arjun Gupta,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11163,2026-06-21,Pooja Bhat,JP Nagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11164,2026-06-21,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-11165,2026-06-22,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-11166,2026-06-22,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,1598.0
+ORD-11167,2026-06-22,Rahul Mehta,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11168,2026-06-22,Shreya Reddy,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11169,2026-06-22,Siddharth Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11170,2026-06-23,Ananya Krishnan,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11171,2026-06-23,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,719.1
+ORD-11172,2026-06-23,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11173,2026-06-24,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11174,2026-06-24,Varun Verma,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11175,2026-06-25,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11176,2026-06-25,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11177,2026-06-25,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11178,2026-06-25,Pooja Hegde,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11179,2026-06-25,Sanjana Hegde,JP Nagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11180,2026-06-25,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11181,2026-06-25,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11182,2026-06-25,Siddharth Nair,Hebbal,Monthly filter coffee subscription,Referral,799.0
+ORD-11183,2026-06-26,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11184,2026-06-26,Sneha Kulkarni,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11185,2026-06-27,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-11186,2026-06-27,Rahul Patel,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11187,2026-06-28,Diya Mehta,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-11188,2026-06-28,Diya Rao,Electronic City,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-11189,2026-06-28,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11190,2026-06-28,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11191,2026-06-28,Vikram Reddy 4,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11192,2026-06-28,Zoya Mehta 49,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11193,2026-06-30,Karthik Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11194,2026-06-30,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11195,2026-06-30,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,719.1
+ORD-11196,2026-06-30,Neha Iyer 27,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11197,2026-06-30,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11198,2026-07-01,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11199,2026-07-01,Shreya Gupta,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11200,2026-07-02,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11201,2026-07-03,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11202,2026-07-04,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-11203,2026-07-04,Harsh Joshi 21,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11204,2026-07-05,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11205,2026-07-05,Siddharth Kulkarni,Bellandur,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11206,2026-07-05,Yash Kulkarni,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11207,2026-07-06,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11208,2026-07-07,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11209,2026-07-07,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-11210,2026-07-07,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11211,2026-07-07,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11212,2026-07-07,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11213,2026-07-07,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11214,2026-07-09,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11215,2026-07-09,Diya Bhat 68,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11216,2026-07-09,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11217,2026-07-09,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11218,2026-07-09,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11219,2026-07-09,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11220,2026-07-09,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11221,2026-07-10,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11222,2026-07-10,Nikhil Joshi,Electronic City,Monthly filter coffee subscription,Instagram,1438.2
+ORD-11223,2026-07-10,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11224,2026-07-11,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11225,2026-07-11,Harsh Menon,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11226,2026-07-11,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11227,2026-07-11,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11228,2026-07-11,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11229,2026-07-12,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11230,2026-07-12,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-11231,2026-07-13,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11232,2026-07-13,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11233,2026-07-14,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11234,2026-07-14,Rohan Rao,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11235,2026-07-14,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11236,2026-07-15,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11237,2026-07-15,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11238,2026-07-16,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11239,2026-07-16,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11240,2026-07-16,Rohan Iyer 51,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-11241,2026-07-16,Yash Shetty,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11242,2026-07-17,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-11243,2026-07-17,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,719.1
+ORD-11244,2026-07-17,Ishaan Sharma,Jayanagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11245,2026-07-17,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11246,2026-07-17,Yash Kapoor,Jayanagar,Monthly filter coffee subscription,Instagram,719.1
+ORD-11247,2026-07-18,Aarav Nair,JP Nagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-11248,2026-07-18,Nikhil Reddy,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11249,2026-07-18,Tanvi Pillai 37,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11250,2026-07-19,Ishaan Shetty,Koramangala,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11251,2026-07-19,Kavya Joshi,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11252,2026-07-19,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-11253,2026-07-19,Siddharth Mehta,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11254,2026-07-20,Harsh Bhat,Hebbal,Monthly filter coffee subscription,Google Search,719.1
+ORD-11255,2026-07-21,Harsh Patel 90,Koramangala,Monthly filter coffee subscription,Referral,719.1
+ORD-11256,2026-07-21,Sanjana Kulkarni,Indiranagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11257,2026-07-21,Yash Nair,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-11258,2026-07-22,Diya Reddy,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-11259,2026-07-22,Karthik Reddy 38,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11260,2026-07-22,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11261,2026-07-22,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11262,2026-07-22,Siddharth Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11263,2026-07-23,Divya Iyer,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11264,2026-07-23,Ishaan Mehta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-11265,2026-07-24,Pooja Hegde,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11266,2026-07-24,Shreya Krishnan,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11267,2026-07-24,Siddharth Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11268,2026-07-25,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11269,2026-07-25,Kiran Bhat,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11270,2026-07-25,Kiran Iyer,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11271,2026-07-25,Meera Pillai 24,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11272,2026-07-25,Riya Shetty,Koramangala,Monthly filter coffee subscription,Referral,1598.0
+ORD-11273,2026-07-26,Priya Das,Malleshwaram,Monthly filter coffee subscription,Instagram,1438.2
+ORD-11274,2026-07-26,Zoya Reddy,Jayanagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11275,2026-07-27,Arjun Gupta,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11276,2026-07-27,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11277,2026-07-27,Pooja Krishnan,Koramangala,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11278,2026-07-28,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11279,2026-07-28,Aditi Verma,Bellandur,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11280,2026-07-28,Kiran Reddy,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-11281,2026-07-28,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11282,2026-07-28,Priya Bhat,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-11283,2026-07-29,Harsh Sharma 77,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11284,2026-07-29,Kiran Patel,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-11285,2026-07-29,Pooja Verma,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-11286,2026-07-29,Priya Iyer,Indiranagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11287,2026-07-29,Rahul Nair,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-11288,2026-07-29,Rahul Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11289,2026-07-29,Riya Pillai,Hebbal,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11290,2026-07-30,Aditya Kulkarni 61,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-11291,2026-07-30,Karthik Bhat,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11292,2026-07-30,Siddharth Das,Hebbal,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11293,2026-07-30,Siddharth Hegde 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11294,2026-07-31,Harsh Sharma,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11295,2026-07-31,Kiran Kulkarni 64,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-11296,2026-08-01,Siddharth Shetty 12,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11297,2026-08-02,Aarav Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11298,2026-08-02,Karthik Das,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11299,2026-08-02,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11300,2026-08-02,Sanjana Verma 20,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11301,2026-08-03,Shreya Gupta,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11302,2026-08-03,Siddharth Rao 63,HSR Layout,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11303,2026-08-03,Yash Singh,HSR Layout,Monthly filter coffee subscription,Referral,799.0
+ORD-11304,2026-08-04,Diya Menon,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11305,2026-08-04,Meera Shetty,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11306,2026-08-04,Nikhil Kulkarni,Indiranagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11307,2026-08-04,Sneha Verma,Hebbal,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11308,2026-08-04,Vikram Patel 28,Electronic City,Monthly filter coffee subscription,Referral,1598.0
+ORD-11309,2026-08-05,Yash Kulkarni,Jayanagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11310,2026-08-06,Aarav Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11311,2026-08-06,Aditya Bhat,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11312,2026-08-06,Divya Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,1438.2
+ORD-11313,2026-08-06,Diya Bhat 68,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11314,2026-08-06,Neha Krishnan,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-11315,2026-08-06,Siddharth Menon,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11316,2026-08-07,Aarav Mehta,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-11317,2026-08-07,Aditya Das,Whitefield,Monthly filter coffee subscription,Referral,1598.0
+ORD-11318,2026-08-07,Akash Gupta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-11319,2026-08-07,Kiran Hegde,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11320,2026-08-07,Meera Hegde,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11321,2026-08-07,Nikhil Joshi,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11322,2026-08-07,Rohan Joshi,Hebbal,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11323,2026-08-07,Varun Verma 64,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11324,2026-08-08,Aditi Shetty,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11325,2026-08-08,Akash Kulkarni 19,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11326,2026-08-08,Karthik Sharma 29,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11327,2026-08-08,Priya Sharma,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11328,2026-08-08,Rahul Pillai,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11329,2026-08-08,Siddharth Kulkarni,Bellandur,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11330,2026-08-09,Aarav Menon,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11331,2026-08-09,Akash Kapoor,Indiranagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11332,2026-08-09,Ananya Nair,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11333,2026-08-09,Arjun Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11334,2026-08-09,Kavya Sharma,HSR Layout,Monthly filter coffee subscription,Referral,799.0
+ORD-11335,2026-08-09,Shreya Reddy 10,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11336,2026-08-10,Priya Kulkarni,Koramangala,Monthly filter coffee subscription,Instagram,799.0
+ORD-11337,2026-08-10,Priya Shetty,Malleshwaram,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11338,2026-08-11,Harsh Menon,Electronic City,Monthly filter coffee subscription,Google Search,799.0
+ORD-11339,2026-08-11,Kiran Das,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11340,2026-08-11,Pooja Menon,Koramangala,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11341,2026-08-11,Rohan Rao,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11342,2026-08-11,Sanjana Mehta 98,JP Nagar,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-11343,2026-08-12,Ishaan Kulkarni,Bellandur,Monthly filter coffee subscription,Referral,1598.0
+ORD-11344,2026-08-12,Riya Nair,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11345,2026-08-12,Sanjana Kapoor,Koramangala,Monthly filter coffee subscription,Referral,719.1
+ORD-11346,2026-08-13,Aditi Verma 20,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11347,2026-08-13,Karthik Verma,HSR Layout,Monthly filter coffee subscription,Google Search,719.1
+ORD-11348,2026-08-13,Neha Bhat,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11349,2026-08-13,Priya Patel,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-11350,2026-08-13,Varun Rao 4,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11351,2026-08-14,Aditya Rao,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11352,2026-08-14,Arjun Joshi,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11353,2026-08-14,Harsh Gupta,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11354,2026-08-14,Ishaan Hegde,Indiranagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-11355,2026-08-14,Nikhil Rao,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11356,2026-08-14,Riya Menon 72,HSR Layout,Monthly filter coffee subscription,Referral,799.0
+ORD-11357,2026-08-14,Tanvi Kapoor,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11358,2026-08-14,Varun Mehta,JP Nagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11359,2026-08-15,Aarav Iyer 44,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11360,2026-08-15,Ananya Singh,HSR Layout,Monthly filter coffee subscription,Google Search,799.0
+ORD-11361,2026-08-15,Meera Joshi 83,Jayanagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11362,2026-08-15,Rahul Rao 17,Jayanagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11363,2026-08-15,Shreya Singh,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-11364,2026-08-15,Sneha Krishnan,Koramangala,Monthly filter coffee subscription,WhatsApp,719.1
+ORD-11365,2026-08-16,Ishaan Sharma,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11366,2026-08-16,Rohan Menon,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-11367,2026-08-16,Sanjana Verma,Electronic City,Monthly filter coffee subscription,Instagram,799.0
+ORD-11368,2026-08-16,Yash Nair,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-11369,2026-08-17,Aditya Nair,Malleshwaram,Monthly filter coffee subscription,Referral,799.0
+ORD-11370,2026-08-17,Diya Joshi,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11371,2026-08-17,Nikhil Reddy,JP Nagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11372,2026-08-17,Vikram Patel,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11373,2026-08-17,Yash Kapoor,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11374,2026-08-17,Yash Verma,Whitefield,Monthly filter coffee subscription,Google Search,799.0
+ORD-11375,2026-08-18,Karthik Reddy 38,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11376,2026-08-18,Sanjana Kulkarni,Indiranagar,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11377,2026-08-18,Shreya Krishnan,Jayanagar,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11378,2026-08-18,Varun Kulkarni,Whitefield,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11379,2026-08-19,Aarav Nair,JP Nagar,Monthly filter coffee subscription,Referral,799.0
+ORD-11380,2026-08-19,Neha Verma,Bellandur,Monthly filter coffee subscription,Referral,799.0
+ORD-11381,2026-08-19,Rohan Iyer 51,Whitefield,Monthly filter coffee subscription,Referral,799.0
+ORD-11382,2026-08-19,Shreya Patel 74,Bellandur,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11383,2026-08-19,Vikram Iyer,Koramangala,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11384,2026-08-19,Yash Shetty,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11385,2026-08-19,Zoya Reddy,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11386,2026-08-20,Ishaan Shetty,Koramangala,Monthly filter coffee subscription,Google Search,1598.0
+ORD-11387,2026-08-20,Siddharth Mehta,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11388,2026-08-20,Siddharth Verma,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11389,2026-08-21,Aditi Verma,Bellandur,Monthly filter coffee subscription,Instagram,1598.0
+ORD-11390,2026-08-21,Arjun Pillai 15,Jayanagar,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11391,2026-08-21,Kiran Gupta 7,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11392,2026-08-21,Rohan Krishnan,Indiranagar,Monthly filter coffee subscription,Walk-in,719.1
+ORD-11393,2026-08-21,Tanvi Pillai 37,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11394,2026-08-21,Zoya Verma,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-11395,2026-08-22,Priya Iyer,Indiranagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-11396,2026-08-23,Harsh Patel 90,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-11397,2026-08-23,Ishaan Mehta,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-11398,2026-08-23,Kavya Joshi,Whitefield,Monthly filter coffee subscription,Instagram,799.0
+ORD-11399,2026-08-24,Divya Iyer,JP Nagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11400,2026-08-24,Harsh Bhat,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-11401,2026-08-24,Kiran Iyer,Koramangala,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11402,2026-08-24,Shreya Das,Indiranagar,Monthly filter coffee subscription,Google Search,799.0
+ORD-11403,2026-08-24,Siddharth Das,Hebbal,Monthly filter coffee subscription,Google Search,799.0
+ORD-11404,2026-08-24,Tanvi Menon,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11405,2026-08-25,Arjun Patel,Jayanagar,Monthly filter coffee subscription,Instagram,799.0
+ORD-11406,2026-08-25,Diya Reddy,Bellandur,Monthly filter coffee subscription,Instagram,799.0
+ORD-11407,2026-08-25,Riya Shetty,Koramangala,Monthly filter coffee subscription,Referral,799.0
+ORD-11408,2026-08-25,Siddharth Kapoor,JP Nagar,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11409,2026-08-26,Karthik Iyer,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11410,2026-08-26,Rahul Nair,HSR Layout,Monthly filter coffee subscription,Instagram,799.0
+ORD-11411,2026-08-26,Varun Rao,Hebbal,Monthly filter coffee subscription,Instagram,799.0
+ORD-11412,2026-08-27,Aditi Sharma,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11413,2026-08-27,Priya Bhat,Electronic City,Monthly filter coffee subscription,Referral,799.0
+ORD-11414,2026-08-27,Rohan Iyer 5,Malleshwaram,Monthly filter coffee subscription,Walk-in,1598.0
+ORD-11415,2026-08-29,Akash Das,Electronic City,Monthly filter coffee subscription,Google Search,719.1
+ORD-11416,2026-08-29,Nikhil Menon,HSR Layout,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11417,2026-08-29,Yash Singh,HSR Layout,Monthly filter coffee subscription,Referral,799.0
+ORD-11418,2026-08-30,Aditi Mehta,Koramangala,Monthly filter coffee subscription,Google Search,799.0
+ORD-11419,2026-08-30,Nikhil Krishnan,Jayanagar,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11420,2026-08-30,Priya Das,Malleshwaram,Monthly filter coffee subscription,Instagram,799.0
+ORD-11421,2026-08-30,Tanvi Reddy,Bellandur,Monthly filter coffee subscription,Google Search,799.0
+ORD-11422,2026-08-31,Karthik Das,Malleshwaram,Monthly filter coffee subscription,WhatsApp,799.0
+ORD-11423,2026-08-31,Kiran Patel,Whitefield,Monthly filter coffee subscription,Referral,1598.0
+ORD-11424,2026-08-31,Kiran Rao,Jayanagar,Monthly filter coffee subscription,Referral,1598.0
+ORD-11425,2026-08-31,Meera Shetty,Electronic City,Monthly filter coffee subscription,Walk-in,799.0
+ORD-11426,2026-08-31,Neha Nair,Whitefield,Monthly filter coffee subscription,WhatsApp,1598.0
+ORD-11427,2026-08-31,Neha Pillai 35,HSR Layout,Monthly filter coffee subscription,Referral,799.0

@@ -21,8 +21,10 @@ from fastapi.responses import HTMLResponse, Response, StreamingResponse
 
 from agents.analytics import PeriodMetrics
 from agents._segments import SEGMENT_DEFINITIONS, SEGMENT_LABELS, SEGMENTS
+from tools import speech
 from api import flows, jobs, uploads
 from api.schemas import (
+    SpeakRequest,
     AnswersRequest,
     EventOut,
     ExistingBusinessRequest,
@@ -39,6 +41,7 @@ from observability.usage import usage_summary
 from orchestration.cycle import REFINABLE_AGENTS, RefineError, refine_execution_agent
 from storage import (
     FINAL_KINDS,
+    delete_run,
     fetch_events,
     fetch_records,
     fetch_usage,
@@ -220,6 +223,32 @@ def get_run_detail(run_id: int, after_seq: int = Query(default=0, ge=0)) -> dict
     }
 
 
+@app.delete("/runs/{run_id}", status_code=204)
+def remove_run(run_id: int) -> Response:
+    """Delete a plan and everything written under it.
+
+    Refused while a run is still working. A worker thread is mid-plan and
+    holds this run id; deleting the row under it would have the agents write
+    decision records against a run that no longer exists, and the founder
+    would be told the plan failed rather than that they deleted it. Stopped,
+    failed and finished runs are all fair game.
+
+    The cascade is real rather than three deletes in a row: decision records
+    go through the ORM relationship, while usage and events are removed by
+    `ON DELETE CASCADE` in the schema itself (SQLite enforces it because
+    `storage/db.py` turns `PRAGMA foreign_keys` on; Postgres always does).
+    So a deleted plan leaves nothing behind in any of the four tables.
+    """
+    run = _require_run(run_id)
+    if run["status"] in {"running", "queued"}:
+        raise HTTPException(
+            status_code=409,
+            detail="This plan is still being built. Wait for it to finish before deleting it.",
+        )
+    delete_run(run_id)
+    return Response(status_code=204)
+
+
 @app.get("/runs/{run_id}/events", response_model=list[EventOut])
 def get_run_events(run_id: int, after_seq: int = Query(default=0, ge=0)) -> list[dict]:
     """Plain polling, for clients that would rather not hold a stream open."""
@@ -334,6 +363,51 @@ def get_landing_page(run_id: int) -> Response:
         content=html,
         headers={"Content-Disposition": f'attachment; filename="launch-page-{run_id}.html"'},
     )
+
+
+# --------------------------------------------------------------- speech --
+
+
+@app.post("/speech/transcribe")
+async def transcribe_speech(file: UploadFile) -> dict:
+    """Voice in. The browser records; this turns it into text for whatever
+    field asked for it -- the composer or a refine box.
+
+    `async def` because reading the upload needs `await`, but the Groq call
+    inside `speech.transcribe` sleeps synchronously between retries -- doing
+    that on the event loop would stall every other request on the server
+    for the length of a rate-limit backoff. `asyncio.to_thread` is what
+    keeps this endpoint async-compatible without making `speech.py` learn
+    two concurrency styles for the sake of one caller.
+    """
+    audio = await file.read()
+    try:
+        text = await asyncio.to_thread(speech.transcribe, audio, file.filename or "")
+    except speech.SpeechError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 -- provider/network failure, not ours
+        raise HTTPException(status_code=502, detail=jobs.founder_message(exc)) from exc
+    return {"text": text}
+
+
+@app.post("/speech/synthesize")
+def synthesize_speech(payload: SpeakRequest) -> Response:
+    """Voice out. Plain `def`, like /runs/{id}/refine -- FastAPI runs a
+    synchronous handler in its own thread pool, which is what already
+    absorbs the blocking retry sleeps in `speech.synthesize`.
+
+    A non-200 here is the frontend's signal to fall back to the browser's
+    own voice rather than go silent -- Orpheus' free tier is thin enough
+    (10 req/min, ~100/day) that this path is expected to be hit sometimes,
+    not just guarded against.
+    """
+    try:
+        audio = speech.synthesize(payload.text)
+    except speech.SpeechError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 -- provider/network failure, not ours
+        raise HTTPException(status_code=502, detail=jobs.founder_message(exc)) from exc
+    return Response(content=audio, media_type="audio/wav")
 
 
 # -------------------------------------------------------------- orders --
