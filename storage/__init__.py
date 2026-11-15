@@ -8,6 +8,7 @@ the test suite need no database running.
 the dashboard use; it forwards here.
 """
 
+from storage.assets import get_asset, save_asset
 from storage.db import (
     ENV_VAR,
     DEFAULT_SQLITE_PATH,
@@ -43,6 +44,8 @@ __all__ = [
     "add_event",
     "add_record",
     "add_usage",
+    "get_asset",
+    "save_asset",
     "clear_records",
     "clear_usage",
     "current_run_id",

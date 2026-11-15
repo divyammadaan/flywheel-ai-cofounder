@@ -1,4 +1,4 @@
-"""CRM message clean-up -- the code that fixes what the local model gets wrong
+"""CRM message clean-up -- the code that fixes what the model gets wrong
 in its message drafts. No model involved."""
 
 import sys

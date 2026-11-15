@@ -46,3 +46,14 @@ def test_strategy_sees_every_section():
 
 def test_empty_sections_are_left_out():
     assert join_context({"research": "R", "analytics": ""}, ("research", "analytics", "orders")) == "R"
+
+
+def test_strategy_is_told_to_price_in_the_unit_cost_unit():
+    # Break-even compares price with unit cost directly, so a price per subscription
+    # against a cost per meal gave about 31 units instead of about 70.
+    from agents.strategy import _INSTRUCTION
+    from orchestration.cycle import launch_sections
+
+    assert "price_unit MUST be that same unit" in _INSTRUCTION
+    text = launch_sections.__code__.co_consts
+    assert any("Price in that same unit" in str(c) for c in text)

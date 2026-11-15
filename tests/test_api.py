@@ -13,6 +13,7 @@ import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -21,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from api import flows
 from api.main import app
-from storage import get_run
+from storage import get_run, update_run
 
 TERMINAL = {"done", "failed", "blocked", "awaiting_answers"}
 
@@ -178,8 +179,15 @@ def test_the_run_is_labelled_with_the_business_not_just_an_id(client):
     assert get_run(run_id)["mode"] == "new_idea"
 
 
-def test_answers_are_refused_when_the_run_is_not_waiting_for_them(client):
+def test_answers_are_refused_when_the_run_is_not_waiting_for_them(client, monkeypatch):
     """Posting answers twice, or to a finished run, must not restart it."""
+    # Answering resumes the run at the advisor. Stub it (a NO_GO ends the run at
+    # once), so this test does not start the real advisor and planning agents --
+    # real model calls from a test, running on after it has finished.
+    no_go = SimpleNamespace(
+        verdict="NO_GO", rationale=["stub"], seed_positioning="", seed_price=0.0, seed_price_unit="", seed_priorities={}
+    )
+    monkeypatch.setattr(flows, "FounderAdvisorAgent", lambda: _Stub(decide=lambda *a: no_go))
     run_id = client.post(
         "/runs/new-idea",
         json={"pitch": "A filter coffee subscription for Bangalore", "starting_capital": 1500000},
@@ -346,9 +354,13 @@ def test_a_held_upload_is_used_by_the_plan_and_then_discarded(client, monkeypatc
     token = client.post("/orders/preview", files={"file": ("orders.csv", csv, "text/csv")}).json()["token"]
 
     seen = {}
-    monkeypatch.setattr(
-        flows, "start_business_review", lambda run_id, **kw: seen.update(orders=kw["orders"])
-    )
+
+    def fake_review(run_id, **kw):
+        seen.update(orders=kw["orders"])
+        # The real flow ends by marking the run done; the stub has to as well.
+        update_run(run_id, status="done")
+
+    monkeypatch.setattr(flows, "start_business_review", fake_review)
 
     created = client.post(
         "/runs/existing-business",
@@ -651,19 +663,32 @@ def test_deleting_a_plan_takes_its_records_usage_and_events_with_it(client):
 def test_deleting_a_plan_that_is_still_building_is_refused(client, monkeypatch):
     """A worker thread holds this run id; deleting the row under it would
     surface to the founder as "your plan failed" rather than as a deletion."""
+    import threading
+
     from api import flows
 
-    monkeypatch.setattr(flows, "IntakeAgent", lambda: _Stub(process=lambda _: FakeBusiness()))
+    # Hold the first agent until the delete has been tried. Instant stand-ins let
+    # the run finish before the request arrived, which made this test depend on timing.
+    release = threading.Event()
+
+    def held_intake(_):
+        release.wait(timeout=15)
+        return FakeBusiness()
+
+    monkeypatch.setattr(flows, "IntakeAgent", lambda: _Stub(process=held_intake))
     monkeypatch.setattr(flows, "MarketResearchAgent", lambda: _Stub(research=lambda _: FakeResearch()))
     run_id = client.post(
         "/runs/new-idea",
         json={"pitch": "A filter coffee subscription for Bangalore", "starting_capital": 1500000},
     ).json()["run_id"]
 
-    response = client.delete(f"/runs/{run_id}")
-    assert response.status_code == 409
-    assert "still being built" in response.json()["detail"]
-    assert client.get(f"/runs/{run_id}").status_code == 200
+    try:
+        response = client.delete(f"/runs/{run_id}")
+        assert response.status_code == 409
+        assert "still being built" in response.json()["detail"]
+        assert client.get(f"/runs/{run_id}").status_code == 200
+    finally:
+        release.set()
 
     # Drain the background job before teardown, as above.
     wait_for(client, run_id)

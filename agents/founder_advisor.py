@@ -6,11 +6,16 @@ plan's Strategy agent starts from.
 CrewAI + Groq, same pattern as Marketing/Product/Sales.
 """
 
+import re
 from dataclasses import dataclass
+from typing import Literal
 
 from crewai import LLM, Agent, Crew, Task
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
@@ -43,7 +48,16 @@ directly costs the founder waiting time.)"""
 
 
 class AdvisorOutputSchema(BaseModel):
-    verdict: str = Field(description="One of: GO, PIVOT, NO_GO")
+    verdict: Literal["GO", "PIVOT", "NO_GO"] = Field(description="One of: GO, PIVOT, NO_GO")
+
+    @field_validator("verdict", mode="before")
+    @classmethod
+    def _normalise_verdict(cls, value):
+        # "NO-GO", "no go" and "No_Go" are the same answer. Anything else is a
+        # validation error: an unrecognised word must never read as a GO, and
+        # only an exact NO_GO stops the flow.
+        return re.sub(r"[\s-]+", "_", str(value).strip()).upper()
+
     rationale: list[str] = Field(
         default_factory=list,
         description="2-4 reasons, one per entry, each a complete sentence citing the market research "
@@ -77,7 +91,7 @@ class FounderAdvisorAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
         register_role("Founder Advisor", "founder_advisor", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["founder_advisor"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["founder_advisor"], **llm_metadata("founder_advisor"))
         self._agent = Agent(
             role="Founder Advisor",
             goal="Give a clear-eyed GO/PIVOT/NO-GO verdict grounded in real constraints",
@@ -88,6 +102,7 @@ class FounderAdvisorAgent:
             verbose=False,
         )
 
+    @traced("founder_advisor")
     @cached("founder_advisor", AdvisorDecision)
     @retry_on_rate_limit()
     def decide(
@@ -112,8 +127,9 @@ class FounderAdvisorAgent:
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=AdvisorOutputSchema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("founder_advisor"))
         crew.kickoff()
         parsed: AdvisorOutputSchema = task.output.pydantic
 

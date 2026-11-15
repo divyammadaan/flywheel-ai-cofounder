@@ -7,6 +7,7 @@
  * better grammar, so it is turned back into a sentence.
  */
 
+import { ACCESS_COOKIE, ACCESS_REQUIRED_EVENT, getAccessCode, withAccessCode } from "./access";
 import type {
   DecisionRecord,
   OrdersPreview,
@@ -65,6 +66,23 @@ function prettyField(path: string): string {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
+/**
+ * The access code, as a header, when one has been entered.
+ *
+ * In the browser it comes from storage. During a server render there is no browser, so
+ * it is read from the visitor's own cookie: the server fetches on that visitor's behalf
+ * with their code, and a visitor without one is refused exactly as in the browser.
+ */
+async function authHeaders(): Promise<Record<string, string>> {
+  if (typeof window === "undefined") {
+    const { cookies } = await import("next/headers");
+    const code = (await cookies()).get(ACCESS_COOKIE)?.value;
+    return code ? { "X-Access-Code": decodeURIComponent(code) } : {};
+  }
+  const code = getAccessCode();
+  return code ? { "X-Access-Code": code } : {};
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
@@ -74,6 +92,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         ...(init?.body && !(init.body instanceof FormData)
           ? { "Content-Type": "application/json" }
           : {}),
+        ...(await authHeaders()),
         ...init?.headers,
       },
     });
@@ -94,6 +113,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       /* a non-JSON error body is handled by the fallback below */
     }
     const { message, fields } = readableDetail(detail);
+    // A hosted deployment answers 401 until the access code is sent; tell the
+    // gate so it can ask for it.
+    if (response.status === 401 && typeof window !== "undefined") {
+      window.dispatchEvent(new Event(ACCESS_REQUIRED_EVENT));
+    }
     throw new ApiError(message, response.status, fields);
   }
 
@@ -103,6 +127,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<{ status: string }>("/health"),
+
+  accessCheck: () => request<{ ok: boolean; code_required: boolean }>("/access/check"),
 
   segmentMeta: () => request<SegmentMeta>("/meta/segments"),
 
@@ -158,8 +184,14 @@ export const api = {
     return request<OrdersPreview>("/orders/preview", { method: "POST", body: form });
   },
 
-  landingPageUrl: (id: number) => `${API_BASE}/runs/${id}/landing-page`,
-  sampleOrdersUrl: (extension: "csv" | "xlsx") => `${API_BASE}/orders/sample.${extension}`,
+  landingPageUrl: (id: number) => withAccessCode(`${API_BASE}/runs/${id}/landing-page`),
+  sampleOrdersUrl: (extension: "csv" | "xlsx") =>
+    withAccessCode(`${API_BASE}/orders/sample.${extension}`),
+  planUrl: (id: number, format: "md" | "json") =>
+    withAccessCode(`${API_BASE}/runs/${id}/plan.${format}?download=true`),
+  adImageUrl: (id: number) => withAccessCode(`${API_BASE}/runs/${id}/ad-image`),
+  streamUrl: (id: number, afterSeq = 0) =>
+    withAccessCode(`${API_BASE}/runs/${id}/stream?after_seq=${afterSeq}`),
 
   /**
    * Voice to text. Takes whatever container the browser's MediaRecorder
@@ -182,7 +214,7 @@ export const api = {
   synthesize: async (text: string): Promise<Blob> => {
     const response = await fetch(`${API_BASE}/speech/synthesize`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await authHeaders()) },
       body: JSON.stringify({ text }),
     });
     if (!response.ok) {

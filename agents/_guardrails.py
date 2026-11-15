@@ -64,7 +64,7 @@ _PLACEHOLDER_MESSAGE = re.compile(r"^\s*(?:hi \{name\},?\s*)?(?:win-back\s+)?mes
 
 
 def crm_output_problems(data: dict) -> list[str]:
-    """Whether the local CRM model's reply is a real plan or a placeholder echo.
+    """Whether the CRM model's reply is a real plan or a placeholder echo.
 
     In one live run every action came back as "Action for best customers",
     every message as "message for slipping away", and every spend as 0 -- the

@@ -20,7 +20,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Card } from "@/components/primitives";
-import { API_BASE, api } from "@/lib/api";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { agentLabel } from "@/lib/format";
 import type { RunEvent, RunStatus } from "@/lib/types";
@@ -100,7 +100,7 @@ export function RunProgress({
     };
 
     try {
-      source = new EventSource(`${API_BASE}/runs/${runId}/stream?after_seq=0`);
+      source = new EventSource(api.streamUrl(runId));
       source.onmessage = (e) => absorb([JSON.parse(e.data)]);
       // Named events (the server sets `event:` to the kind) don't reach
       // onmessage, so each kind is subscribed explicitly.

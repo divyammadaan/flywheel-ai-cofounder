@@ -24,7 +24,8 @@ the toy benchmark is what made NVIDIA look viable:
               latency -- routing the fan-out agents here took a 2-cycle run
               from 255s to 667s. Tested and rejected; don't retry it
               without re-measuring on a real agent call.
-  Ollama      local, no limit, ~15-20s/call on CPU.
+  Ollama      local, no limit, ~15-20s/call on CPU. Used for CRM until it moved to
+              Groq so the whole system could be deployed (nothing local).
 
 So everything hosted sits on Groq: 1.1s/call beats the alternatives by so
 much that its token cap is still the better trade. The remaining levers on
@@ -63,14 +64,6 @@ GROQ_MODEL_ADK_JSON = "groq/qwen/qwen3.8-27b"
 # --- Gemini: 20 req/DAY, so only agents that fire once per run.
 GEMINI_MODEL = "gemini/gemini-3.6-flash"
 
-# --- Ollama: CRM stays local on purpose. Customer/churn data never leaves
-# the machine.
-# A plain Ollama model name, not a litellm "ollama/..." string: CRM calls
-# Ollama's native /api/chat directly (think:false + JSON schema). See crm.py.
-OLLAMA_MODEL = "qwen3:4b"
-OLLAMA_BASE_URL = "http://localhost:11434"
-
-
 # Per-agent assignment, so the routing is visible in one place instead of
 # being buried in eleven constructors.
 AGENT_MODELS = {
@@ -88,7 +81,7 @@ AGENT_MODELS = {
     "marketing": GROQ_MODEL,
     "product": GROQ_MODEL,
     "sales": GROQ_MODEL,
-    "crm": OLLAMA_MODEL,
+    "crm": GROQ_MODEL,
 }
 
 # Reply-length caps per agent, in output tokens. They stop a runaway answer

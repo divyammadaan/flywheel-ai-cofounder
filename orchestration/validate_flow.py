@@ -54,6 +54,7 @@ from agents.company_formation import CompanyFormationAgent
 from agents.founder_advisor import FounderAdvisorAgent
 from agents.intake import IntakeAgent
 from agents.market_research import MarketResearchAgent
+from observability import langfuse_setup, trace
 from observability.decision_record import DecisionRecord, log_decision, reset_records
 from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, run_funding, run_launch_plan
@@ -190,6 +191,8 @@ if __name__ == "__main__":
     parser.add_argument("--skip-formation", action="store_true", help="skip the company formation stage")
     parser.add_argument("--skip-funding", action="store_true", help="skip the funding roadmap")
     args = parser.parse_args()
+    trace.enable()
+    langfuse_setup.install()
 
     pitch = args.pitch or input("Describe your business idea: ")
     capital = args.capital if args.capital and args.capital > 0 else _ask_capital(args.currency)

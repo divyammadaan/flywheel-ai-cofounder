@@ -1,0 +1,31 @@
+# Render blueprint for the Flywheel backend (Docker). Render's free web service has
+# 512 MB of memory and the backend peaks near 480 MB while planning, so treat this as a
+# fallback; see docs/DEPLOYMENT.md. Secrets are entered in the Render dashboard.
+services:
+  - type: web
+    name: flywheel-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: FLYWHEEL_A2A_URL
+        value: http://127.0.0.1:10000/a2a
+      - key: FLYWHEEL_LLM_CACHE
+        value: "0"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: FLYWHEEL_DATABASE_URL
+        sync: false
+      - key: FLYWHEEL_ACCESS_CODE
+        sync: false
+      - key: FLYWHEEL_CORS_ORIGINS
+        sync: false
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+      - key: LANGFUSE_HOST
+        sync: false

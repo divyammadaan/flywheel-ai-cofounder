@@ -19,6 +19,9 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._retry import retry_on_rate_limit
@@ -99,7 +102,7 @@ class CompanyFormationAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
         register_role("Company Formation Advisor", "company_formation", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["company_formation"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["company_formation"], **llm_metadata("company_formation"))
         self._agent = Agent(
             role="Company Formation Advisor",
             goal="Give a founder a concrete, jurisdiction-appropriate incorporation checklist",
@@ -110,6 +113,7 @@ class CompanyFormationAgent:
             verbose=False,
         )
 
+    @traced("company_formation")
     @cached("company_formation", FormationPlan)
     @retry_on_rate_limit()
     def plan(self, business: BusinessInput) -> FormationPlan:
@@ -125,8 +129,9 @@ class CompanyFormationAgent:
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=FormationSchema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("company_formation"))
         crew.kickoff()
         p: FormationSchema = task.output.pydantic
 

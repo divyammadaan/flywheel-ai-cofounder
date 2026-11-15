@@ -30,3 +30,11 @@ data/sample_orders.*
 data/uploads/
 Course_Handout__Agentic AI.pdf
 docs/project_report.md
+
+# deployment secrets (never commit)
+.env.deploy
+
+# private / course files (not part of the project repository)
+Course Material/
+FLYWHEEL_*.md
+MORNING_REPORT.md

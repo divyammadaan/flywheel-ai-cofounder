@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
+import { AccessGate } from "@/components/access-gate";
 import { RailScript } from "@/components/rail-toggle";
 import { ThemeScript } from "@/components/theme-toggle";
 
@@ -55,7 +56,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeScript />
         <RailScript />
       </head>
-      <body className="flex min-h-full flex-col bg-canvas text-ink">{children}</body>
+      <body className="flex min-h-full flex-col bg-canvas text-ink">
+        <AccessGate>{children}</AccessGate>
+      </body>
     </html>
   );
 }

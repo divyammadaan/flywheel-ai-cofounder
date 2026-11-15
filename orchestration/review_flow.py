@@ -43,6 +43,7 @@ load_dotenv()
 from agents._money import SUPPORTED_CURRENCIES, fmt_money
 from agents.analytics import PeriodMetrics
 from agents.intake import BusinessInput, IntakeAgent
+from observability import langfuse_setup, trace
 from observability.decision_record import DecisionRecord, current_run, get_records, log_decision, reset_records
 from observability.usage import usage_summary
 from orchestration.cycle import PRECYCLE, PlanBlocked, next_review_cycle, run_business_review, run_funding
@@ -152,6 +153,8 @@ if __name__ == "__main__":
 
     if args.budget <= 0:
         parser.error("--budget must be above zero")
+    trace.enable()
+    langfuse_setup.install()
 
     review(
         args.description,

@@ -23,6 +23,8 @@ from agents.analytics import PeriodMetrics
 from agents._segments import SEGMENT_DEFINITIONS, SEGMENT_LABELS, SEGMENTS
 from tools import speech
 from api import flows, jobs, uploads
+from api.security import AccessGate, access_code, cors_origin_regex, cors_origins
+from orchestration.a2a_bridge import a2a_base_url, create_app as create_a2a_app
 from api.schemas import (
     SpeakRequest,
     AnswersRequest,
@@ -37,14 +39,17 @@ from api.schemas import (
     RunSummary,
     UsageOut,
 )
+from observability import langfuse_setup, trace
 from observability.usage import usage_summary
 from orchestration.cycle import REFINABLE_AGENTS, RefineError, refine_execution_agent
+from orchestration.final_plan import FinalPlan, build_final_plan, to_markdown
 from storage import (
     FINAL_KINDS,
     delete_run,
     fetch_events,
     fetch_records,
     fetch_usage,
+    get_asset,
     get_run,
     list_runs,
     using_run,
@@ -64,7 +69,13 @@ HEARTBEAT_SECONDS = 15.0
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # Agent calls print in the server's terminal as plans run (observability/trace.py).
+    trace.enable(wall_clock=True)
+    # Model calls go to Langfuse too, when its keys are in the environment.
+    langfuse_setup.install()
     yield
+    langfuse_setup.flush()
+    trace.disable()
     jobs.shutdown()
 
 
@@ -75,19 +86,39 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# The Next.js front end is served from a different origin in development.
+# Added first so it sits inside CORS: a 401 or 429 from the gate then still
+# carries CORS headers, and the browser shows the real error, not a CORS one.
+app.add_middleware(AccessGate)
+
+# The Next.js front end is served from a different origin. Locally that is
+# localhost:3000; a deployment lists its own address in FLYWHEEL_CORS_ORIGINS.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=cors_origins(),
+    allow_origin_regex=cors_origin_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+# The CrewAI execution agents, published over A2A (agent cards at
+# /a2a/<agent>/.well-known/agent-card.json). The plan's ADK coordinator calls them
+# through this mount; the access gate above guards it like every other path.
+app.mount("/a2a", create_a2a_app(a2a_base_url()))
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/access/check")
+def access_check() -> dict:
+    """Whether the caller may use the API. The access gate has already run by the
+    time this answers, so reaching it at all means the code (if any) was right;
+    the website calls it to decide whether to ask for one."""
+    return {"ok": True, "code_required": bool(access_code())}
 
 
 @app.get("/meta/segments")
@@ -178,10 +209,10 @@ def refine_run(run_id: int, payload: RefineRequest) -> dict:
     """Redo one agent's output on the founder's own instruction.
 
     Synchronous, not a background job: unlike a full plan this is a single
-    agent call (a few seconds on Groq, up to ~20s for CRM's local model), so
+    agent call (a few seconds on Groq, a little longer for CRM), so
     there is nothing here worth a progress stream for. Defined as a plain
     `def`, which FastAPI runs in its threadpool -- the event loop stays free
-    while the call is out to Groq or Ollama.
+    while the call is out to Groq.
 
     Only a finished plan can be refined: refining mid-run would race the
     plan that is still being built, and a blocked or failed run has nothing
@@ -331,6 +362,12 @@ def get_ad_image(run_id: int) -> Response:
     file on disk.
     """
     _require_run(run_id)
+    stored = get_asset(run_id, "ad_image")
+    if stored:
+        data, content_type = stored
+        return Response(content=data, media_type=content_type, headers={"Cache-Control": "private, max-age=3600"})
+
+    # Older runs, from before images were kept in the database, are on disk.
     records = {r["agent"]: r["decision"] for r in fetch_records(run_id=run_id, as_json_text=False)}
     raw = (records.get("marketing") or {}).get("ad_image_path")
     if not raw:
@@ -346,6 +383,27 @@ def get_ad_image(run_id: int) -> Response:
         media_type="image/jpeg" if path.suffix.lower() in {".jpg", ".jpeg"} else "image/png",
         headers={"Cache-Control": "private, max-age=3600"},
     )
+
+
+@app.get("/runs/{run_id}/plan.json", response_model=FinalPlan)
+def get_plan_json(run_id: int, download: bool = False) -> Response:
+    """The whole plan as one validated JSON document (the run's final output)."""
+    _require_run(run_id)
+    plan = build_final_plan(run_id)
+    response = Response(content=plan.model_dump_json(indent=2), media_type="application/json")
+    if download:
+        response.headers["Content-Disposition"] = f'attachment; filename="flywheel-plan-{run_id}.json"'
+    return response
+
+
+@app.get("/runs/{run_id}/plan.md")
+def get_plan_markdown(run_id: int, download: bool = False) -> Response:
+    """The whole plan as a Markdown document: budgets, campaigns and lead sources as tables."""
+    _require_run(run_id)
+    response = Response(content=to_markdown(build_final_plan(run_id)), media_type="text/markdown; charset=utf-8")
+    if download:
+        response.headers["Content-Disposition"] = f'attachment; filename="flywheel-plan-{run_id}.md"'
+    return response
 
 
 @app.get("/runs/{run_id}/landing-page", response_class=HTMLResponse)

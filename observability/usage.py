@@ -16,13 +16,14 @@ sources turned out to be empty:
   registers its role (register_role).
 - ADK agents (Strategy, Analytics): ADK puts usage on each response event;
   they call record_adk_usage.
-- CRM: Ollama returns token counts in its response; it calls record_usage.
+- CRM: a CrewAI agent like the others, counted by the litellm hook (role registered).
 """
 
 import re
 import threading
 import time
 
+from observability import trace
 from storage.usage import add_usage, fetch_usage, usage_row_count
 
 # The planning agents run in parallel threads, and litellm reports from its
@@ -59,6 +60,7 @@ def record_usage(
             calls=calls,
             cached=cached,
         )
+    trace.call(agent, model, prompt_tokens, completion_tokens, seconds, cached)
 
 
 # ---------------------------------------------------------------- CrewAI --

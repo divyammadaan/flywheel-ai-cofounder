@@ -17,6 +17,9 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._brief import LAUNCH, PlanBrief
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
@@ -75,7 +78,7 @@ class MarketingAgent:
         self._generate_image = generate_image
         self.model_name = model
         register_role("Marketing Lead", "marketing", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["marketing"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["marketing"], **llm_metadata("marketing"))
         self._agent = Agent(
             role="Marketing Lead",
             goal="Plan specific campaigns that reach the right customers, plus the ad they will see",
@@ -89,6 +92,7 @@ class MarketingAgent:
             verbose=False,
         )
 
+    @traced("marketing")
     @cached("marketing", MarketingOutput)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float) -> MarketingOutput:
@@ -106,8 +110,9 @@ class MarketingAgent:
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=MarketingOutputSchema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("marketing"))
         crew.kickoff()
         parsed: MarketingOutputSchema = task.output.pydantic
 

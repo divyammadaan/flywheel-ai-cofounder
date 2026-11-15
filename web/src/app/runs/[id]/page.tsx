@@ -30,6 +30,7 @@ import { Card, Warning } from "@/components/primitives";
 import { QuestionsForm } from "@/components/questions-form";
 import { RunProgress } from "@/components/run-progress";
 import { StrategySection } from "@/components/strategy-section";
+import { ExecutionLogSection } from "@/components/execution-log";
 import { UsageSection } from "@/components/usage-section";
 import { VerdictBlock } from "@/components/verdict";
 import { ApiError, api, toPlan, wasRevised } from "@/lib/api";
@@ -175,6 +176,8 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
           <BackgroundSection research={plan.research} formation={plan.formation} />
 
           {usage ? <UsageSection usage={usage} /> : null}
+
+          <ExecutionLogSection events={detail.events} />
         </div>
       </Page>
     </AppShell>
@@ -215,12 +218,18 @@ function ConnectionProblem({ message }: { message: string }) {
         <Card className="w-full max-w-lg p-8">
           <h1 className="text-title font-semibold text-ink">Can&apos;t load this plan</h1>
           <p className="mt-2 text-body text-ink-muted">{message}</p>
-          <p className="mt-4 text-small text-ink-faint">
-            Start the API with{" "}
-            <code className="rounded bg-surface-sunken px-1.5 py-0.5 font-mono text-caption">
-              python -m uvicorn api.main:app --port 8000
-            </code>
-          </p>
+          {message.toLowerCase().includes("access code") ? (
+            <p className="mt-4 text-small text-ink-faint">
+              Reload the page and enter the access code when it asks.
+            </p>
+          ) : (
+            <p className="mt-4 text-small text-ink-faint">
+              Start the API with{" "}
+              <code className="rounded bg-surface-sunken px-1.5 py-0.5 font-mono text-caption">
+                python -m uvicorn api.main:app --port 8000
+              </code>
+            </p>
+          )}
         </Card>
       </Page>
     </AppShell>

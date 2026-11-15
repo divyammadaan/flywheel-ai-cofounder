@@ -14,8 +14,12 @@ from dataclasses import dataclass, field
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._cache import cached
 from agents._cash import DEFAULT_RUNWAY_MONTHS
+from agents._input_guard import check_user_text
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._retry import retry_on_rate_limit
 from observability.usage import register_role
@@ -91,7 +95,7 @@ class IntakeAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
         register_role("Intake Analyst", "intake", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["intake"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["intake"], **llm_metadata("intake"))
         self._agent = Agent(
             role="Intake Analyst",
             goal="Turn a founder's raw pitch or business description into structured data",
@@ -101,16 +105,21 @@ class IntakeAgent:
             verbose=False,
         )
 
+    @traced("intake")
     @cached("intake", BusinessInput)
     @retry_on_rate_limit()
     def process(self, raw_input: str) -> BusinessInput:
+        # Every entry point (website, CLI) reaches the model through here, so
+        # this is the one place that sees all founder text first.
+        raw_input = check_user_text(raw_input, "description")
         task = Task(
             description=f"{_INSTRUCTION}\n\nFounder's input:\n\n{raw_input}\n\nExtract the structured record.",
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=IntakeOutputSchema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("intake"))
         crew.kickoff()
         parsed: IntakeOutputSchema = task.output.pydantic
 

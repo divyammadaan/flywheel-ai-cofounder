@@ -18,6 +18,7 @@ import json
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
+from observability import trace
 from storage import db as _db
 from storage.records import add_record, fetch_records
 from storage.runs import current_run_id, start_run
@@ -40,7 +41,7 @@ class DecisionRecord:
 
 def log_decision(record: DecisionRecord) -> int:
     """Persist a DecisionRecord in the current run and return its row id."""
-    return add_record(
+    row_id = add_record(
         cycle=record.cycle,
         agent=record.agent,
         input_snapshot=_jsonable(record.input_snapshot),
@@ -49,6 +50,8 @@ def log_decision(record: DecisionRecord) -> int:
         confidence=record.confidence,
         timestamp=record.timestamp,
     )
+    trace.decision(record.agent, record.input_snapshot, record.decision)
+    return row_id
 
 
 def get_records(cycle: int | None = None, agent: str | None = None, run_id: int | None = None) -> list[dict]:

@@ -14,7 +14,7 @@
 
 import { useState } from "react";
 
-import { API_BASE } from "@/lib/api";
+import { api } from "@/lib/api";
 
 export function AdImage({ runId }: { runId: number }) {
   const [failed, setFailed] = useState(false);
@@ -23,7 +23,7 @@ export function AdImage({ runId }: { runId: number }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- served by the API, outside Next's loader
     <img
-      src={`${API_BASE}/runs/${runId}/ad-image`}
+      src={api.adImageUrl(runId)}
       alt="The generated ad image for this campaign"
       width={128}
       height={128}

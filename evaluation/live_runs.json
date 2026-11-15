@@ -1,0 +1,162 @@
+{
+  "3": {
+    "label": "A healthy millet-based breakfast subscription for working professionals, cooked fresh daily in a rented cloud kitchen and delivered before 8 am in Baner, Aundh and Wakad, Pune.",
+    "mode": "new_idea",
+    "status": "done",
+    "verdict": "PIVOT",
+    "agent_seconds": 218.7,
+    "spans": {
+      "intake": 6.6,
+      "market_research": 15.3,
+      "founder_advisor": 72.4,
+      "company_formation": 5.5,
+      "planning": 113.3,
+      "funding": 5.6
+    },
+    "calls": 10,
+    "tin": 23743,
+    "tout": 5234,
+    "model_s": 23.0,
+    "cost": 0.0399,
+    "checks": {
+      "sections_complete": true,
+      "missing_sections": [],
+      "stopped_by_advisor": false,
+      "budget_within_total": true,
+      "no_area_over_cap": true,
+      "marketing_spend_within_budget": true,
+      "sales_spend_within_budget": true,
+      "product_spend_within_budget": true,
+      "guardrail_rejections": 0
+    },
+    "agents": {
+      "intake": [
+        1746,
+        259,
+        1.2
+      ],
+      "market_research": [
+        1760,
+        855,
+        2.7
+      ],
+      "founder_advisor": [
+        2895,
+        442,
+        1.5
+      ],
+      "company_formation": [
+        1772,
+        478,
+        2.6
+      ],
+      "strategy": [
+        2075,
+        295,
+        4.2
+      ],
+      "marketing": [
+        2875,
+        450,
+        1.6
+      ],
+      "product": [
+        2250,
+        652,
+        2.9
+      ],
+      "sales": [
+        5967,
+        990,
+        3.6
+      ],
+      "funding": [
+        2403,
+        813,
+        2.7
+      ]
+    },
+    "monitor": 25,
+    "transport": "a2a",
+    "crm_groups": null
+  },
+  "4": {
+    "label": "Monthly filter-coffee subscription in Bangalore roasting beans from Chikmagalur and delivering 250g packs to working professionals in Indiranagar, Koramangala and HSR Layout, acquired via Instagram, WhatsApp groups and referrals.",
+    "mode": "existing_business",
+    "status": "done",
+    "verdict": null,
+    "agent_seconds": 101.5,
+    "spans": {
+      "intake": 4.5,
+      "planning": 75.7,
+      "funding": 21.3
+    },
+    "calls": 8,
+    "tin": 15162,
+    "tout": 3345,
+    "model_s": 17.3,
+    "cost": 0.0255,
+    "checks": {
+      "sections_complete": true,
+      "missing_sections": [],
+      "stopped_by_advisor": false,
+      "budget_within_total": true,
+      "no_area_over_cap": true,
+      "marketing_spend_within_budget": true,
+      "sales_spend_within_budget": true,
+      "product_spend_within_budget": true,
+      "guardrail_rejections": 0
+    },
+    "agents": {
+      "intake": [
+        1714,
+        300,
+        1.3
+      ],
+      "analytics": [
+        737,
+        175,
+        4.2
+      ],
+      "strategy": [
+        1269,
+        221,
+        2.9
+      ],
+      "product": [
+        2135,
+        567,
+        1.6
+      ],
+      "marketing": [
+        2280,
+        516,
+        1.6
+      ],
+      "crm": [
+        2621,
+        404,
+        2.1
+      ],
+      "sales": [
+        1858,
+        348,
+        0.9
+      ],
+      "funding": [
+        2548,
+        814,
+        2.7
+      ]
+    },
+    "monitor": 22,
+    "transport": "a2a",
+    "crm_groups": {
+      "best": 66,
+      "regular": 32,
+      "new": 45,
+      "slipping": 51,
+      "lost": 106
+    }
+  }
+}

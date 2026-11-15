@@ -31,6 +31,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Index,
+    LargeBinary,
     Integer,
     String,
     Text,
@@ -160,6 +161,24 @@ class LlmUsageRow(Base):
     seconds: Mapped[float] = mapped_column(Float, default=0.0)
     cached: Mapped[bool] = mapped_column(Boolean, default=False)
     timestamp: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class RunAsset(Base):
+    """A file a run produced (today: the ad image), kept in the database.
+
+    The server's disk is not durable on a hosted deployment -- it is wiped on a
+    restart or redeploy -- so anything a founder should still see afterwards
+    lives here, next to the run it belongs to.
+    """
+
+    __tablename__ = "run_assets"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(100), nullable=False, default="application/octet-stream")
+    data: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
 class RunEvent(Base):

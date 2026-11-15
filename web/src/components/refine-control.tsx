@@ -142,7 +142,7 @@ export function RefineControl({
       {busy ? (
         <p className="mt-2 text-caption text-ink-faint">
           {agent === "crm"
-            ? "This runs on the local model, so it can take up to 20 seconds."
+            ? "This asks the model again, so it can take up to 20 seconds."
             : "Usually just a few seconds."}
         </p>
       ) : null}

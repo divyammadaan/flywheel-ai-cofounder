@@ -32,6 +32,15 @@ def isolated_database(tmp_path, monkeypatch):
     the worker shutdown below ahead of the environment being restored.
     """
     monkeypatch.setenv(storage_db.ENV_VAR, f"sqlite:///{(tmp_path / 'flywheel.db').as_posix()}")
+    # No test may spend real model quota. api.main loads .env at import, so the
+    # real key is in the environment; replace it, so an agent a test forgot to
+    # stub fails fast with an auth error instead of making a live Groq call.
+    monkeypatch.setenv("GROQ_API_KEY", "test-key-not-real")
+    # A running dev server on this machine would otherwise be found and used for A2A.
+    monkeypatch.setenv("FLYWHEEL_A2A", "off")
+    monkeypatch.setenv("FLYWHEEL_MCP_TOOLS", "off")
+    monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "")
+    monkeypatch.setenv("LANGFUSE_SECRET_KEY", "")
     _reset_workers()
     # The engine is cached per URL, so drop the previous test's: on Windows an
     # open pooled connection keeps the temp file locked and cleanup fails.

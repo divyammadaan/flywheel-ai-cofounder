@@ -39,6 +39,7 @@ ENV_VAR = "FLYWHEEL_DATABASE_URL"
 # -- opening a run seeds its workspace first -- and a plain Lock deadlocks on
 # itself there.
 _write_lock = threading.RLock()
+_engine_lock = threading.RLock()
 
 _engine: Engine | None = None
 _session_factory: sessionmaker[Session] | None = None
@@ -49,8 +50,18 @@ def default_url() -> str:
     return f"sqlite:///{DEFAULT_SQLITE_PATH}"
 
 
+def normalise_url(url: str) -> str:
+    """A URL SQLAlchemy can use. Hosts such as Neon hand out `postgresql://`
+    (or the older `postgres://`), which SQLAlchemy reads as the psycopg2
+    driver; this project installs psycopg 3, so the driver is named."""
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    return url
+
+
 def database_url() -> str:
-    return os.environ.get(ENV_VAR) or default_url()
+    return normalise_url(os.environ.get(ENV_VAR) or default_url())
 
 
 def is_sqlite(url: str | None = None) -> bool:
@@ -83,7 +94,9 @@ def _create_engine(url: str) -> Engine:
 
     # pool_pre_ping: a pooled Postgres connection that died while the process
     # sat idle between runs is replaced instead of raising on first use.
-    return create_engine(url, future=True, pool_pre_ping=True)
+    # pool_recycle: serverless Postgres (Neon) drops idle connections after a
+    # few minutes; recycling before that avoids a first-request failure.
+    return create_engine(url, future=True, pool_pre_ping=True, pool_recycle=240)
 
 
 def get_engine() -> Engine:
@@ -94,12 +107,23 @@ def get_engine() -> Engine:
     """
     global _engine, _session_factory, _configured_url
     url = database_url()
-    if _engine is None or url != _configured_url:
-        dispose()
-        _engine = _create_engine(url)
-        _session_factory = sessionmaker(bind=_engine, expire_on_commit=False, future=True)
-        _configured_url = url
-        Base.metadata.create_all(_engine)
+    if _engine is not None and url == _configured_url:
+        return _engine
+    # One thread builds the engine and the tables. Without the lock, two
+    # threads arriving together (the first requests after a start, or a
+    # background worker and a test) both ran create_all and one of them failed
+    # with "table already exists".
+    with _engine_lock:
+        if _engine is None or url != _configured_url:
+            dispose()
+            engine = _create_engine(url)
+            # Tables first, and the engine published last: a thread that finds
+            # `_engine` set skips this block, so it must never see an engine
+            # whose tables do not exist yet.
+            Base.metadata.create_all(engine)
+            _session_factory = sessionmaker(bind=engine, expire_on_commit=False, future=True)
+            _configured_url = url
+            _engine = engine
     return _engine
 
 
@@ -121,12 +145,16 @@ def dispose() -> None:
 def session_scope(write: bool = False):
     """A session that commits on success, rolls back on failure, always closes.
 
-    `write=True` takes the serialising lock described in the module docstring.
+    `write=True` takes the serialising lock described above.
     """
     get_engine()
     assert _session_factory is not None
     session = _session_factory()
-    lock = _write_lock if write and is_sqlite() else None
+    # Serialised on every backend, not just SQLite: event numbers are allocated
+    # as max(seq)+1, which two concurrent Postgres transactions would both read
+    # as the same value (seen on Neon: 15 of 20 concurrent events lost to a
+    # unique-key violation). One server process is the supported deployment.
+    lock = _write_lock if write else None
     if lock:
         lock.acquire()
     try:

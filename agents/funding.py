@@ -26,6 +26,9 @@ from datetime import date
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._brief import LAUNCH
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
@@ -114,7 +117,7 @@ class FundingAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
         register_role("Funding Advisor", "funding", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["funding"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["funding"], **llm_metadata("funding"))
         self._agent = Agent(
             role="Funding Advisor",
             goal="Lay out when this business should raise, and what it must achieve first",
@@ -127,6 +130,7 @@ class FundingAgent:
         )
 
     # Today's date is part of the prompt, so it's part of the cache key.
+    @traced("funding")
     @cached("funding", FundingPlan, extra_key=lambda: date.today().isoformat())
     @retry_on_rate_limit()
     def assess(
@@ -164,8 +168,9 @@ class FundingAgent:
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=FundingSchema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("funding"))
         crew.kickoff()
         p: FundingSchema = task.output.pydantic
 

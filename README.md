@@ -25,7 +25,7 @@ Where arithmetic is involved, code does the maths and the model does the judgeme
 | Marketing | both | 2–4 campaigns with copy and a matching ad image |
 | Sales | both | 2–4 lead sources with a weekly cadence, and the steps from lead to customer |
 | Product | both | Opening inventory or delivery capacity, priced and cut to fit the budget |
-| CRM | existing, with an upload | Code groups customers (best/regular/new/slipping/lost); a local model writes actions and win-back messages so customer data never leaves the machine |
+| CRM | existing, with an upload | Code groups customers (best/regular/new/slipping/lost); the model writes actions and win-back messages for each group |
 | Funding | both | Target raise date, stage, and the milestones to hit first |
 
 There's no CRM in a launch plan (no customers yet to retain) and no Analytics (nothing has happened yet).
@@ -72,9 +72,12 @@ There's no CRM in a launch plan (no customers yet to retain) and no Analytics (n
                        └─────────┘ and profit milestones
 ```
 
-Agent output is structured data (arrays of points, not paragraphs), so the UI renders real lists instead of guessing where to split prose.
+Agent output is structured data (arrays of points, not paragraphs), so the UI renders real lists instead of guessing where to split prose. The whole plan is also one validated Pydantic object (`orchestration/final_plan.py`), downloadable as JSON or Markdown.
+
+**How the execution stage runs.** Marketing, Sales, Product and CRM are CrewAI agents served over **A2A** (agent cards at `/a2a/<agent>/.well-known/agent-card.json`). A Google ADK `ParallelAgent` made of `RemoteA2aAgent`s calls them concurrently, with the plan so far carried as ADK session state (`orchestration/adk_coordinator.py`). If the A2A agents can't be reached, the same agents run in-process, so a plan never fails over the protocol.
 
 **Guardrails in code, not prompts:**
+- `agents/_input_guard.py` — what comes in: abusive language and prompt-injection attempts in the founder's text are refused; web-search results are type-checked and have instruction-like sentences cut out before a model sees them.
 - `agents/_guardrails.py` — every Strategy plan is checked (describes this business, metric units, price near what customers pay, no demeaning wording) before other agents use it. A failing plan is sent back once, then the run stops.
 - `agents/_cash.py` — reserve, break-even, runway, debt ratio.
 - `agents/finance.py` — no budget area gets more than 60% of the total.
@@ -90,11 +93,13 @@ Agent output is structured data (arrays of points, not paragraphs), so the UI re
 - **Backend:** FastAPI, wrapping the same orchestration functions the CLIs call. Long-running plans run on a worker thread; progress is written as rows a client can resume from after a reload.
 - **Frontend:** Next.js, TypeScript, Tailwind. Types generated from the live API schema.
 - **Storage:** SQLAlchemy over SQLite or Postgres (`FLYWHEEL_DATABASE_URL`), Alembic migrations. Plans are scoped to runs, not overwritten.
-- **Agent orchestration:** CrewAI (planning + advisory agents), Google ADK (Strategy/Analytics).
-- **Agent-to-tool:** MCP — a FastMCP server exposing decision history over stdio.
-- **Agent-to-agent:** A2A — Marketing runs behind a discoverable Agent Card; falls back to a direct call if the server is down.
-- **LLMs:** Groq (hosted agents), Ollama (local, for CRM — so customer data never leaves the machine).
-- **Web search:** DuckDuckGo via `ddgs`, no API key.
+- **Agents:** CrewAI (Intake, Market Research, Founder Advisor, Company Formation, Marketing, Sales, Product, CRM, Funding) and Google ADK (Strategy, Analytics, and the coordinator that calls the execution agents). Finance is plain code.
+- **Agent-to-tool:** MCP — a FastMCP server (`tools/mcp_server.py`) with web search, a cash calculator, an order-file parser and the decision-record history; the engine calls it over stdio, with a local fallback.
+- **Agent-to-agent:** A2A — see above.
+- **Monitoring:** callbacks on both frameworks (`observability/callbacks.py`) record steps, model calls, tool calls and errors; `observability/trace.py` prints them live in the server terminal.
+- **Observability:** every model call is traced in Langfuse (`observability/langfuse_setup.py`), tagged by agent and run; customer data is masked there.
+- **LLMs:** Groq, for every agent. The prompt CRM sends contains real customer names and spend, so **customer data is processed by Groq**; it is masked in Langfuse traces.
+- **Web search:** DuckDuckGo via `ddgs`, no API key, reached through the MCP tool.
 
 ---
 
@@ -108,10 +113,12 @@ flywheel/
 ├── web/               # Next.js frontend
 ├── storage/           # SQLAlchemy models, runs, decision records, usage
 ├── migrations/        # Alembic
-├── observability/     # usage tracking, decision records, Streamlit dashboard
-├── tools/              # order file parsing, web search, MCP server, landing page, image gen
+├── observability/     # decision records, usage, callbacks, live trace, Langfuse
+├── tools/              # order file parsing, web search, MCP server and client, landing page, image gen
+├── evaluation/        # end-to-end evaluation (time, tokens, cost, correctness)
+├── deploy/            # Dockerfile entry point, Hugging Face and Modal deploy scripts
 ├── tests/
-└── docs/
+└── docs/              # setup, deployment, evaluation, requirements map
 ```
 
 ---
@@ -128,14 +135,15 @@ Install in stages (see `docs/setup.md`):
 
 ```bash
 pip install crewai && pip install google-adk && pip install mcp a2a-sdk
-pip install ollama groq google-genai && pip install fastapi uvicorn python-dotenv pydantic
+pip install groq google-genai && pip install fastapi uvicorn python-dotenv pydantic
 pip install sqlalchemy alembic "psycopg[binary]"
-pip install pandas openpyxl ddgs && pip install streamlit && pip install pytest
+pip install pandas openpyxl ddgs && pip install pytest
 ```
+
+Or, to get exactly the versions this was built and tested with: `pip install -r requirements.deploy.txt`.
 
 ```bash
 cp .env.example .env   # add GROQ_API_KEY (console.groq.com/keys)
-ollama pull qwen3:4b    # local model for CRM
 ```
 
 **API + web app:**
@@ -157,3 +165,17 @@ python orchestration/review_flow.py --description "..." --period "FY2025-26" \
 
 pytest tests/ -q
 ```
+
+The CLI flows print each agent starting, calling its model, finishing and saving, as they run (`FLYWHEEL_TRACE=0` silences it); the API server prints the same lines in its terminal.
+
+---
+
+## Deployment
+
+The website is on Vercel and the backend is a Docker container (`Dockerfile`) that serves the API, the A2A agents and the MCP-backed tools from one process, against a managed Postgres (Neon). See `docs/DEPLOYMENT.md` for the steps, the access-code protection and the free-hosting notes.
+
+## More
+
+- `docs/REQUIREMENTS_MAP.md` — each course requirement and where it lives in the code.
+- `docs/EVALUATION.md` — measured time, tokens, cost and correctness checks.
+- `docs/CHANGES_FOR_VIVA.md` — the end-term changes explained in plain language.

@@ -9,6 +9,7 @@ front end gets a precise, per-field error for free and cannot forget one.
 
 from pydantic import BaseModel, Field, field_validator
 
+from agents._input_guard import check_user_text
 from agents._money import SUPPORTED_CURRENCIES
 from agents._cash import DEFAULT_RUNWAY_MONTHS
 
@@ -37,13 +38,20 @@ class NewIdeaRequest(BaseModel):
     def not_just_whitespace(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("describe the idea in a sentence or two")
-        return value.strip()
+        return check_user_text(value.strip(), "idea")
 
 
 class AnswersRequest(BaseModel):
     """The founder's replies, keyed by the question they answer."""
 
     answers: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("answers")
+    @classmethod
+    def safe_answers(cls, value: dict[str, str]) -> dict[str, str]:
+        for answer in value.values():
+            check_user_text(answer, "answer")
+        return value
 
 
 class PeriodMetricsIn(BaseModel):
@@ -75,6 +83,11 @@ class ExistingBusinessRequest(BaseModel):
         if value not in SUPPORTED_CURRENCIES:
             raise ValueError(f"currency must be one of {', '.join(SUPPORTED_CURRENCIES)}")
         return value
+
+    @field_validator("description")
+    @classmethod
+    def safe_description(cls, value: str) -> str:
+        return check_user_text(value, "description")
 
 
 class RunSummary(BaseModel):
@@ -166,7 +179,7 @@ class RefineRequest(BaseModel):
     def not_just_whitespace(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("say what you'd like changed")
-        return value.strip()
+        return check_user_text(value.strip(), "change request")
 
 
 class SpeakRequest(BaseModel):

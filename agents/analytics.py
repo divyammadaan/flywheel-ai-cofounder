@@ -23,6 +23,9 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import adk_callbacks
+from observability.trace import traced
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, GROQ_MODEL_ADK_JSON
 from agents._money import fmt_money
@@ -186,7 +189,7 @@ class AnalyticsAgent:
     def __init__(self, model: str = DEFAULT_MODEL, session_id: str = "analytics_session"):
         self.model_name = model
         resolved_model = (
-            LiteLlm(model=model, max_tokens=AGENT_MAX_TOKENS["analytics"]) if model.startswith("groq/") else model
+            LiteLlm(model=model, max_tokens=AGENT_MAX_TOKENS["analytics"], **llm_metadata("analytics")) if model.startswith("groq/") else model
         )
         self._agent = LlmAgent(
             name="analytics_agent",
@@ -194,10 +197,27 @@ class AnalyticsAgent:
             instruction=_INSTRUCTION,
             output_schema=AnalyticsSchema,
             output_key="analytics_output",
+            **adk_callbacks("analytics"),
         )
         self._session_service = InMemorySessionService()
         self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
         self._session_id = session_id
+        self._session_ready = False
+
+    def _reset_session(self):
+        """Start the next attempt in a clean session.
+
+        A call that fails (a provider rate limit, a malformed reply) has already put
+        its user message in the session. Retrying in the same session sends that
+        message again on top of itself, so each retry's request is bigger than the
+        last -- and a request over the provider's per-minute input limit can never
+        succeed. Seen live: a Strategy request that grew to 7,958 tokens against a
+        limit of 7,000. A new session per failed attempt keeps every retry the
+        same size. (A deliberate revision after a *successful* reply keeps its
+        session: there the earlier answer is wanted.)
+        """
+        self._session_service = InMemorySessionService()
+        self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
         self._session_ready = False
 
     async def _ensure_session(self):
@@ -240,11 +260,17 @@ class AnalyticsAgent:
         summary = None
         usage = []
         started = time.perf_counter()
-        async for event in self._runner.run_async(user_id=USER_ID, session_id=self._session_id, new_message=content):
-            if getattr(event, "usage_metadata", None):
-                usage.append(event.usage_metadata)
-            if event.is_final_response() and event.content and event.content.parts:
-                summary = event.content.parts[0].text
+        try:
+            async for event in self._runner.run_async(
+                user_id=USER_ID, session_id=self._session_id, new_message=content
+            ):
+                if getattr(event, "usage_metadata", None):
+                    usage.append(event.usage_metadata)
+                if event.is_final_response() and event.content and event.content.parts:
+                    summary = event.content.parts[0].text
+        except Exception:
+            self._reset_session()
+            raise
         record_adk_usage("analytics", self.model_name, usage, started)
 
         if summary is None:
@@ -265,6 +291,7 @@ class AnalyticsAgent:
             file_metrics=file_metrics,
         )
 
+    @traced("analytics")
     @cached("analytics", AnalyticsReport)
     @retry_on_rate_limit()
     def summarize(

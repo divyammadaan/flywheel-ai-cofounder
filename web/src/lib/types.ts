@@ -41,7 +41,8 @@ export interface RunEvent {
     | "awaiting_answers"
     | "blocked"
     | "failed"
-    | "finished";
+    | "finished"
+    | "monitor";
   agent: string | null;
   message: string | null;
   payload: Record<string, unknown>;

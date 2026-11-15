@@ -28,8 +28,8 @@ from typing import Callable
 from orchestration.cycle import PlanBlocked
 from storage import add_event, fetch_events, start_run, update_run, using_run
 
-# Bounded on purpose. Each job holds a Groq rate limit and, for CRM, the local
-# Ollama model; running many at once makes every one of them slower rather
+# Bounded on purpose. Each job holds a share of the Groq rate limit; running
+# many at once makes every one of them slower rather
 # than finishing any sooner.
 MAX_CONCURRENT_RUNS = 4
 
@@ -47,13 +47,26 @@ def executor() -> ThreadPoolExecutor:
         return _executor
 
 
+# Pools that were told to stop without waiting but may still have a job running.
+# Kept so that a later shutdown(wait=True) can wait for them: the API's own
+# shutdown does not wait, which left a running job unreachable (and, in the test
+# suite, writing into the next test's database).
+_draining: list[ThreadPoolExecutor] = []
+
+
 def shutdown(wait: bool = False) -> None:
     """Stop the pool. Called on API shutdown and between tests."""
     global _executor
     with _executor_lock:
         if _executor is not None:
             _executor.shutdown(wait=wait, cancel_futures=not wait)
+            if not wait:
+                _draining.append(_executor)
         _executor = None
+        if wait:
+            for pool in _draining:
+                pool.shutdown(wait=True)
+            _draining.clear()
 
 
 # What the founder is told when a provider fails, keyed by a marker in the

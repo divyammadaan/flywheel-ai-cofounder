@@ -15,6 +15,9 @@ from dataclasses import dataclass, field
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fmt_money
@@ -84,7 +87,7 @@ class MarketResearchAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
         register_role("Market Research Analyst", "market_research", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["market_research"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["market_research"], **llm_metadata("market_research"))
         self._agent = Agent(
             role="Market Research Analyst",
             goal="Size the market and identify what's still unknown before a GO/NO-GO call",
@@ -95,6 +98,7 @@ class MarketResearchAgent:
             verbose=False,
         )
 
+    @traced("market_research")
     @cached("market_research", MarketResearchReport)
     def research(self, business: BusinessInput) -> MarketResearchReport:
         # Searched outside the rate-limit retry, so a Groq retry doesn't repeat
@@ -124,8 +128,9 @@ class MarketResearchAgent:
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=MarketResearchSchema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("market_research"))
         crew.kickoff()
         parsed: MarketResearchSchema = task.output.pydantic
 

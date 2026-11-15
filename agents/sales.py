@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._brief import LAUNCH, PlanBrief
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
@@ -60,7 +63,7 @@ class SalesAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
         register_role("Sales Lead", "sales", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["sales"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["sales"], **llm_metadata("sales"))
         self._agent = Agent(
             role="Sales Lead",
             goal="Say exactly where and how the business gets its leads, and how they become customers",
@@ -73,6 +76,7 @@ class SalesAgent:
             verbose=False,
         )
 
+    @traced("sales")
     @cached("sales", SalesOutput)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float) -> SalesOutput:
@@ -90,8 +94,9 @@ class SalesAgent:
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=SalesOutputSchema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("sales"))
         crew.kickoff()
         parsed: SalesOutputSchema = task.output.pydantic
 

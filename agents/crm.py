@@ -7,19 +7,12 @@ agent's model writes what to do about each group and a spend for each, plus
 ready-to-send messages. A business that hasn't launched has no customers, so it
 gets no CRM plan at all.
 
-Deliberately runs on a local Ollama model (qwen3:4b), not a hosted API: this
-agent sees real customer names and spending, so that data never leaves the
-machine. Satisfies the course's local-LLM / data-privacy requirement (CO2).
-
-Why it calls Ollama directly instead of going through CrewAI -- measured on the
-dev machine's CPU (~9.5 tokens/s), same prompt and sample data:
-- Through CrewAI: two model calls (6m04s + 8m45s). CrewAI wraps the task in its
-  own agent prompt, then makes a second call to convert the answer into the
-  schema; a 4B model on CPU pays heavily for both.
-- Direct: one call to Ollama's native /api/chat with think:false and the JSON
-  schema passed as `format` -- about a minute, valid JSON.
-  (think:false matters: qwen3 otherwise reasons first, roughly doubling output,
-  and Ollama's OpenAI-compatible endpoint ignores reasoning_effort="none".)
+A CrewAI agent on Groq, like Marketing, Sales and Product. It used to run on a
+local Ollama model so that customer names never left the machine; it moved to
+the hosted model so the whole system can be deployed with nothing running on
+the founder's laptop. The consequence is a privacy trade-off to state plainly:
+the prompt now contains customer names and spend, and those go to Groq (and are
+masked in Langfuse traces -- see observability/langfuse_setup.py).
 
 What the model gets wrong is fixed or caught in code rather than trusted:
 - its per-group spends are cut to fit the budget (it allocated Rs 75k of a
@@ -35,22 +28,24 @@ What the model gets wrong is fixed or caught in code rather than trusted:
 """
 
 import re
-import time
 from dataclasses import dataclass, field
 
-import httpx
+from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._brief import PlanBrief
 from agents._cache import cached
 from agents._guardrails import crm_output_problems, demeaning_terms
-from agents._models import AGENT_MAX_TOKENS, OLLAMA_BASE_URL, OLLAMA_MODEL
+from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
 from agents._money import fit_to_budget, fmt_money
 from agents._retry import retry_on_rate_limit
 from agents._segments import SEGMENT_DEFINITIONS, SEGMENT_LABELS, SEGMENTS, describe_segments, segment_changes
-from observability.usage import record_usage
+from observability.usage import register_role
 
-REQUEST_TIMEOUT_SECONDS = 300
+DEFAULT_MODEL = AGENT_MODELS["crm"]
 PREVIEW_CUSTOMERS = 3
 
 _SYSTEM = """You run customer retention for a small business. You work from real customer
@@ -64,7 +59,7 @@ sensible share of the budget, and complete messages. Never repeat a field's name
 description as its value."""
 
 NO_PLAN_WARNING = (
-    "The local CRM model returned placeholder text twice, so there is no CRM plan this run. "
+    "The CRM model returned placeholder text twice, so there is no CRM plan this run. "
     "Run the review again to get one."
 )
 
@@ -147,39 +142,38 @@ def personalise(message: str, customer: str) -> str:
 
 
 class CRMAgent:
-    """Direct call to a local Ollama model -- customer data never leaves this
-    machine, by design."""
+    """CrewAI agent backed by Groq -- retention actions and messages per customer group."""
 
-    def __init__(self, model: str = OLLAMA_MODEL, base_url: str = OLLAMA_BASE_URL):
+    def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
-        self.base_url = base_url.rstrip("/")
+        register_role("Customer Retention Lead", "crm", model)
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["crm"], temperature=0.4, **llm_metadata("crm"))
+        self._agent = Agent(
+            role="Customer Retention Lead",
+            goal="Win back slipping customers and keep the best ones, with specific actions and spends",
+            backstory=(
+                "You run customer retention for a small business. You work from real customer groups "
+                "and write specific actions the founder can do this week, each with a spend, in warm "
+                "plain language that sounds like the business, never like a marketing department."
+            ),
+            llm=llm,
+            verbose=False,
+        )
 
     def _ask(self, prompt: str) -> CRMPlanSchema:
-        started = time.perf_counter()
-        response = httpx.post(
-            f"{self.base_url}/api/chat",
-            json={
-                "model": self.model_name,
-                "messages": [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": prompt}],
-                "stream": False,
-                "think": False,
-                "format": CRMPlanSchema.model_json_schema(),
-                "options": {"temperature": 0.4, "num_predict": AGENT_MAX_TOKENS["crm"]},
-                # Unload right after this one call. Ollama otherwise keeps the
-                # model in RAM for 5 minutes (~3.9 GB), and on a 16 GB machine
-                # that got the rest of the pipeline killed for low memory.
-                "keep_alive": 0,
-            },
-            timeout=REQUEST_TIMEOUT_SECONDS,
+        task = Task(
+            description=_SYSTEM + "\n\n" + prompt,
+            expected_output="A JSON object matching the required schema.",
+            agent=self._agent,
+            output_pydantic=CRMPlanSchema,
+            **task_kwargs(),
         )
-        response.raise_for_status()
-        body = response.json()
-        record_usage(
-            "crm", self.model_name, body.get("prompt_eval_count", 0), body.get("eval_count", 0), time.perf_counter() - started
-        )
-        return CRMPlanSchema.model_validate_json(body["message"]["content"])
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("crm"))
+        crew.kickoff()
+        return task.output.pydantic
 
     # A failed plan isn't saved, so the next run asks the model again.
+    @traced("crm")
     @cached("crm", CRMOutput, should_cache=lambda result: not result.warnings)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float, segments: dict, previous: dict | None = None) -> CRMOutput:

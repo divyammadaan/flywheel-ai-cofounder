@@ -19,14 +19,15 @@ see all of it; each planning agent gets only the sections it uses
 founder's answers and every number.
 
 What is deliberately NOT here:
-  - The market simulator. simulator/market_simulator.py and its tests still
-    exist but aren't wired in: made-up revenue for a business that hasn't
-    launched was misleading.
+  - A market simulator. It was removed: made-up revenue for a business that
+    hasn't launched was misleading.
   - A hardcoded budget. Every amount is the founder's own figure.
 """
 
+import contextvars
 import json
 import re
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass, fields, replace
 
@@ -50,6 +51,10 @@ from agents.sales import SalesAgent, SalesOutput
 from agents.strategy import StrategyAgent, StrategyDecision
 from observability.decision_record import DecisionRecord, get_records, log_decision
 from orchestration.a2a_bridge import request_marketing
+from orchestration.adk_coordinator import a2a_enabled, run_execution_team
+from orchestration.final_plan import build_final_plan
+from observability import trace
+from storage import current_run_id, save_asset
 from tools.mcp_client_tool import query_decision_records
 from tools.orders_file import order_metrics
 
@@ -107,8 +112,17 @@ def join_context(sections: dict, keys=None) -> str:
 
 def previous_segments(cycle: int) -> dict | None:
     """Last period's CRM customer segments, fetched over MCP from the Decision
-    Record server running as a separate process."""
-    earlier = [r for r in query_decision_records(agent="crm") if r["cycle"] < cycle]
+    Record server running as a separate process.
+
+    History is a bonus, not a requirement: if the MCP server cannot be reached
+    (it failed to start, or timed out) the plan carries on without a comparison
+    rather than failing a founder's run over it.
+    """
+    try:
+        earlier = [r for r in query_decision_records(agent="crm") if r["cycle"] < cycle]
+    except Exception as exc:  # noqa: BLE001 - see above
+        trace.note("ERROR", f"previous-period lookup over MCP failed ({type(exc).__name__}); planning without it")
+        return None
     if not earlier:
         return None
     return max(earlier, key=lambda r: r["cycle"])["decision"].get("segments")
@@ -143,6 +157,103 @@ def _checked_strategy(
         log_decision(DecisionRecord(cycle, "strategy_rejected", {"attempt": attempt, "problems": problems}, asdict(decision)))
         feedback = "\n\nYour previous plan was rejected by the plan checker: " + " ".join(problems) + " Fix every one of these."
     raise PlanBlocked("Strategy produced an unusable plan twice. " + " ".join(problems))
+
+
+def store_ad_image(marketing) -> None:
+    """Keep Marketing's generated image in the database, under the current run.
+
+    Marketing writes it to the server's disk, which a hosted deployment loses on
+    restart; the run's page must still show it afterwards. Done here, in the
+    caller's thread, because the caller is the one that knows the run (and
+    Marketing may have run in another process over A2A).
+    """
+    path = getattr(marketing, "ad_image_path", None)
+    if not path:
+        return
+    try:
+        data = Path(path).read_bytes()
+    except OSError:
+        return
+    content_type = "image/png" if str(path).lower().endswith(".png") else "image/jpeg"
+    try:
+        save_asset("ad_image", data, content_type)
+    except Exception:  # noqa: BLE001 - the image is supplementary, never fail a plan over it
+        pass
+
+
+def submit_in_context(pool, fn, *args):
+    """pool.submit, with the caller's context carried into the worker thread.
+
+    The current run lives in a ContextVar, which a pool thread does not
+    inherit. Without the copied context, the agents' usage rows, monitor events
+    and trace lines landed on the newest run instead of the one being planned.
+    Each call copies its own context: one context cannot be entered by two
+    threads at once.
+    """
+    return pool.submit(contextvars.copy_context().run, fn, *args)
+
+
+def _run_execution_agents(areas, briefs, allocation, base_brief, segments, cycle):
+    """Marketing, Sales, Product and (for an operating business) CRM.
+
+    Returns (marketing output, transport, {other agent: output}).
+
+    The agents are independent: each needs only its brief and its own slice of
+    the budget, and none reads another's output, so they run concurrently --
+    this stage is as slow as the slowest agent, not the sum of all of them.
+
+    Two ways to run them, the first preferred:
+      - over A2A, through the ADK coordinator (orchestration/adk_coordinator.py),
+        when the CrewAI agents are being served (see orchestration/a2a_bridge.py);
+      - in this process, on a thread pool.
+    If the A2A attempt fails for any reason, the in-process path runs instead.
+    """
+    previous = previous_segments(cycle) if "crm" in areas else None
+
+    if a2a_enabled():
+        try:
+            return _over_a2a(areas, briefs, allocation, base_brief, segments, previous)
+        except Exception as exc:  # noqa: BLE001 - A2A is an upgrade, never a new way to fail
+            trace.note("ERROR", f"A2A team failed ({type(exc).__name__}: {str(exc)[:120]}); running the agents in-process")
+    return _in_process(areas, briefs, allocation, segments, previous)
+
+
+def _over_a2a(areas, briefs, allocation, base_brief, segments, previous):
+    inputs = {name: {"brief": asdict(briefs[name]), "budget": getattr(allocation, name)} for name in areas}
+    if "crm" in areas:
+        inputs["crm"].update({"segments": segments, "previous": previous})
+    run = current_run_id()
+    # The shared state of the ADK session: the brief, the budgets, and the plan so
+    # far (research, verdict, strategy, finance...) as a validated FinalPlan snapshot.
+    shared = {
+        "brief": asdict(base_brief),
+        "budgets": {name: inputs[name]["budget"] for name in areas},
+        "plan_state": build_final_plan(run).model_dump(mode="json"),
+    }
+    trace.note("A2A", f"ADK coordinator sends {', '.join(areas)} to their CrewAI agents over A2A")
+    results = run_execution_team(inputs, run_id=run, shared=shared)
+    return results["marketing"], "a2a", {name: out for name, out in results.items() if name != "marketing"}
+
+
+def _in_process(areas, briefs, allocation, segments, previous):
+    trace.note("PARALLEL", f"{', '.join(areas)} run at the same time")
+    with ThreadPoolExecutor(max_workers=len(areas)) as pool:
+
+        def submit(fn, *args):
+            return submit_in_context(pool, fn, *args)
+
+        futures = {
+            "marketing": submit(request_marketing, briefs["marketing"], allocation.marketing),
+            "product": submit(ProductAgent().execute, briefs["product"], allocation.product),
+            "sales": submit(SalesAgent().execute, briefs["sales"], allocation.sales),
+        }
+        if "crm" in areas:
+            futures["crm"] = submit(CRMAgent().execute, briefs["crm"], allocation.crm, segments, previous)
+        # .result() re-raises in the caller, so a failing agent still surfaces
+        # rather than being silently swallowed by the pool.
+        marketing, transport = futures["marketing"].result()
+        outputs = {name: f.result() for name, f in futures.items() if name != "marketing"}
+    return marketing, transport, outputs
 
 
 def _plan(
@@ -198,32 +309,14 @@ def _plan(
     )
     briefs = {name: replace(base_brief, context=join_context(sections, AGENT_CONTEXT[name])) for name in areas}
 
-    # The planning agents are independent: each needs only its brief and its
-    # own slice of the budget, and none reads another's output. Running them
-    # concurrently makes this stage as slow as the slowest agent rather than
-    # the sum of all of them.
-    #
-    # Marketing goes through request_marketing(), which routes over A2A when
-    # the bridge server is running (see orchestration/a2a_bridge.py) and
-    # falls back to an in-process call otherwise.
-    with ThreadPoolExecutor(max_workers=len(areas)) as pool:
-        futures = {
-            "marketing": pool.submit(request_marketing, briefs["marketing"], allocation.marketing),
-            "product": pool.submit(ProductAgent().execute, briefs["product"], allocation.product),
-            "sales": pool.submit(SalesAgent().execute, briefs["sales"], allocation.sales),
-        }
-        if "crm" in areas:
-            futures["crm"] = pool.submit(
-                CRMAgent().execute, briefs["crm"], allocation.crm, segments, previous_segments(cycle)
-            )
-        # .result() re-raises in the caller, so a failing agent still surfaces
-        # rather than being silently swallowed by the pool.
-        marketing, transport = futures["marketing"].result()
-        outputs = {name: f.result() for name, f in futures.items() if name != "marketing"}
+    marketing, transport, outputs = _run_execution_agents(
+        areas, briefs, allocation, base_brief, segments, cycle
+    )
 
     # Models occasionally leak raw tool-call markup into a text field (seen in a
     # live Sales run); cut it off before anything is logged or shown.
     marketing = _clean_output(marketing)
+    store_ad_image(marketing)
     outputs = {name: _clean_output(out) for name, out in outputs.items()}
 
     logged = {"marketing": marketing, **outputs}
@@ -256,7 +349,8 @@ def launch_sections(
         "capital_costs": (
             f"Founder's capital for the launch: {fmt_money(business.starting_capital, currency)}. "
             f"Monthly fixed costs: {fmt_money(business.monthly_fixed_costs, currency)}; cost to deliver one unit: "
-            f"{fmt_money(business.unit_cost, currency)} ('—' means not given)."
+            f"{fmt_money(business.unit_cost, currency)} ('—' means not given). "
+            "Price in that same unit, so price and unit cost can be compared directly."
         ),
         # as_text, not the raw field: these are lists of points now, and an
         # f-string would hand the model a Python repr full of brackets and quotes.
@@ -446,6 +540,7 @@ def refine_execution_agent(cycle: int, agent: str, feedback: str):
     if agent == "marketing":
         out, transport = request_marketing(brief, budget)
         out = _clean_output(out)
+        store_ad_image(out)
         log_decision(
             DecisionRecord(
                 cycle,

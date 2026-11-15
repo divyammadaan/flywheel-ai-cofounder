@@ -19,9 +19,11 @@ didn't already say.
 
 from dataclasses import dataclass, field
 
+from observability.trace import traced
 from agents._cash import launch_cash_plan, operating_cash_position
 from agents._money import fmt_money
 from agents.analytics import PeriodMetrics
+from tools.mcp_client_tool import with_fallback
 
 # Guardrail: no single area may receive more than this fraction of budget.
 MAX_SHARE_PER_AGENT = 0.6
@@ -125,6 +127,7 @@ class FinanceAgent:
     def __init__(self, currency: str):
         self.currency = currency
 
+    @traced("finance")
     def plan_launch(
         self,
         cycle: int,
@@ -135,12 +138,34 @@ class FinanceAgent:
         unit_cost: float | None,
         runway_months: int,
     ) -> BudgetAllocation:
-        health = launch_cash_plan(capital, price, monthly_fixed_costs, unit_cost, runway_months)
+        # The arithmetic is done by the MCP server's cash_calculator tool; the local
+        # function is the same code and runs if the tool cannot be reached.
+        health = with_fallback(
+            "cash_calculator",
+            {
+                "capital": capital,
+                "price": price,
+                "monthly_fixed_costs": monthly_fixed_costs,
+                "unit_cost": unit_cost,
+                "runway_months": runway_months,
+            },
+            launch_cash_plan,
+        )
         return self.allocate(cycle, priorities, health["launch_budget"], health)
 
+    @traced("finance")
     def plan_operating(self, cycle: int, priorities: dict, metrics: PeriodMetrics, budget: float) -> BudgetAllocation:
-        health = operating_cash_position(
-            metrics.revenue, metrics.net_profit, metrics.total_debt, budget, metrics.period_months, metrics.cash_in_bank
+        health = with_fallback(
+            "operating_cash_position_tool",
+            {
+                "revenue": metrics.revenue,
+                "net_profit": metrics.net_profit,
+                "total_debt": metrics.total_debt,
+                "budget": budget,
+                "period_months": metrics.period_months,
+                "cash_in_bank": metrics.cash_in_bank,
+            },
+            operating_cash_position,
         )
         return self.allocate(cycle, priorities, budget, health)
 

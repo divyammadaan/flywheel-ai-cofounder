@@ -61,9 +61,17 @@ export function PlanHeader({
           </div>
 
           {hasPlan ? (
-            <LinkButton href={api.landingPageUrl(run.id)} download className="shrink-0">
-              Download launch page
-            </LinkButton>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <LinkButton href={api.planUrl(run.id, "md")} download>
+                Plan (Markdown)
+              </LinkButton>
+              <LinkButton href={api.planUrl(run.id, "json")} download>
+                Plan (JSON)
+              </LinkButton>
+              <LinkButton href={api.landingPageUrl(run.id)} download>
+                Launch page
+              </LinkButton>
+            </div>
           ) : null}
         </div>
       </Page>

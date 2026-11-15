@@ -111,7 +111,7 @@ def print_plan(result) -> None:
     cr = result.crm
     if cr is None:
         return
-    rule(f"CRM -- {m(cr.budget)} (local Ollama, from your uploaded orders)")
+    rule(f"CRM -- {m(cr.budget)} (from your uploaded orders)")
     if cr.warnings:
         for warning in cr.warnings:
             print(f"!! {warning}")

@@ -60,7 +60,7 @@ def _parse_dates(column: pd.Series) -> pd.Series:
 def load_orders(source, filename: str | None = None) -> pd.DataFrame:
     """Read and clean an order file.
 
-    `source` is a path, or a file-like object (e.g. a Streamlit upload) with
+    `source` is a path, or a file-like object with
     `filename` given so the format can be detected. Returns columns
     customer, order_date, amount (+ city/product/channel if present), sorted
     by date. Rows with no customer, an unreadable date or a non-numeric amount

@@ -3,11 +3,11 @@
 Upload file: `demo/demo_orders.csv` (1,427 orders, 300 customers, 2025-09-01 to 2026-08-31). The same data is already consistent with the numbers below.
 
 ## Before you start
-1. Ollama running, with `qwen3:4b` pulled (the CRM step needs it).
+1. Nothing else to install: every agent, CRM included, uses Groq.
 2. `GROQ_API_KEY` set in `.env`.
 3. API: `.venv/Scripts/python -m uvicorn api.main:app --port 8000`
 4. Web: `cd web && npm run dev`, then open http://localhost:3000/existing
-5. A full run takes a few minutes (CRM on the local model is the slowest part). Do one dry run tonight so the answers are cached and tomorrow's run is much faster.
+5. A full run takes two to four minutes: Groq's free tier allows about 1,000 output tokens a minute, so agents wait out the limit. Open the site a few minutes early so a sleeping host has woken up.
 
 ## Form values to enter
 
@@ -41,17 +41,17 @@ Upload file: `demo/demo_orders.csv` (1,427 orders, 300 customers, 2025-09-01 to 
 1. Show the form and the upload preview: "Messy exports are fine; it reports skipped rows."
 2. Start the run and point at the live progress list (Intake, Analytics, Strategy, Finance, then Marketing/Sales/Product/CRM together).
 3. Open the plan: Analytics headline, the budget split (note no area exceeds 60%), customer groups with tooltips explaining each rule.
-4. Open the CRM section: "This ran on the local model, so customer names stay on this laptop."
+4. Open the CRM section: "Code grouped the customers; the model wrote an action and a message for each group. Customer names are masked in the Langfuse trace."
 5. Use "Suggest a change" on Sales, for example "Only free channels for now", to show human-in-the-loop.
 6. Optional: download the launch page.
 
 ## Likely questions and safe answers
 - Why is Finance not an AI? Money maths must be exact, so plain code does it and tests cover it.
-- Is customer data private? Customer names go only to the local model. Do not click the read-aloud button on the customer-groups section; that one sends text online.
-- Is the improvement loop automatic? No. Each period the founder enters new numbers; comparing periods works in the command line and dashboard, not yet in the web app.
+- Is customer data private? The CRM agent's prompt contains customer names and spend, and that prompt goes to Groq; it is masked in Langfuse. Be straightforward about that. The read-aloud button on the customer-groups section also sends its text to Groq.
+- Is the improvement loop automatic? No. Each period the founder enters new numbers; comparing periods works in the command line, not yet in the web app.
 
 ## If something goes wrong
 - "Can't reach Flywheel": the API is not running on port 8000.
 - Rate-limit message: wait a minute and rerun (Groq free tier).
-- CRM says "no CRM plan this run": the small local model returned placeholder text twice; rerun.
+- CRM says "no CRM plan this run": the model returned placeholder text twice; rerun.
 - Regenerate the file anytime: `.venv/Scripts/python tools/sample_data.py --out demo/demo_orders.csv`

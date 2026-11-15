@@ -1,4 +1,4 @@
-"""The dashboard's text-shaping helpers. They must never mangle model prose
+"""The text-shaping helpers (agents/_text.py). They must never mangle model prose
 into looking structured -- when there's no clear structure, they leave it be."""
 
 import sys
@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from observability.dashboard.format import as_bullets, clause_items, headline, numbered_items, shorten
+from agents._text import as_bullets, clause_items, headline, numbered_items, shorten
 
 
 def test_a_numbered_outline_becomes_items():

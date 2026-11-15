@@ -19,10 +19,9 @@ pip install --upgrade pip
 pip install crewai
 pip install google-adk
 pip install mcp a2a-sdk
-pip install ollama groq google-genai
+pip install groq google-genai
 pip install fastapi uvicorn python-dotenv pydantic
 pip install chromadb
-pip install streamlit
 pip install pytest
 ```
 
@@ -42,24 +41,13 @@ Copy `.env.example` to `.env` and fill in:
 
 `.env` is gitignored; never commit it.
 
-## Local LLM (Ollama)
+## Models
 
-CRM deliberately runs on a local model, not a hosted API — customer/churn
-data is the most privacy-sensitive slice of the project, so it never leaves
-the machine. Satisfies the course's local-LLM / data-privacy requirement.
-
-```bash
-winget install --id Ollama.Ollama -e   # Windows; see ollama.com for other OS
-ollama pull qwen3:4b
-```
-
-`qwen3:4b` was picked over a larger model because this is a CPU-only,
-no-GPU dev machine (Ryzen 7 5800U, 16GB RAM) — 7-8B models are painfully
-slow at that spec. qwen3:4b is a reasoning model and generates ~9.5 tokens/s on this CPU. CRM
-calls Ollama's native `/api/chat` directly with `think: false` and its JSON
-schema as `format`: one call, about 66s. Going through CrewAI took two calls
-and over 14 minutes, and Ollama's OpenAI-compatible endpoint ignores
-`reasoning_effort="none"`. Details in `agents/crm.py`.
+Every agent uses Groq (`GROQ_API_KEY` in `.env`). CRM used to run on a local Ollama
+model so that customer names never left the machine; it moved to Groq so the whole
+system can be deployed with nothing running on a laptop. The trade-off: the CRM
+prompt now contains customer names and spend and is processed by Groq. They are
+masked in Langfuse traces (`observability/langfuse_setup.py`).
 
 ## Running it
 
@@ -78,9 +66,6 @@ python tools/sample_data.py --out data/sample_orders.xlsx
 python orchestration/review_flow.py --description "..." --period "FY2025-26" \
     --revenue 2400000 --net-profit 180000 --debt 500000 --budget 400000 --cash 700000 \
     --orders data/sample_orders.xlsx
-
-# dashboard -- must be the venv python, a system streamlit shadows it
-.venv/Scripts/python -m streamlit run observability/dashboard/app.py
 ```
 
 There is no hardcoded budget: the launch plan works from the capital you pass, and
@@ -153,13 +138,6 @@ Three things that cost time here, worth knowing before touching this file:
   midnight). Switched all 6 hosted-LLM agents to Groq's free tier instead.
   Every agent's `model` constructor param still accepts a plain Gemini
   string to switch back per-agent if wanted.
-- **`streamlit run ...` uses the WRONG Python.** There is a system-wide
-  `streamlit.exe` on PATH that shadows the venv's. Because Streamlit doesn't
-  import the app until a browser connects, the server starts normally and
-  then dies on first render with `ModuleNotFoundError: No module named
-  'crewai'`. Always launch via `.venv/Scripts/python -m streamlit run ...`
-  (or activate the venv first). The dashboard now catches this and prints
-  the fix instead of a raw traceback.
 - **Groq's free tier has its own limit**: output tokens per minute (not
   per-day), and it throttles *down* under sustained use. Two error shapes,
   both retryable:

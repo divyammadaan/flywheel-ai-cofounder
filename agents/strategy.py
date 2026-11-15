@@ -31,6 +31,9 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import adk_callbacks
+from observability.trace import traced
 from agents._brief import LAUNCH
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, GROQ_MODEL_ADK_JSON
@@ -69,6 +72,9 @@ Set:
 Rules:
 - Stay on the business you are given. Don't turn it into a different product.
 - Use the plan currency. For a business in India, use metric units (g, kg, ml).
+- If a cost to deliver one unit is given, price_unit MUST be that same unit (cost per meal
+  means a price per meal; cost per plan means a price per plan). Never price per month or
+  per subscription against a per-item cost: break-even compares the two directly.
 - If the founder's answers or the order history show what customers will pay, keep the
   price near that unless you say why.
 - Describe customers by what they want and can afford. Never characterise neighbourhoods
@@ -127,7 +133,7 @@ class StrategyAgent:
     def __init__(self, model: str = DEFAULT_MODEL, session_id: str = "strategy_session"):
         self.model_name = model
         resolved_model = (
-            LiteLlm(model=model, max_tokens=AGENT_MAX_TOKENS["strategy"]) if model.startswith("groq/") else model
+            LiteLlm(model=model, max_tokens=AGENT_MAX_TOKENS["strategy"], **llm_metadata("strategy")) if model.startswith("groq/") else model
         )
         self._agent = LlmAgent(
             name="strategy_agent",
@@ -135,10 +141,27 @@ class StrategyAgent:
             instruction=_INSTRUCTION,
             output_schema=StrategyOutput,
             output_key="strategy_output",
+            **adk_callbacks("strategy"),
         )
         self._session_service = InMemorySessionService()
         self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
         self._session_id = session_id
+        self._session_ready = False
+
+    def _reset_session(self):
+        """Start the next attempt in a clean session.
+
+        A call that fails (a provider rate limit, a malformed reply) has already put
+        its user message in the session. Retrying in the same session sends that
+        message again on top of itself, so each retry's request is bigger than the
+        last -- and a request over the provider's per-minute input limit can never
+        succeed. Seen live: a Strategy request that grew to 7,958 tokens against a
+        limit of 7,000. A new session per failed attempt keeps every retry the
+        same size. (A deliberate revision after a *successful* reply keeps its
+        session: there the earlier answer is wanted.)
+        """
+        self._session_service = InMemorySessionService()
+        self._runner = Runner(agent=self._agent, app_name=APP_NAME, session_service=self._session_service)
         self._session_ready = False
 
     async def _ensure_session(self):
@@ -163,11 +186,17 @@ class StrategyAgent:
         final_text = None
         usage = []
         started = time.perf_counter()
-        async for event in self._runner.run_async(user_id=USER_ID, session_id=self._session_id, new_message=content):
-            if getattr(event, "usage_metadata", None):
-                usage.append(event.usage_metadata)
-            if event.is_final_response() and event.content and event.content.parts:
-                final_text = event.content.parts[0].text
+        try:
+            async for event in self._runner.run_async(
+                user_id=USER_ID, session_id=self._session_id, new_message=content
+            ):
+                if getattr(event, "usage_metadata", None):
+                    usage.append(event.usage_metadata)
+                if event.is_final_response() and event.content and event.content.parts:
+                    final_text = event.content.parts[0].text
+        except Exception:
+            self._reset_session()
+            raise
         record_adk_usage("strategy", self.model_name, usage, started)
 
         if final_text is None:
@@ -186,6 +215,7 @@ class StrategyAgent:
             rationale=as_list(parsed.rationale),
         )
 
+    @traced("strategy")
     @cached("strategy", StrategyDecision)
     @retry_on_rate_limit()
     def decide(self, cycle: int, mode: str, currency: str, context: str, business_line: str) -> StrategyDecision:

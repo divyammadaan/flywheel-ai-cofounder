@@ -1,0 +1,16 @@
+.git
+.venv
+.env
+.env.*
+web
+tests
+docs
+demo
+data
+Course Material
+FLYWHEEL_*.md
+*.pdf
+*.pptx
+__pycache__
+*.pyc
+node_modules

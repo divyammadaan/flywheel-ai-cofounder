@@ -18,6 +18,9 @@ from dataclasses import dataclass
 from crewai import LLM, Agent, Crew, Task
 from pydantic import BaseModel, Field
 
+from observability.langfuse_setup import llm_metadata
+from observability.callbacks import crew_kwargs, task_kwargs
+from observability.trace import traced
 from agents._brief import LAUNCH, PlanBrief
 from agents._cache import cached
 from agents._models import AGENT_MAX_TOKENS, AGENT_MODELS
@@ -126,7 +129,7 @@ class ProductAgent:
     def __init__(self, model: str = DEFAULT_MODEL):
         self.model_name = model
         register_role("Product & Operations Lead", "product", model)
-        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["product"])
+        llm = LLM(model=model, max_tokens=AGENT_MAX_TOKENS["product"], **llm_metadata("product"))
         self._agent = Agent(
             role="Product & Operations Lead",
             goal="Plan exactly what the business needs to deliver, from whom, and when to add more",
@@ -140,6 +143,7 @@ class ProductAgent:
             verbose=False,
         )
 
+    @traced("product")
     @cached("product", ProductOutput)
     @retry_on_rate_limit()
     def execute(self, brief: PlanBrief, budget: float) -> ProductOutput:
@@ -166,8 +170,9 @@ class ProductAgent:
             expected_output="A JSON object matching the required schema.",
             agent=self._agent,
             output_pydantic=schema,
+            **task_kwargs(),
         )
-        crew = Crew(agents=[self._agent], tasks=[task], verbose=False)
+        crew = Crew(agents=[self._agent], tasks=[task], verbose=False, **crew_kwargs("product"))
         crew.kickoff()
         parsed = task.output.pydantic
 
