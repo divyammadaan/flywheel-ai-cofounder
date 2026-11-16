@@ -83,20 +83,19 @@ cd web
 .venv/Scripts/python deploy/deploy_frontend.py https://<backend address>
 ```
 
-(it reads `VERCEL_TOKEN` from `.env.deploy`). The site asks for the access code on
-first use and remembers it in the browser.
+(it reads `VERCEL_TOKEN` from `.env.deploy`). The deployed demo is open: there is no access code.
 
 ## Checking a deployment
 
 1. `<backend>/health` is ok.
-2. Open the website, enter the access code, start the demo plan (`demo/DEMO_GUIDE.md`).
+2. Open the website and start the demo plan (`demo/DEMO_GUIDE.md`).
 3. The plan completes; "Plan (Markdown)" downloads.
 4. Langfuse shows the run under *Sessions* as `run-<id>`.
-5. `python evaluation/run_eval.py --base-url <backend> --access-code <code>` for the numbers.
+5. `python evaluation/run_eval.py --base-url <backend>` for the numbers.
 
 ## Demo-day checklist
 
 - Open the site and the backend `/health` five minutes early (hosts that scale to zero need a minute to wake).
-- Keep the access code and the Langfuse tab ready.
+- Keep the Langfuse tab ready.
 - **Mind Groq's daily allowance.** The free tier gives 200,000 tokens a day for this model, about seven full plans (each is roughly 27,000 tokens). Rehearsals count: do not spend the allowance the day before. If it runs out, plans fail with a rate-limit message until it resets.
 - Run one plan at a time: Groq's free tier allows about 1,000 output tokens a minute for this model, so a plan takes two to four minutes and two plans at once both slow down.

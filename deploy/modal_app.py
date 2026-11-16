@@ -56,7 +56,11 @@ def _secret() -> modal.Secret:
     values = {
         "GROQ_API_KEY": model.get("GROQ_API_KEY", ""),
         "FLYWHEEL_DATABASE_URL": deploy.get("NEON_DATABASE_URL", ""),
-        "FLYWHEEL_ACCESS_CODE": deploy.get("ACCESS_CODE", ""),
+        # No access code: the demo is open, so examiners can use it without one. Left empty,
+        # the gate in api/security.py stays off and the website never shows its code form.
+        # The per-address rate limit (FLYWHEEL_RUNS_PER_HOUR) still applies. To lock the
+        # demo again, put ACCESS_CODE in .env.deploy and use deploy.get("ACCESS_CODE", "").
+        "FLYWHEEL_ACCESS_CODE": "",
         "FLYWHEEL_CORS_ORIGINS": deploy.get("FLYWHEEL_CORS_ORIGINS", ""),
         "LANGFUSE_PUBLIC_KEY": deploy.get("LANGFUSE_PUBLIC_KEY", ""),
         "LANGFUSE_SECRET_KEY": deploy.get("LANGFUSE_SECRET_KEY", ""),
@@ -69,7 +73,7 @@ def _secret() -> modal.Secret:
         # this keeps their traces apart in Langfuse (filter by environment).
         "LANGFUSE_TRACING_ENVIRONMENT": "production",
     }
-    missing = [k for k in ("GROQ_API_KEY", "FLYWHEEL_DATABASE_URL", "FLYWHEEL_ACCESS_CODE") if not values[k]]
+    missing = [k for k in ("GROQ_API_KEY", "FLYWHEEL_DATABASE_URL") if not values[k]]
     if missing:
         raise SystemExit(f"missing in .env / .env.deploy: {', '.join(missing)}")
     return modal.Secret.from_dict({k: v for k, v in values.items() if v})

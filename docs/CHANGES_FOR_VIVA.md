@@ -131,9 +131,9 @@ Found by testing against the real hosted database:
 
 ## 10. Protecting a public deployment (`api/security.py`)
 
-A shared access code (`FLYWHEEL_ACCESS_CODE`) is required on every request except `/health` and
-the docs; the website asks for it once. A per-address rate limit caps how many plans can be
-started an hour. Both exist because every plan spends the owner's free model quota.
+A shared access code (`FLYWHEEL_ACCESS_CODE`) can be required on every request except `/health` and
+the docs; the deployed demo leaves it unset so it is open. A per-address rate limit caps how many plans can be
+started an hour, because every plan spends the owner's free model quota.
 
 ## 11. Smaller fixes made on the way
 

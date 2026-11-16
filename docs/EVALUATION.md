@@ -131,7 +131,7 @@ its raw output only because three of its five replies were rate-limited rather t
 ## 6. Reproduce
 
 ```
-.venv\Scripts\python evaluation\run_eval.py --base-url https://<backend> --access-code <code> --baseline 5
+.venv\Scripts\python evaluation\run_eval.py --base-url https://<backend> --baseline 5
 ```
 
 Run it when the day's Groq allowance has recovered, one scenario at a time (`--only`) if needed.

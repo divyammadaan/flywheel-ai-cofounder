@@ -36,7 +36,7 @@ code (ask Divyam).
 3. **"Finance is an AI agent."** Finance is plain code (exact arithmetic). It makes no model call.
 4. **"Agents freely choose their tools in a reasoning loop."** Each agent's reasoning is one
    structured model call. Tools (web search, calculators) are called by the engine through MCP.
-5. **"User accounts / login."** There is a shared access code, not accounts.
+5. **"User accounts / login."** The deployed demo is open (no login and no access code); a per-address rate limit protects the model quota.
 6. **"Scales to many users."** One backend instance, free-tier limits (see section 6).
 
 ---
@@ -271,7 +271,7 @@ sequenceDiagram
 | Model input | cuts instruction-like lines from any prompt | ADK `before_model_callback` |
 | Output | Strategy, Funding and CRM checked by rules; CrewAI task guardrail; verdict is a strict type | `agents/_guardrails.py`, `observability/callbacks.py` |
 | Numbers | cash maths and the 60% cap in code; spends scaled to budgets | `agents/_cash.py`, `finance.py`, `_money.py` |
-| Access | shared access code; per-address rate limit | `api/security.py` |
+| Access | open demo; per-address rate limit (the shared-access-code gate exists in code and is switched off on the deployment) | `api/security.py` |
 
 ### 4.9 Monitoring and observability
 
@@ -293,7 +293,7 @@ change" redoes one agent with the founder's note; the new result is saved next t
 ```mermaid
 flowchart TB
   B[Browser] --> V[Vercel<br/>Next.js website]
-  V -->|calls with access code| M
+  V -->|calls| M
   subgraph M[Modal container, 1.5 GB, one instance]
     A[FastAPI] --- A2[A2A agents mounted at /a2a]
     A --- MC[MCP server<br/>child process]
@@ -335,9 +335,9 @@ up), `run_assets` (the ad image). Migrations are managed with Alembic.
 | Database | Neon serverless Postgres, region AWS US East 2, free plan. Connection string held as a secret |
 | Tracing | Langfuse Cloud (US region), free plan; production traces are tagged `production` |
 | Model | Groq, free tier |
-| Secrets | the model key, database address, access code and Langfuse keys are stored as the host's secrets, never in the repository (`.env.deploy` is git-ignored) |
+| Secrets | the model key, database address and Langfuse keys are stored as the host's secrets, never in the repository (`.env.deploy` is git-ignored) |
 | Cost | all free tiers. Modal's free credit is $1 without a payment method; at the settings above the container costs about $0.036 an hour while running and nothing while idle |
-| Access control | every API request needs the shared access code (header `X-Access-Code`; a query parameter for the live stream and images); the website stores it in the browser and in a cookie so server-rendered pages can use it; at most 30 plans an hour per address; the website's address is the only one allowed by CORS |
+| Access control | the deployed demo is open, with no access code, so examiners can use it directly (the code gate in `api/security.py` is switched off by leaving `FLYWHEEL_ACCESS_CODE` unset); at most 30 plans an hour per address; the website's address is the only one allowed by CORS |
 | Why this layout | the backend runs long background jobs and streams progress, which suits a long-lived container rather than serverless functions; free hosts that need no card offer 512 MB or less, which is too little (the backend peaks near 480 MB); Modal lets us choose the memory and bills against a free credit. Azure for Students (about $9,500 credit) is available as an alternative host |
 | How to redeploy | `python -m modal deploy deploy/modal_app.py` for the backend; `deploy/deploy_frontend.py <backend address>` for the website |
 
